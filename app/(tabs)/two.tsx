@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 
-export default function TabTwoScreen() {
+export default function TransactionHistoryScreen() {
     return (
         <View className="flex-1 items-center justify-center">
-            <Text className="text-xl font-bold">Tab Two</Text>
+            <Text className="text-xl font-bold">Transaction History</Text>
         </View>
     );
 }
