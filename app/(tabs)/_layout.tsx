@@ -4,7 +4,8 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
+    withTiming,
+    Easing,
 } from "react-native-reanimated";
 
 import { Link, Tabs } from "expo-router";
@@ -33,9 +34,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const indicatorPosition = useSharedValue(0);
 
     useEffect(() => {
-        indicatorPosition.value = withSpring(state.index * TAB_WIDTH, {
-            damping: 15,
-            stiffness: 150,
+        indicatorPosition.value = withTiming(state.index * TAB_WIDTH, {
+            duration: 200,
+            easing: Easing.out(Easing.ease),
         });
     }, [state.index]);
 
