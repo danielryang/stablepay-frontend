@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TextInput } from "react-native";
 import { fetchRealHistoricalData, fetchStablecoinLiquidityData } from "@/utils/realDataFetcher";
 import { analyzeAndOptimize, UserBalance } from "@/utils/enhancedOptimizer";
+import { enhanceRecommendationWithAI, generateAISummary, answerPortfolioQuestion } from "@/utils/aiEnhancer";
+import { fetchMarketSentiment } from "@/utils/marketSentiment";
+import { trackUserAction, getUserPreferencesForAI } from "@/utils/userLearning";
 
 // Extract balances from home screen structure
 // USDC: $500 on Ethereum, USDT: $700 on Polygon, ARS: 50,000 ARS
@@ -14,9 +17,20 @@ const getUserBalances = (): UserBalance[] => {
 
 export default function OptimizerScreen() {
     const [loading, setLoading] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [dataSource, setDataSource] = useState('');
     const [results, setResults] = useState<ReturnType<typeof analyzeAndOptimize> | null>(null);
+    
+    // AI-enhanced data
+    const [aiEnhancedRecs, setAiEnhancedRecs] = useState<any[]>([]);
+    const [aiSummary, setAiSummary] = useState<any>(null);
+    const [marketSentiment, setMarketSentiment] = useState<any>(null);
+    
+    // Q&A state
+    const [question, setQuestion] = useState('');
+    const [aiAnswer, setAiAnswer] = useState('');
+    const [answering, setAnswering] = useState(false);
 
     const generateReport = async () => {
         try {
@@ -82,6 +96,67 @@ export default function OptimizerScreen() {
             setResults(optimization);
             console.log('✅ Analysis complete');
 
+            // Step 6: Enhance with AI (if API key available)
+            const hasAiKey = typeof process !== 'undefined' && (
+                process.env?.EXPO_PUBLIC_ANTHROPIC_API_KEY ||
+                process.env?.EXPO_PUBLIC_CLAUDE_API_KEY
+            );
+            
+            if (hasAiKey) {
+                try {
+                    setAiLoading(true);
+                    console.log('🤖 Enhancing with AI...');
+                    console.log('⚠️ Note: Anthropic API has CORS restrictions in browsers. AI features work best on native devices (iOS/Android).');
+                    
+                    // Get user preferences for context
+                    const userPrefs = await getUserPreferencesForAI();
+                    
+                    // Enhance recommendations with AI explanations
+                    const enhanced = await Promise.all(
+                        optimization.recommendations.map(async (rec) => {
+                            try {
+                                return await enhanceRecommendationWithAI(rec, {
+                                    userBalances,
+                                    userCountry: 'argentina',
+                                    totalSavings: optimization.totalPotentialSavings,
+                                });
+                            } catch (error) {
+                                // Silently fallback - CORS errors are expected in browsers
+                                return rec; // Fallback to original
+                            }
+                        })
+                    );
+                    setAiEnhancedRecs(enhanced);
+                    
+                    // Generate AI summary
+                    try {
+                        const summary = await generateAISummary(optimization, {
+                            userCountry: 'argentina',
+                            monthlyExpenses: 800,
+                        });
+                        setAiSummary(summary);
+                    } catch (error) {
+                        // Silently fail - CORS errors are expected in browsers
+                        // Algorithmic results are still available
+                    }
+                    
+                    // Fetch market sentiment (this doesn't use Anthropic API, so it should work)
+                    try {
+                        const sentiment = await fetchMarketSentiment();
+                        setMarketSentiment(sentiment);
+                    } catch (error) {
+                        console.warn('Market sentiment fetch failed:', error);
+                    }
+                    
+                    console.log('✅ AI enhancement complete');
+                } catch (error) {
+                    console.warn('AI enhancement failed:', error);
+                    // Continue without AI - algorithmic results still available
+                } finally {
+                    setAiLoading(false);
+                }
+            }
+
         } catch (err) {
             console.error('❌ Initialization failed:', err);
             let errorMessage = 'Unknown error occurred';
@@ -100,6 +175,43 @@ export default function OptimizerScreen() {
         }
     };
 
+    // Q&A handler
+    const handleAskQuestion = async () => {
+        if (!question.trim() || !results) return;
+        setAnswering(true);
+        try {
+            const answer = await answerPortfolioQuestion(question, results, {
+                userBalances: getUserBalances(),
+                userCountry: 'argentina',
+            });
+            setAiAnswer(answer);
+        } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : String(error);
+            if (errorMsg.includes('CORS_BLOCKED') || errorMsg.includes('CORS')) {
+                setAiAnswer('⚠️ AI Q&A requires a native app (iOS/Android) or backend proxy due to CORS restrictions. The Anthropic API does not support browser requests. Algorithmic recommendations are still available above.');
+            } else {
+                setAiAnswer('Sorry, I couldn\'t process that question. Please try again.');
+            }
+        } finally {
+            setAnswering(false);
+        }
+    };
+
+    // Track user feedback
+    const handleUserFeedback = async (recId: string, recType: string, action: 'accepted' | 'rejected') => {
+        try {
+            await trackUserAction({
+                recommendationId: recId,
+                type: recType as any,
+                action,
+                timestamp: Date.now(),
+            });
+            console.log(`✅ Tracked user action: ${action} for ${recType}`);
+        } catch (error) {
+            console.warn('Failed to track user action:', error);
+        }
+    };
+
     if (loading) {
         return (
             <View style={styles.container}>
@@ -107,6 +219,18 @@ export default function OptimizerScreen() {
                     <ActivityIndicator size="large" color="#0891D1" />
                     <Text style={styles.loadingText}>Analyzing market data...</Text>
                     <Text style={styles.loadingSubtext}>Loading 90 days of real price data + stablecoin liquidity</Text>
+                </View>
+            </View>
+        );
+    }
+
+    if (aiLoading) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0891D1" />
+                    <Text style={styles.loadingText}>Enhancing with AI...</Text>
+                    <Text style={styles.loadingSubtext}>Generating explanations and insights</Text>
                 </View>
             </View>
         );
@@ -159,11 +283,88 @@ export default function OptimizerScreen() {
 
                     {results && (
                         <>
+                            {/* CORS Warning Banner (if AI failed due to CORS) */}
+                            {aiEnhancedRecs.length === 0 && results.recommendations.length > 0 && (
+                                <View style={styles.corsWarningCard}>
+                                    <Text style={styles.corsWarningTitle}>⚠️ AI Features Limited in Browser</Text>
+                                    <Text style={styles.corsWarningText}>
+                                        Anthropic API doesn't support browser CORS. AI explanations work on native devices (iOS/Android) or require a backend proxy. Algorithmic recommendations are fully functional below.
+                                    </Text>
+                                </View>
+                            )}
+
+                            {/* AI Summary */}
+                            {aiSummary && (
+                                <View style={styles.aiSummaryCard}>
+                                    <Text style={styles.aiSummaryTitle}>🤖 AI Analysis Summary</Text>
+                                    <Text style={styles.aiSummaryText}>{aiSummary.summary}</Text>
+                                    {aiSummary.keyInsights && aiSummary.keyInsights.length > 0 && (
+                                        <View style={styles.aiInsightsContainer}>
+                                            <Text style={styles.aiInsightsTitle}>Key Insights:</Text>
+                                            {aiSummary.keyInsights.map((insight: string, i: number) => (
+                                                <Text key={i} style={styles.aiInsightItem}>• {insight}</Text>
+                                            ))}
+                                        </View>
+                                    )}
+                                    {aiSummary.actionItems && aiSummary.actionItems.length > 0 && (
+                                        <View style={styles.aiInsightsContainer}>
+                                            <Text style={styles.aiInsightsTitle}>Action Items:</Text>
+                                            {aiSummary.actionItems.map((item: string, i: number) => (
+                                                <Text key={i} style={styles.aiInsightItem}>• {item}</Text>
+                                            ))}
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+
+                            {/* Market Sentiment */}
+                            {marketSentiment && (
+                                <View style={styles.sentimentCard}>
+                                    <Text style={styles.sentimentTitle}>📊 Market Sentiment</Text>
+                                    <View style={styles.sentimentRow}>
+                                        <Text style={styles.sentimentLabel}>Sentiment:</Text>
+                                        <Text style={[
+                                            styles.sentimentValue,
+                                            marketSentiment.sentiment === 'bullish' && styles.sentimentBullish,
+                                            marketSentiment.sentiment === 'bearish' && styles.sentimentBearish,
+                                        ]}>
+                                            {marketSentiment.sentiment.toUpperCase()}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.sentimentRow}>
+                                        <Text style={styles.sentimentLabel}>Confidence:</Text>
+                                        <Text style={styles.sentimentValue}>
+                                            {(marketSentiment.confidence * 100).toFixed(0)}%
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.sentimentReasoning}>{marketSentiment.reasoning}</Text>
+                                    {marketSentiment.indicators && (
+                                        <View style={styles.sentimentIndicators}>
+                                            <Text style={styles.sentimentIndicatorText}>
+                                                Price Trend: {marketSentiment.indicators.priceTrend > 0 ? '+' : ''}{marketSentiment.indicators.priceTrend.toFixed(2)}%
+                                            </Text>
+                                            <Text style={styles.sentimentIndicatorText}>
+                                                Volatility: {(marketSentiment.indicators.volatility * 100).toFixed(1)}%
+                                            </Text>
+                                            <Text style={styles.sentimentIndicatorText}>
+                                                Gas Trend: {marketSentiment.indicators.gasTrend}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+
                             {/* Stablecoin Recommendations */}
                             {stablecoinRecs.length > 0 && (
                                 <View style={styles.sectionCard}>
                                     <Text style={styles.sectionTitle}>Stablecoin Optimization</Text>
-                                    {stablecoinRecs.map((rec, idx) => (
+                                    {stablecoinRecs.map((rec, idx) => {
+                                        const enhancedRec = aiEnhancedRecs.find((e: any) => 
+                                            e.type === rec.type && e.from === rec.from && e.to === rec.to
+                                        ) || rec;
+                                        const recId = `${rec.type}-${rec.from}-${rec.to}-${idx}`;
+                                        
+                                        return (
                                         <View key={idx} style={styles.recommendationCard}>
                                             <View style={styles.recommendationHeader}>
                                                 <View style={styles.recommendationHeaderLeft}>
@@ -197,8 +398,42 @@ export default function OptimizerScreen() {
                                                     ✓ {rec.details.regionalFit.join(' • ')}
                                                 </Text>
                                             )}
+                                            
+                                            {/* AI Explanation */}
+                                            {enhancedRec.aiExplanation && (
+                                                <View style={styles.aiExplanationCard}>
+                                                    <Text style={styles.aiExplanationLabel}>🤖 AI Explanation:</Text>
+                                                    <Text style={styles.aiExplanationText}>{enhancedRec.aiExplanation}</Text>
+                                                </View>
+                                            )}
+                                            
+                                            {/* AI Insights */}
+                                            {enhancedRec.aiInsights && enhancedRec.aiInsights.length > 0 && (
+                                                <View style={styles.aiInsightsList}>
+                                                    {enhancedRec.aiInsights.map((insight: string, i: number) => (
+                                                        <Text key={i} style={styles.aiInsightText}>💡 {insight}</Text>
+                                                    ))}
+                                                </View>
+                                            )}
+                                            
+                                            {/* User Feedback Buttons */}
+                                            <View style={styles.feedbackButtons}>
+                                                <Pressable
+                                                    style={[styles.feedbackButton, styles.feedbackButtonPositive]}
+                                                    onPress={() => handleUserFeedback(recId, rec.type || 'switch_stablecoin', 'accepted')}
+                                                >
+                                                    <Text style={styles.feedbackButtonText}>✓ Helpful</Text>
+                                                </Pressable>
+                                                <Pressable
+                                                    style={[styles.feedbackButton, styles.feedbackButtonNegative]}
+                                                    onPress={() => handleUserFeedback(recId, rec.type || 'switch_stablecoin', 'rejected')}
+                                                >
+                                                    <Text style={styles.feedbackButtonText}>✗ Not helpful</Text>
+                                                </Pressable>
+                                            </View>
                                         </View>
-                                    ))}
+                                    );
+                                    })}
                                 </View>
                             )}
 
@@ -389,10 +624,37 @@ export default function OptimizerScreen() {
                                         Over 6 months by optimizing your stablecoins, timing, and network selection
                                     </Text>
                                     <Text style={styles.savingsNote}>
-                                        * Based on 90 days of real market data from {dataSource}
+                                        * Based on 90 days of real market data from {dataSource || 'CoinGecko API'}
                                     </Text>
                                 </View>
                             )}
+
+                            {/* Interactive Q&A */}
+                            <View style={styles.qaSection}>
+                                <Text style={styles.qaTitle}>💬 Ask about your portfolio</Text>
+                                <TextInput
+                                    value={question}
+                                    onChangeText={setQuestion}
+                                    placeholder="e.g., Should I switch to USDT?"
+                                    style={styles.qaInput}
+                                    multiline
+                                />
+                                <Pressable
+                                    style={[styles.qaButton, answering && styles.qaButtonDisabled]}
+                                    onPress={handleAskQuestion}
+                                    disabled={answering || !question.trim()}
+                                >
+                                    <Text style={styles.qaButtonText}>
+                                        {answering ? 'Thinking...' : 'Ask AI'}
+                                    </Text>
+                                </Pressable>
+                                {aiAnswer && (
+                                    <View style={styles.qaAnswer}>
+                                        <Text style={styles.qaAnswerLabel}>🤖 AI Answer:</Text>
+                                        <Text style={styles.qaAnswerText}>{aiAnswer}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </>
                     )}
                 </View>
@@ -857,6 +1119,226 @@ const styles = StyleSheet.create({
         color: '#A7F3D0',
         marginTop: 8,
         textAlign: 'center',
+    },
+    aiSummaryCard: {
+        backgroundColor: '#EFF6FF',
+        borderRadius: 12,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#DBEAFE',
+        marginBottom: 16,
+    },
+    aiSummaryTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1E40AF',
+        marginBottom: 12,
+    },
+    aiSummaryText: {
+        fontSize: 15,
+        color: '#1E3A8A',
+        lineHeight: 22,
+        marginBottom: 12,
+    },
+    aiInsightsContainer: {
+        marginTop: 12,
+    },
+    aiInsightsTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1E40AF',
+        marginBottom: 8,
+    },
+    aiInsightItem: {
+        fontSize: 14,
+        color: '#1E3A8A',
+        marginLeft: 8,
+        marginBottom: 4,
+    },
+    sentimentCard: {
+        backgroundColor: '#FEF3C7',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#FCD34D',
+        marginBottom: 16,
+    },
+    sentimentTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#92400E',
+        marginBottom: 12,
+    },
+    sentimentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    sentimentLabel: {
+        fontSize: 14,
+        color: '#92400E',
+        fontWeight: '600',
+    },
+    sentimentValue: {
+        fontSize: 14,
+        color: '#92400E',
+        fontWeight: 'bold',
+    },
+    sentimentBullish: {
+        color: '#22C55E',
+    },
+    sentimentBearish: {
+        color: '#EF4444',
+    },
+    sentimentReasoning: {
+        fontSize: 13,
+        color: '#78350F',
+        marginTop: 8,
+        lineHeight: 18,
+    },
+    sentimentIndicators: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#FCD34D',
+    },
+    sentimentIndicatorText: {
+        fontSize: 12,
+        color: '#78350F',
+        marginBottom: 4,
+    },
+    aiExplanationCard: {
+        backgroundColor: '#F9FAFB',
+        borderRadius: 8,
+        padding: 12,
+        marginTop: 12,
+        borderLeftWidth: 3,
+        borderLeftColor: '#0891D1',
+    },
+    aiExplanationLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#6B7280',
+        marginBottom: 6,
+    },
+    aiExplanationText: {
+        fontSize: 14,
+        color: '#29343D',
+        lineHeight: 20,
+    },
+    aiInsightsList: {
+        marginTop: 8,
+    },
+    aiInsightText: {
+        fontSize: 13,
+        color: '#6B7280',
+        marginBottom: 4,
+        lineHeight: 18,
+    },
+    feedbackButtons: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 12,
+    },
+    feedbackButton: {
+        flex: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+    },
+    feedbackButtonPositive: {
+        backgroundColor: '#DCFCE7',
+        borderWidth: 1,
+        borderColor: '#22C55E',
+    },
+    feedbackButtonNegative: {
+        backgroundColor: '#FEE2E2',
+        borderWidth: 1,
+        borderColor: '#EF4444',
+    },
+    feedbackButtonText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    qaSection: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        marginTop: 16,
+    },
+    qaTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#29343D',
+        marginBottom: 12,
+    },
+    qaInput: {
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 14,
+        color: '#29343D',
+        backgroundColor: '#FAFAFA',
+        minHeight: 60,
+        marginBottom: 12,
+        textAlignVertical: 'top',
+    },
+    qaButton: {
+        backgroundColor: '#0891D1',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    qaButtonDisabled: {
+        backgroundColor: '#9CA3AF',
+    },
+    qaButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    qaAnswer: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: '#F0F9FF',
+        borderRadius: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: '#0891D1',
+    },
+    qaAnswerLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#0891D1',
+        marginBottom: 6,
+    },
+    qaAnswerText: {
+        fontSize: 14,
+        color: '#29343D',
+        lineHeight: 20,
+    },
+    corsWarningCard: {
+        backgroundColor: '#FEF3C7',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#FCD34D',
+        marginBottom: 16,
+    },
+    corsWarningTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#92400E',
+        marginBottom: 8,
+    },
+    corsWarningText: {
+        fontSize: 14,
+        color: '#78350F',
+        lineHeight: 20,
     },
 });
 

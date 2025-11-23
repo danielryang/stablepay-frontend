@@ -7,14 +7,39 @@
 
 import { OptimizationResult, Recommendation } from './enhancedOptimizer';
 
-// Configuration
-const AI_CONFIG = {
-    provider: 'openai' as 'openai' | 'anthropic' | 'gemini' | 'groq',
-    model: 'gpt-4o-mini', // Cost-effective model
-    temperature: 0.3, // Lower = more deterministic
-    maxTokens: 500,
-    cacheEnabled: true,
-};
+/**
+ * Get AI configuration from environment variables
+ */
+function getAIConfig() {
+    // Get model from environment, default to Claude Haiku
+    let model = 'claude-3-haiku-20240307'; // Default: Claude Haiku - fast and cost-effective
+    
+    if (typeof process !== 'undefined' && process.env) {
+        model = process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 
+                process.env.EXPO_PUBLIC_CLAUDE_MODEL ||
+                model;
+    } else {
+        try {
+            const Constants = require('expo-constants').default;
+            model = Constants.expoConfig?.extra?.anthropicModel ||
+                    Constants.expoConfig?.extra?.claudeModel ||
+                    model;
+        } catch {
+            // Use default
+        }
+    }
+    
+    return {
+        provider: 'anthropic' as 'openai' | 'anthropic' | 'gemini' | 'groq',
+        model: model,
+        temperature: 0.3, // Lower = more deterministic
+        maxTokens: 500,
+        cacheEnabled: true,
+    };
+}
+
+// Configuration (dynamically loaded)
+const AI_CONFIG = getAIConfig();
 
 // Cache for AI responses (in-memory, could use AsyncStorage for persistence)
 const aiCache = new Map<string, string>();
@@ -24,15 +49,18 @@ const aiCache = new Map<string, string>();
  */
 function getApiKey(): string | null {
     if (typeof process !== 'undefined' && process.env) {
-        return process.env.EXPO_PUBLIC_OPENAI_API_KEY || 
-               process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ||
+        // Prioritize Anthropic/Claude API key
+        return process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ||
+               process.env.EXPO_PUBLIC_CLAUDE_API_KEY ||
+               process.env.EXPO_PUBLIC_OPENAI_API_KEY || 
                process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
                null;
     }
     try {
         const Constants = require('expo-constants').default;
-        return Constants.expoConfig?.extra?.openaiApiKey ||
-               Constants.expoConfig?.extra?.anthropicApiKey ||
+        return Constants.expoConfig?.extra?.anthropicApiKey ||
+               Constants.expoConfig?.extra?.claudeApiKey ||
+               Constants.expoConfig?.extra?.openaiApiKey ||
                Constants.expoConfig?.extra?.geminiApiKey ||
                null;
     } catch {
@@ -56,6 +84,8 @@ async function callOpenAI(prompt: string, systemPrompt: string): Promise<string>
         throw new Error('OpenAI API key not found. Add EXPO_PUBLIC_OPENAI_API_KEY to .env');
     }
 
+    const config = getAIConfig();
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -63,13 +93,13 @@ async function callOpenAI(prompt: string, systemPrompt: string): Promise<string>
             'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-            model: AI_CONFIG.model,
+            model: config.model,
             messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: prompt }
             ],
-            temperature: AI_CONFIG.temperature,
-            max_tokens: AI_CONFIG.maxTokens,
+            temperature: config.temperature,
+            max_tokens: config.maxTokens,
         }),
     });
 
@@ -91,30 +121,46 @@ async function callAnthropic(prompt: string, systemPrompt: string): Promise<stri
         throw new Error('Anthropic API key not found');
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-            model: 'claude-3-haiku-20240307', // Cheapest Claude model
-            max_tokens: AI_CONFIG.maxTokens,
-            system: systemPrompt,
-            messages: [
-                { role: 'user', content: prompt }
-            ],
-        }),
-    });
+    // Get current config (in case model changed)
+    const config = getAIConfig();
+    console.log(`🔑 Using Claude model: ${config.model}`);
 
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Anthropic API error: ${error.error?.message || 'Unknown error'}`);
+    // Anthropic API call - correct format per official docs
+    // Note: CORS is blocked in browsers - this will only work on native devices
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01', // Latest stable version
+            },
+            body: JSON.stringify({
+                model: config.model,
+                max_tokens: config.maxTokens,
+                system: systemPrompt,
+                messages: [
+                    { role: 'user', content: prompt }
+                ],
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+            throw new Error(`Anthropic API error: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+        return data.content[0]?.text || 'Unable to generate explanation';
+    } catch (fetchError: any) {
+        // CORS errors are expected in browsers - silently handle
+        const errorMsg = fetchError?.message || String(fetchError);
+        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('CORS') || errorMsg.includes('Access-Control')) {
+            // Silently handle CORS - expected behavior in browsers
+            throw new Error('CORS_BLOCKED');
+        }
+        throw fetchError;
     }
-
-    const data = await response.json();
-    return data.content[0]?.text || 'Unable to generate explanation';
 }
 
 /**
@@ -140,8 +186,8 @@ async function callGemini(prompt: string, systemPrompt: string): Promise<string>
                     }]
                 }],
                 generationConfig: {
-                    temperature: AI_CONFIG.temperature,
-                    maxOutputTokens: AI_CONFIG.maxTokens,
+                    temperature: getAIConfig().temperature,
+                    maxOutputTokens: getAIConfig().maxTokens,
                 },
             }),
         }
@@ -195,8 +241,11 @@ async function callGroq(prompt: string, systemPrompt: string): Promise<string> {
  * Main AI call function with provider selection and caching
  */
 async function callAI(prompt: string, systemPrompt: string): Promise<string> {
+    // Get current config (in case it changed)
+    const config = getAIConfig();
+    
     // Check cache first
-    if (AI_CONFIG.cacheEnabled) {
+    if (config.cacheEnabled) {
         const cacheKey = generateCacheKey({ prompt, systemPrompt });
         const cached = aiCache.get(cacheKey);
         if (cached) {
@@ -208,7 +257,7 @@ async function callAI(prompt: string, systemPrompt: string): Promise<string> {
     let result: string;
     
     try {
-        switch (AI_CONFIG.provider) {
+        switch (config.provider) {
             case 'openai':
                 result = await callOpenAI(prompt, systemPrompt);
                 break;
@@ -222,17 +271,27 @@ async function callAI(prompt: string, systemPrompt: string): Promise<string> {
                 result = await callGroq(prompt, systemPrompt);
                 break;
             default:
-                throw new Error(`Unknown AI provider: ${AI_CONFIG.provider}`);
+                throw new Error(`Unknown AI provider: ${config.provider}`);
         }
 
         // Cache the result
-        if (AI_CONFIG.cacheEnabled) {
+        if (config.cacheEnabled) {
             const cacheKey = generateCacheKey({ prompt, systemPrompt });
             aiCache.set(cacheKey, result);
         }
 
         return result;
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        
+        // Check if it's a CORS error (browser restriction)
+        // Suppress console errors for CORS - it's expected in browsers
+        if (errorMessage.includes('CORS') || errorMessage.includes('Failed to fetch') || errorMessage.includes('Access-Control') || errorMessage.includes('CORS_BLOCKED')) {
+            // Silently return fallback - don't spam console with CORS errors
+            return generateFallbackExplanation(prompt);
+        }
+        
+        // Only log non-CORS errors
         console.error('AI API call failed:', error);
         // Return fallback explanation
         return generateFallbackExplanation(prompt);
