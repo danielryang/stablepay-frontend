@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -66,7 +66,6 @@ export default function RestoreWalletScreen() {
 
         // Set loading state immediately - this triggers a re-render
         setIsRestoring(true);
-
         try {
             await restoreWallet(mnemonic.trim(), password);
             // Navigation will happen automatically via useEffect when keypair is set

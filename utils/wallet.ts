@@ -58,6 +58,34 @@ const storage = {
     },
 };
 
+// Platform detection
+const isWeb = Platform.OS === 'web';
+
+// Storage wrapper that uses SecureStore on native and AsyncStorage on web
+const storage = {
+    async setItem(key: string, value: string): Promise<void> {
+        if (isWeb) {
+            await AsyncStorage.setItem(key, value);
+        } else {
+            await SecureStore.setItemAsync(key, value);
+        }
+    },
+    async getItem(key: string): Promise<string | null> {
+        if (isWeb) {
+            return await AsyncStorage.getItem(key);
+        } else {
+            return await SecureStore.getItemAsync(key);
+        }
+    },
+    async deleteItem(key: string): Promise<void> {
+        if (isWeb) {
+            await AsyncStorage.removeItem(key);
+        } else {
+            await SecureStore.deleteItemAsync(key);
+        }
+    }
+};
+
 // Connection to Solana devnet
 export const SOLANA_RPC_URL = "https://api.devnet.solana.com";
 export const connection = new Connection(SOLANA_RPC_URL, "confirmed");
@@ -236,7 +264,6 @@ export async function loadEncryptedWallet(password: string): Promise<Keypair> {
     try {
         // Try to load encrypted secret key first (preferred method)
         const encryptedSecretKey = await storage.getItem(WALLET_SECRET_KEY);
-
         if (encryptedSecretKey) {
             // Verify password
             const storedPasswordHash = await storage.getItem(WALLET_PASSWORD_KEY);
@@ -256,7 +283,6 @@ export async function loadEncryptedWallet(password: string): Promise<Keypair> {
 
         // Fallback: if no encrypted secret key, try to load from mnemonic (legacy support)
         const encryptedMnemonic = await storage.getItem(WALLET_STORAGE_KEY);
-
         if (!encryptedMnemonic) {
             throw new Error("No wallet found");
         }
