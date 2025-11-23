@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 
 export interface Transaction {
     id: number;
@@ -9,7 +9,7 @@ export interface Transaction {
     fromToken: string;
     toAmount: string;
     toToken: string;
-    type: "sent" | "received";
+    type: "sent" | "received" | "converted" | "bought";
     status: string;
     transactionFee: string;
     speed: string;

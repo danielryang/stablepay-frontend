@@ -1,5 +1,5 @@
-import { Text, View, Pressable, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function ReceiveScreen() {
     const router = useRouter();
@@ -9,73 +9,228 @@ export default function ReceiveScreen() {
         Alert.alert("Success", "Address copied to clipboard");
     };
 
+    const handleShare = () => {
+        Alert.alert("Share", "Share functionality would be implemented here");
+    };
+
     return (
-        <View className="flex-1 bg-background">
-            <View className="flex-row items-end px-4 pt-4 pb-3 border-b border-border">
-                <Pressable onPress={() => router.back()} className="mr-2">
-                    <Text className="text-foreground text-xl">←</Text>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>←</Text>
                 </Pressable>
-                <Text className="text-xl font-bold text-foreground">Receive</Text>
+                <Text style={styles.headerTitle}>Receive</Text>
             </View>
 
-            <ScrollView className="flex-1 p-4">
-                <View className="p-6 bg-card rounded-lg border border-border gap-6">
-                    <View className="items-center gap-2">
-                        <Text className="text-2xl font-bold text-foreground">Receive Crypto</Text>
-                        <Text className="text-sm text-muted-foreground text-center">
-                            Scan QR code or copy address below
-                        </Text>
-                    </View>
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
+                    <View style={styles.card}>
+                        <View style={styles.titleSection}>
+                            <Text style={styles.title}>Receive Crypto</Text>
+                            <Text style={styles.subtitle}>
+                                Scan QR code or copy address below
+                            </Text>
+                        </View>
 
-                    <View className="items-center">
-                        <View className="w-64 h-64 bg-secondary rounded-2xl items-center justify-center border-2 border-border">
-                            <View className="w-48 h-48 bg-white rounded-lg items-center justify-center">
-                                <Text className="text-xs text-gray-500 text-center px-4">
-                                    QR Code for Bitcoin Wallet
+                        <View style={styles.qrContainer}>
+                            <View style={styles.qrOuter}>
+                                <View style={styles.qrInner}>
+                                    <Text style={styles.qrPlaceholder}>
+                                        QR Code for Bitcoin Wallet
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.addressSection}>
+                            <View style={styles.addressCard}>
+                                <Text style={styles.addressLabel}>
+                                    Your Wallet Address
                                 </Text>
+                                <Text style={styles.addressText}>{walletAddress}</Text>
+                            </View>
+
+                            <View style={styles.buttonRow}>
+                                <Pressable
+                                    onPress={handleCopy}
+                                    style={styles.actionButton}
+                                >
+                                    <Text style={styles.actionIcon}>📋</Text>
+                                    <Text style={styles.actionText}>Copy</Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={handleShare}
+                                    style={styles.actionButton}
+                                >
+                                    <Text style={styles.actionIcon}>↗</Text>
+                                    <Text style={styles.actionText}>Share</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </View>
 
-                    <View className="gap-3">
-                        <View className="p-4 bg-secondary rounded-lg">
-                            <Text className="text-sm text-muted-foreground mb-2">
-                                Your Wallet Address
+                    <View style={styles.notesCard}>
+                        <Text style={styles.notesTitle}>Important Notes</Text>
+                        <View style={styles.notesList}>
+                            <Text style={styles.noteItem}>
+                                • Only send crypto to this address
                             </Text>
-                            <Text className="text-sm text-foreground">{walletAddress}</Text>
+                            <Text style={styles.noteItem}>
+                                • Sending other assets may result in permanent loss
+                            </Text>
+                            <Text style={styles.noteItem}>
+                                • Ensure the network matches before sending
+                            </Text>
                         </View>
-
-                        <View className="flex-row gap-3">
-                            <Pressable
-                                onPress={handleCopy}
-                                className="flex-1 flex-row items-center justify-center gap-2 p-3 border border-border rounded-md"
-                            >
-                                <Text className="text-foreground text-sm">📋</Text>
-                                <Text className="text-foreground">Copy</Text>
-                            </Pressable>
-                            <Pressable className="flex-1 flex-row items-center justify-center gap-2 p-3 border border-border rounded-md">
-                                <Text className="text-foreground text-sm">↗</Text>
-                                <Text className="text-foreground">Share</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-
-                <View className="p-4 bg-card rounded-lg border border-border gap-2 mt-6">
-                    <Text className="font-semibold text-foreground">Important Notes</Text>
-                    <View className="gap-1">
-                        <Text className="text-sm text-muted-foreground">
-                            • Only send crypto to this address
-                        </Text>
-                        <Text className="text-sm text-muted-foreground">
-                            • Sending other assets may result in permanent loss
-                        </Text>
-                        <Text className="text-sm text-muted-foreground">
-                            • Ensure the network matches before sending
-                        </Text>
                     </View>
                 </View>
             </ScrollView>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FAFAFA',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E1E4E8',
+        backgroundColor: '#FFFFFF',
+    },
+    backButton: {
+        marginRight: 8,
+    },
+    backText: {
+        fontSize: 24,
+        color: '#29343D',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#29343D',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        padding: 16,
+    },
+    card: {
+        padding: 24,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        gap: 24,
+    },
+    titleSection: {
+        alignItems: 'center',
+        gap: 8,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#29343D',
+    },
+    subtitle: {
+        fontSize: 14,
+        color: '#737A82',
+        textAlign: 'center',
+    },
+    qrContainer: {
+        alignItems: 'center',
+    },
+    qrOuter: {
+        width: 256,
+        height: 256,
+        backgroundColor: '#EFF1F3',
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: '#E1E4E8',
+    },
+    qrInner: {
+        width: 192,
+        height: 192,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    qrPlaceholder: {
+        fontSize: 12,
+        color: '#737A82',
+        textAlign: 'center',
+        paddingHorizontal: 16,
+    },
+    addressSection: {
+        gap: 12,
+    },
+    addressCard: {
+        padding: 16,
+        backgroundColor: '#EFF1F3',
+        borderRadius: 8,
+    },
+    addressLabel: {
+        fontSize: 14,
+        color: '#737A82',
+        marginBottom: 8,
+    },
+    addressText: {
+        fontSize: 14,
+        color: '#29343D',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    actionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        borderRadius: 8,
+        backgroundColor: '#FFFFFF',
+    },
+    actionIcon: {
+        fontSize: 14,
+        color: '#29343D',
+    },
+    actionText: {
+        fontSize: 14,
+        color: '#29343D',
+    },
+    notesCard: {
+        padding: 16,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        gap: 8,
+        marginTop: 24,
+    },
+    notesTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    notesList: {
+        gap: 4,
+    },
+    noteItem: {
+        fontSize: 14,
+        color: '#737A82',
+    },
+});

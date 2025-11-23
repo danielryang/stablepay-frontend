@@ -1,11 +1,22 @@
 import { useTransactions } from "@/contexts/TransactionContext";
+import * as AuthSession from 'expo-auth-session';
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import * as WebBrowser from 'expo-web-browser';
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+
+// Complete auth session on web
+if (Platform.OS === 'web') {
+    WebBrowser.maybeCompleteAuthSession();
+}
 
 export default function SendScreen() {
     const router = useRouter();
     const { addTransaction } = useTransactions();
+    const [sendToPayPal, setSendToPayPal] = useState(false);
+    const [payPalConnected, setPayPalConnected] = useState(false);
+    const [payPalEmail, setPayPalEmail] = useState("");
+    const [payPalConnecting, setPayPalConnecting] = useState(false);
     const [amount, setAmount] = useState("40");
     const [fromCurrency, setFromCurrency] = useState("USDC");
     const [toCurrency, setToCurrency] = useState("ARS");
@@ -14,7 +25,161 @@ export default function SendScreen() {
     const exchangeRate = 1050;
     const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
 
+    // PayPal OAuth configuration
+    // makeRedirectUri automatically handles:
+    // - Web/localhost: Uses Expo proxy URL (https://auth.expo.io/...) - works with PayPal
+    // - Expo Go: Uses Expo proxy URL (https://auth.expo.io/...) - works with PayPal
+    // - Development Build: Uses custom scheme (stablelivingfrontend://paypal-callback)
+    // - Standalone Build: Uses custom scheme (stablelivingfrontend://paypal-callback)
+    const redirectUri = AuthSession.makeRedirectUri({
+        scheme: 'stablelivingfrontend',
+        path: 'paypal-callback',
+    });
+    
+    // Log the redirect URI for debugging (you'll need to add this to PayPal dashboard)
+    // Check console to see what redirect URI is generated for your environment
+    if (__DEV__) {
+        console.log('PayPal Redirect URI:', redirectUri);
+        console.log('Platform:', Platform.OS);
+        console.log('Add this redirect URI to your PayPal app settings in the dashboard');
+    }
+
+    // PayPal OAuth discovery (for real OAuth flow)
+    // Sandbox: https://api.sandbox.paypal.com/.well-known/openid_configuration
+    // Production: https://api.paypal.com/.well-known/openid_configuration
+    const discovery = {
+        authorizationEndpoint: 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize',
+        tokenEndpoint: 'https://api.paypal.com/v1/oauth2/token',
+        userInfoEndpoint: 'https://api.paypal.com/v1/identity/oauth2/userinfo',
+    };
+
+    const [request, response, promptAsync] = AuthSession.useAuthRequest(
+        {
+            clientId: process.env.EXPO_PUBLIC_PAYPAL_CLIENT_ID || 'YOUR_PAYPAL_CLIENT_ID',
+            responseType: AuthSession.ResponseType.Code,
+            redirectUri,
+            scopes: ['openid', 'email', 'profile'],
+            usePKCE: true,
+            extraParams: {},
+        },
+        discovery
+    );
+
+    const handlePayPalCallback = useCallback(async (authorizationCode: string) => {
+        try {
+            const clientId = process.env.EXPO_PUBLIC_PAYPAL_CLIENT_ID || 'YOUR_PAYPAL_CLIENT_ID';
+            const clientSecret = process.env.EXPO_PUBLIC_PAYPAL_CLIENT_SECRET || 'YOUR_PAYPAL_CLIENT_SECRET';
+            
+            // Real OAuth token exchange
+            // NOTE: In production, this should be done server-side for security (client secret should never be in client code)
+            // For demo purposes, we'll simulate the API calls but show the real structure
+            
+            if (clientId === 'YOUR_PAYPAL_CLIENT_ID' || clientSecret === 'YOUR_PAYPAL_CLIENT_SECRET') {
+                // Simulated flow for demo (no real credentials)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                const userInfo = {
+                    email: "user@paypal.com",
+                    verified: true,
+                    name: "John Doe"
+                };
+                setPayPalConnecting(false);
+                setPayPalConnected(true);
+                setPayPalEmail(userInfo.email);
+                Alert.alert("Success", `PayPal account (${userInfo.email}) connected successfully!`);
+                return;
+            }
+
+            // Real API implementation (when credentials are provided)
+            // Step 1: Exchange authorization code for access token
+            const tokenResponse = await fetch(discovery.tokenEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: authorizationCode,
+                    redirect_uri: redirectUri,
+                }).toString(),
+            });
+
+            if (!tokenResponse.ok) {
+                throw new Error('Failed to exchange authorization code');
+            }
+
+            const tokenData = await tokenResponse.json();
+            const accessToken = tokenData.access_token;
+
+            // Step 2: Get user info using access token
+            const userInfoResponse = await fetch(discovery.userInfoEndpoint, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!userInfoResponse.ok) {
+                throw new Error('Failed to fetch user info');
+            }
+
+            const userInfo = await userInfoResponse.json();
+
+            setPayPalConnecting(false);
+            setPayPalConnected(true);
+            setPayPalEmail(userInfo.email || userInfo.email_address);
+            Alert.alert("Success", `PayPal account (${userInfo.email || userInfo.email_address}) connected successfully!`);
+        } catch (error) {
+            setPayPalConnecting(false);
+            Alert.alert("Error", "Failed to complete PayPal connection. Please try again.");
+            console.error('PayPal OAuth error:', error);
+        }
+    }, [discovery, redirectUri]);
+
+    // Handle OAuth response
+    useEffect(() => {
+        if (response?.type === 'success' && payPalConnecting) {
+            const { code } = response.params;
+            if (code) {
+                handlePayPalCallback(code);
+            }
+        } else if (response?.type === 'error' || response?.type === 'dismiss') {
+            setPayPalConnecting(false);
+            if (response?.type === 'error') {
+                Alert.alert("Error", "PayPal authorization was cancelled or failed");
+            }
+        }
+    }, [response, payPalConnecting, handlePayPalCallback]);
+
+    const handlePayPalLogin = async () => {
+        try {
+            setPayPalConnecting(true);
+            
+            // Start OAuth flow using expo-auth-session
+            // This will:
+            // - Open PayPal authorization page in popup (web) or browser (mobile)
+            // - Handle the callback automatically
+            // - Return authorization code via response
+            await promptAsync();
+        } catch (error) {
+            setPayPalConnecting(false);
+            Alert.alert("Error", "Failed to start PayPal authorization");
+            console.error('PayPal OAuth error:', error);
+        }
+    };
+
+    const handlePayPalDisconnect = () => {
+        setPayPalConnected(false);
+        setPayPalEmail("");
+    };
+
     const handleSend = () => {
+        if (sendToPayPal && !payPalConnected) {
+            Alert.alert("Error", "Please connect your PayPal account first");
+            return;
+        }
+
         const now = new Date();
         const dateString = now.toLocaleString("en-US", {
             month: "short",
@@ -35,10 +200,14 @@ export default function SendScreen() {
         const feesSaved = 8.50;
         const finalTotal = convertedAmount + transactionFee;
 
+        const toAddressDisplay = sendToPayPal 
+            ? `PayPal: ${payPalEmail}` 
+            : shortenAddress(toAddress);
+
         addTransaction({
             date: dateString,
             fromAddress: shortenAddress(fromAddress),
-            toAddress: shortenAddress(toAddress),
+            toAddress: toAddressDisplay,
             fromAmount: parseFloat(amount).toFixed(2),
             fromToken: fromCurrency,
             toAmount: convertedAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -55,8 +224,12 @@ export default function SendScreen() {
         router.push("/(tabs)");
         
         // Show success alert after navigation
+        const successMessage = sendToPayPal 
+            ? `Payment sent to PayPal (${payPalEmail}) successfully!` 
+            : "Transaction sent successfully!";
+        
         setTimeout(() => {
-            Alert.alert("Success", "Transaction sent successfully!");
+            Alert.alert("Success", successMessage);
         }, 100);
     };
 
@@ -72,6 +245,27 @@ export default function SendScreen() {
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     <View style={styles.card}>
+                        <View style={styles.switchSection}>
+                            <View style={styles.switchRow}>
+                                <View style={styles.switchLabelContainer}>
+                                    <Text style={styles.switchLabel}>Send to Address</Text>
+                                    <Text style={styles.switchSubtext}>Crypto wallet address</Text>
+                                </View>
+                                <Switch
+                                    value={sendToPayPal}
+                                    onValueChange={setSendToPayPal}
+                                    trackColor={{ false: '#E1E4E8', true: '#0891D1' }}
+                                    thumbColor="#FFFFFF"
+                                />
+                                <View style={styles.switchLabelContainer}>
+                                    <Text style={styles.switchLabel}>Send to PayPal</Text>
+                                    <Text style={styles.switchSubtext}>Fiat payment</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.divider} />
+
                         <View style={styles.addressSection}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>From Wallet Address</Text>
@@ -82,15 +276,57 @@ export default function SendScreen() {
                                     placeholderTextColor="#737A82"
                                 />
                             </View>
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>To Wallet Address</Text>
-                                <TextInput
-                                    value={toAddress}
-                                    onChangeText={setToAddress}
-                                    style={styles.input}
-                                    placeholderTextColor="#737A82"
-                                />
-                            </View>
+                            {!sendToPayPal ? (
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.label}>To Wallet Address</Text>
+                                    <TextInput
+                                        value={toAddress}
+                                        onChangeText={setToAddress}
+                                        style={styles.input}
+                                        placeholderTextColor="#737A82"
+                                    />
+                                </View>
+                            ) : (
+                                <View style={styles.paypalSection}>
+                                    {payPalConnecting ? (
+                                        <View style={styles.connectingSection}>
+                                            <Text style={styles.connectingTitle}>Connecting to PayPal...</Text>
+                                            <Text style={styles.connectingSubtext}>
+                                                Please complete the login in your browser, then return to this app.
+                                            </Text>
+                                            <View style={styles.loadingIndicator}>
+                                                <Text style={styles.loadingText}>⏳</Text>
+                                            </View>
+                                        </View>
+                                    ) : !payPalConnected ? (
+                                        <>
+                                            <Text style={styles.paypalTitle}>Connect PayPal Account</Text>
+                                            <Text style={styles.paypalDescription}>
+                                                You'll be redirected to PayPal to securely log in and authorize the connection.
+                                            </Text>
+                                            <Pressable
+                                                onPress={handlePayPalLogin}
+                                                style={styles.connectButton}
+                                            >
+                                                <Text style={styles.connectButtonText}>🔵 Connect with PayPal</Text>
+                                            </Pressable>
+                                        </>
+                                    ) : (
+                                        <View style={styles.connectedSection}>
+                                            <View style={styles.connectedHeader}>
+                                                <Text style={styles.connectedTitle}>PayPal Connected</Text>
+                                                <Pressable onPress={handlePayPalDisconnect}>
+                                                    <Text style={styles.disconnectText}>Disconnect</Text>
+                                                </Pressable>
+                                            </View>
+                                            <View style={styles.connectedInfo}>
+                                                <Text style={styles.connectedEmail}>{payPalEmail}</Text>
+                                                <Text style={styles.connectedStatus}>✓ Verified Account</Text>
+                                            </View>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
                         </View>
 
                         <View style={styles.divider} />
@@ -98,33 +334,29 @@ export default function SendScreen() {
                         <View style={styles.amountSection}>
                             <Text style={styles.amountLabel}>Amount</Text>
                             <View style={styles.conversionContainer}>
-                                <View style={styles.inputSide}>
-                                    <TextInput
-                                        value={amount}
-                                        onChangeText={setAmount}
-                                        keyboardType="numeric"
-                                        style={[styles.amountInput, { width: Math.max(60, amount.length * 20) }]}
-                                        placeholderTextColor="#737A82"
-                                    />
-                                    <TextInput
-                                        value={fromCurrency}
-                                        onChangeText={setFromCurrency}
-                                        style={styles.currencyInput}
-                                        placeholderTextColor="#737A82"
-                                    />
-                                </View>
+                                <TextInput
+                                    value={amount}
+                                    onChangeText={setAmount}
+                                    keyboardType="numeric"
+                                    style={styles.amountInput}
+                                    placeholderTextColor="#737A82"
+                                />
+                                <TextInput
+                                    value={fromCurrency}
+                                    onChangeText={setFromCurrency}
+                                    style={styles.currencyInput}
+                                    placeholderTextColor="#737A82"
+                                />
                                 <Text style={styles.equals}>=</Text>
-                                <View style={styles.outputSide}>
-                                    <Text style={styles.convertedValue}>
-                                        {convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </Text>
-                                    <TextInput
-                                        value={toCurrency}
-                                        onChangeText={setToCurrency}
-                                        style={styles.currencyInput}
-                                        placeholderTextColor="#737A82"
-                                    />
-                                </View>
+                                <Text style={styles.convertedValue}>
+                                    {convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </Text>
+                                <TextInput
+                                    value={toCurrency}
+                                    onChangeText={setToCurrency}
+                                    style={styles.currencyInput}
+                                    placeholderTextColor="#737A82"
+                                />
                             </View>
                         </View>
 
@@ -153,7 +385,14 @@ export default function SendScreen() {
                         >
                             <Text style={styles.cancelButtonText}>Cancel</Text>
                         </Pressable>
-                        <Pressable onPress={handleSend} style={styles.sendButton}>
+                        <Pressable 
+                            onPress={handleSend} 
+                            style={[
+                                styles.sendButton,
+                                (sendToPayPal && !payPalConnected) && styles.sendButtonDisabled
+                            ]}
+                            disabled={sendToPayPal && !payPalConnected}
+                        >
                             <Text style={styles.sendButtonText}>Send</Text>
                         </Pressable>
                     </View>
@@ -218,8 +457,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#E1E4E8',
         borderWidth: 1,
         borderColor: '#E1E4E8',
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: 12,
+        padding: 16,
         fontSize: 12,
         color: '#29343D',
     },
@@ -242,49 +481,52 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        ...(Platform.OS === 'web' ? {} : { gap: 2 }),
         flexWrap: 'wrap',
         paddingHorizontal: 8,
-    },
-    inputSide: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        gap: 4,
-        flexShrink: 1,
-    },
-    outputSide: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        gap: 4,
-        flexShrink: 1,
-    },
-    dollarSign: {
-        fontSize: 18,
-        color: '#29343D',
     },
     amountInput: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#29343D',
         textAlign: 'center',
-        paddingHorizontal: 4,
+        paddingHorizontal: 0,
+        ...(Platform.OS === 'web' ? {
+            marginRight: 2,
+            padding: 0,
+            borderWidth: 0,
+            outline: 'none',
+            width: 'auto',
+        } : {}),
     },
     currencyInput: {
         fontSize: 18,
         color: '#737A82',
         textAlign: 'center',
-        minWidth: 50,
-        maxWidth: 80,
+        ...(Platform.OS === 'web' ? {
+            marginRight: 2,
+            padding: 0,
+            borderWidth: 0,
+            outline: 'none',
+            width: 'auto',
+        } : {}),
     },
     convertedValue: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#29343D',
-        flexShrink: 1,
+        ...(Platform.OS === 'web' ? {
+            marginLeft: 2,
+            marginRight: 2,
+        } : {}),
     },
     equals: {
         fontSize: 18,
         color: '#737A82',
+        ...(Platform.OS === 'web' ? {
+            marginLeft: 2,
+            marginRight: 2,
+        } : {}),
     },
     feesSection: {
         gap: 12,
@@ -338,5 +580,114 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '500',
+    },
+    sendButtonDisabled: {
+        backgroundColor: '#E1E4E8',
+        opacity: 0.6,
+    },
+    switchSection: {
+        marginBottom: 8,
+    },
+    switchRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    switchLabelContainer: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    switchLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+        marginBottom: 2,
+    },
+    switchSubtext: {
+        fontSize: 12,
+        color: '#737A82',
+    },
+    paypalSection: {
+        gap: 16,
+    },
+    paypalTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#29343D',
+        marginBottom: 8,
+    },
+    paypalDescription: {
+        fontSize: 14,
+        color: '#737A82',
+        marginBottom: 16,
+        lineHeight: 20,
+    },
+    connectButton: {
+        backgroundColor: '#0891D1',
+        borderRadius: 8,
+        padding: 16,
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    connectButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    connectingSection: {
+        padding: 24,
+        alignItems: 'center',
+        gap: 12,
+    },
+    connectingTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    connectingSubtext: {
+        fontSize: 14,
+        color: '#737A82',
+        textAlign: 'center',
+        lineHeight: 20,
+    },
+    loadingIndicator: {
+        marginTop: 16,
+    },
+    loadingText: {
+        fontSize: 32,
+    },
+    connectedSection: {
+        padding: 16,
+        backgroundColor: '#EFF1F3',
+        borderRadius: 8,
+        gap: 12,
+    },
+    connectedHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    connectedTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    disconnectText: {
+        fontSize: 14,
+        color: '#0891D1',
+        fontWeight: '500',
+    },
+    connectedInfo: {
+        gap: 4,
+    },
+    connectedEmail: {
+        fontSize: 14,
+        color: '#29343D',
+        fontWeight: '500',
+    },
+    connectedStatus: {
+        fontSize: 12,
+        color: '#22C55E',
     },
 });

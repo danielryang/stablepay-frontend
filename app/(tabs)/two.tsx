@@ -16,7 +16,9 @@ export default function ActivityScreen() {
                                 <View style={styles.transactionHeader}>
                                     <View style={styles.headerLeft}>
                                         <View style={styles.iconContainer}>
-                                            <Text style={styles.icon}>↗</Text>
+                                            <Text style={styles.icon}>
+                                                {tx.type === "converted" ? "⟳" : tx.type === "bought" ? "$" : "↗"}
+                                            </Text>
                                         </View>
                                         <View>
                                             <Text style={styles.date}>{tx.date}</Text>
@@ -33,15 +35,19 @@ export default function ActivityScreen() {
                                     </View>
                                 </View>
 
-                                <View style={styles.divider} />
+                                {tx.type !== "converted" && (
+                                    <>
+                                        <View style={styles.divider} />
 
-                                <View style={styles.addressRow}>
-                                    <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
-                                    <Text style={styles.arrow}>→</Text>
-                                    <Text style={styles.addressRight}>{tx.toAddress}</Text>
-                                </View>
+                                        <View style={styles.addressRow}>
+                                            <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
+                                            <Text style={styles.arrow}>→</Text>
+                                            <Text style={styles.addressRight}>{tx.toAddress}</Text>
+                                        </View>
 
-                                <View style={styles.divider} />
+                                        <View style={styles.divider} />
+                                    </>
+                                )}
 
                                 <View style={styles.detailsSection}>
                                     <View style={styles.detailRow}>

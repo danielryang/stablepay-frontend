@@ -1,0 +1,288 @@
+import { useTransactions } from "@/contexts/TransactionContext";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+
+export default function ConvertScreen() {
+    const router = useRouter();
+    const { addTransaction } = useTransactions();
+    const [amount, setAmount] = useState("40");
+    const [fromCurrency, setFromCurrency] = useState("USDC");
+    const [toCurrency, setToCurrency] = useState("ARS");
+    const exchangeRate = 1050;
+    const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
+
+    const handleConvert = () => {
+        const now = new Date();
+        const dateString = now.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+
+        const transactionFee = 2.00;
+        const feesSaved = 8.50;
+        const finalTotal = convertedAmount + transactionFee;
+
+        addTransaction({
+            date: dateString,
+            fromAddress: "Same Wallet",
+            toAddress: "Same Wallet",
+            fromAmount: parseFloat(amount).toFixed(2),
+            fromToken: fromCurrency,
+            toAmount: convertedAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            toToken: toCurrency,
+            type: "converted",
+            status: "Confirmed",
+            transactionFee: `${transactionFee} ${toCurrency}`,
+            speed: "2s",
+            feesSaved: `${feesSaved} ${toCurrency}`,
+            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${toCurrency}`,
+        });
+
+        // Navigate to home immediately
+        router.push("/(tabs)");
+        
+        // Show success alert after navigation
+        setTimeout(() => {
+            Alert.alert("Success", "Conversion completed successfully!");
+        }, 100);
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>←</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>Convert</Text>
+            </View>
+
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
+                    <View style={styles.card}>
+                        <View style={styles.amountSection}>
+                            <Text style={styles.amountLabel}>Amount</Text>
+                            <View style={styles.conversionContainer}>
+                                <TextInput
+                                    value={amount}
+                                    onChangeText={setAmount}
+                                    keyboardType="numeric"
+                                    style={styles.amountInput}
+                                    placeholderTextColor="#737A82"
+                                />
+                                <TextInput
+                                    value={fromCurrency}
+                                    onChangeText={setFromCurrency}
+                                    style={styles.currencyInput}
+                                    placeholderTextColor="#737A82"
+                                />
+                                <Text style={styles.equals}>=</Text>
+                                <Text style={styles.convertedValue}>
+                                    {convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </Text>
+                                <TextInput
+                                    value={toCurrency}
+                                    onChangeText={setToCurrency}
+                                    style={styles.currencyInput}
+                                    placeholderTextColor="#737A82"
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.feesSection}>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Total Fees Saved:</Text>
+                                <Text style={styles.feeValueSuccess}>8.50 {toCurrency}</Text>
+                            </View>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Transaction Fee:</Text>
+                                <Text style={styles.feeValue}>2.00 {toCurrency}</Text>
+                            </View>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Speed:</Text>
+                                <Text style={styles.feeValue}>2s</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                        <Pressable
+                            onPress={() => router.back()}
+                            style={styles.cancelButton}
+                        >
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                        </Pressable>
+                        <Pressable onPress={handleConvert} style={styles.convertButton}>
+                            <Text style={styles.convertButtonText}>Convert</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </ScrollView>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FAFAFA',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E1E4E8',
+        backgroundColor: '#FFFFFF',
+    },
+    backButton: {
+        marginRight: 8,
+    },
+    backText: {
+        fontSize: 24,
+        color: '#29343D',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#29343D',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        padding: 16,
+    },
+    card: {
+        padding: 24,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        gap: 24,
+    },
+    amountSection: {
+        alignItems: 'center',
+        gap: 12,
+    },
+    amountLabel: {
+        fontSize: 14,
+        color: '#737A82',
+    },
+    conversionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...(Platform.OS === 'web' ? {} : { gap: 2 }),
+        flexWrap: 'wrap',
+        paddingHorizontal: 8,
+    },
+    amountInput: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#29343D',
+        textAlign: 'center',
+        paddingHorizontal: 0,
+        ...(Platform.OS === 'web' ? {
+            marginRight: 2,
+            padding: 0,
+            borderWidth: 0,
+            outline: 'none',
+            width: 'auto',
+        } : {}),
+    },
+    currencyInput: {
+        fontSize: 18,
+        color: '#737A82',
+        textAlign: 'center',
+        ...(Platform.OS === 'web' ? {
+            marginRight: 2,
+            padding: 0,
+            borderWidth: 0,
+            outline: 'none',
+            width: 'auto',
+        } : {}),
+    },
+    convertedValue: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#29343D',
+        ...(Platform.OS === 'web' ? {
+            marginLeft: 2,
+            marginRight: 2,
+        } : {}),
+    },
+    equals: {
+        fontSize: 18,
+        color: '#737A82',
+        ...(Platform.OS === 'web' ? {
+            marginLeft: 2,
+            marginRight: 2,
+        } : {}),
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#E1E4E8',
+    },
+    feesSection: {
+        gap: 12,
+    },
+    feeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    feeLabel: {
+        fontSize: 14,
+        color: '#737A82',
+    },
+    feeValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+    },
+    feeValueSuccess: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#22C55E',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 16,
+    },
+    cancelButton: {
+        flex: 1,
+        height: 48,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#FFFFFF',
+    },
+    cancelButtonText: {
+        color: '#29343D',
+        fontSize: 16,
+    },
+    convertButton: {
+        flex: 1,
+        height: 48,
+        backgroundColor: '#0891D1',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    convertButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+});
+

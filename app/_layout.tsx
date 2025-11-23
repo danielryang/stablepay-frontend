@@ -63,6 +63,8 @@ function RootLayoutNav() {
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                         <Stack.Screen name="send" options={{ headerShown: false }} />
                         <Stack.Screen name="receive" options={{ headerShown: false }} />
+                        <Stack.Screen name="convert" options={{ headerShown: false }} />
+                        <Stack.Screen name="buy" options={{ headerShown: false }} />
                         <Stack.Screen name="activity" options={{ headerShown: false }} />
                         <Stack.Screen name="settings" options={{ headerShown: false }} />
                         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
