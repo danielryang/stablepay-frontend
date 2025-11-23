@@ -20,7 +20,7 @@ import { useWallet } from "@/contexts/WalletContext";
 
 export default function SettingsScreen() {
     const router = useRouter();
-    const { logout, publicKeyString } = useWallet();
+    const { logout } = useWallet();
     const { settings, updateSettings } = useOptimizerSettings();
     const { theme, setTheme } = useTheme();
     const colorScheme = useColorScheme();
@@ -66,14 +66,14 @@ export default function SettingsScreen() {
         );
     };
 
-    const formatAddress = (address: string | null) => {
-        if (!address) return "Not available";
-        return `${address.slice(0, 8)}...${address.slice(-8)}`;
-    };
-
     return (
         <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-            <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+            <View
+                style={[
+                    styles.header,
+                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                ]}
+            >
                 <View style={styles.headerLeft}>
                     <Pressable onPress={() => router.back()} style={styles.backButton}>
                         <Text style={[styles.backText, { color: colors.text }]}>←</Text>
@@ -85,24 +85,31 @@ export default function SettingsScreen() {
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     <View style={styles.section}>
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>👤</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
+                                    🔔
+                                </Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Wallet Address</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
-                                        {formatAddress(publicKeyString)}
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Notifications
                                     </Text>
-                                </View>
-                            </View>
-
-                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-                            <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🔔</Text>
-                                <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Notifications</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>Push notifications</Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        Push notifications
+                                    </Text>
                                 </View>
                                 <Switch
                                     value={notificationsEnabled}
@@ -115,10 +122,19 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🛡</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
+                                    🛡
+                                </Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Security</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Security
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
                                         Password and biometric settings
                                     </Text>
                                 </View>
@@ -127,10 +143,21 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🌍</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
+                                    🌍
+                                </Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Language & Region</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>English (US)</Text>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Language & Region
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        English (US)
+                                    </Text>
                                 </View>
                             </Pressable>
                         </View>
@@ -138,7 +165,15 @@ export default function SettingsScreen() {
 
                     {/* Optimizer Settings Section */}
                     <View style={styles.section}>
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.sectionHeader}>
                                 <Text style={[styles.sectionHeaderText, { color: colors.text }]}>
                                     📊 Smart Allocation Optimizer
@@ -148,17 +183,31 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>💰</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
+                                    💰
+                                </Text>
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Minimum Monthly Expenses
                                     </Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
                                         Minimum spending threshold (default: $800)
                                     </Text>
                                 </View>
-                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
-                                    <Text style={[styles.inputPrefix, { color: colors.text }]}>$</Text>
+                                <View
+                                    style={[
+                                        styles.inputContainer,
+                                        { backgroundColor: colors.inputBackground },
+                                    ]}
+                                >
+                                    <Text style={[styles.inputPrefix, { color: colors.text }]}>
+                                        $
+                                    </Text>
                                     <TextInput
                                         style={[styles.numberInput, { color: colors.text }]}
                                         value={minMonthlyExpenses}
@@ -176,14 +225,28 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>📈</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
+                                    📈
+                                </Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Spending Percentage</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Spending Percentage
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
                                         % of balance spent monthly (default: 15%)
                                     </Text>
                                 </View>
-                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
+                                <View
+                                    style={[
+                                        styles.inputContainer,
+                                        { backgroundColor: colors.inputBackground },
+                                    ]}
+                                >
                                     <TextInput
                                         style={[styles.numberInput, { color: colors.text }]}
                                         value={spendingPercent}
@@ -200,41 +263,84 @@ export default function SettingsScreen() {
                                             setSpendingPercent(value.toString());
                                         }}
                                     />
-                                    <Text style={[styles.inputSuffix, { color: colors.text }]}>%</Text>
+                                    <Text style={[styles.inputSuffix, { color: colors.text }]}>
+                                        %
+                                    </Text>
                                 </View>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.settingItem}>
-                                <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
-                                    <Text style={[styles.iconText, { color: colors.primary }]}>🌓</Text>
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        { backgroundColor: colors.primaryLight },
+                                    ]}
+                                >
+                                    <Text style={[styles.iconText, { color: colors.primary }]}>
+                                        🌓
+                                    </Text>
                                 </View>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Theme</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Theme
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
                                         {theme === "dark" ? "Dark mode" : "Light mode"}
                                     </Text>
                                 </View>
                                 <Switch
                                     value={theme === "dark"}
-                                    onValueChange={(value) => setTheme(value ? "dark" : "light")}
+                                    onValueChange={value => setTheme(value ? "dark" : "light")}
                                     trackColor={{ false: colors.border, true: colors.primary }}
-                                    thumbColor={theme === "dark" ? colors.textInverse : colors.textInverse}
+                                    thumbColor={
+                                        theme === "dark" ? colors.textInverse : colors.textInverse
+                                    }
                                 />
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Pressable onPress={handleLogout} style={styles.settingItem}>
-                                <Text style={[styles.destructiveIcon, { color: colors.error }]}>🚪</Text>
+                                <Text style={[styles.destructiveIcon, { color: colors.error }]}>
+                                    🚪
+                                </Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={[styles.destructiveText, { color: colors.error }]}>Lock Wallet</Text>
-                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                    <Text style={[styles.destructiveText, { color: colors.error }]}>
+                                        Lock Wallet
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
                                         Lock your wallet and require password to unlock
                                     </Text>
                                 </View>
@@ -243,7 +349,9 @@ export default function SettingsScreen() {
                     </View>
 
                     <View style={styles.versionContainer}>
-                        <Text style={[styles.versionText, { color: colors.textSecondary }]}>Version 1.0.0</Text>
+                        <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+                            Version 1.0.0
+                        </Text>
                     </View>
                 </View>
             </ScrollView>

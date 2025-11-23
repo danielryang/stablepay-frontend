@@ -43,7 +43,7 @@ export async function fetchDirectFee(
         }
 
         const data = await response.json();
-        
+
         // Validate response structure
         if (typeof data.fee !== "number") {
             throw new Error("Invalid response format: fee must be a number");
@@ -86,7 +86,7 @@ export async function fetchMinimizedFee(
         }
 
         const data = await response.json();
-        
+
         // Validate response structure
         if (typeof data.fee !== "number") {
             throw new Error("Invalid response format: fee must be a number");
@@ -149,4 +149,3 @@ export async function fetchFeeInfo(
         throw error;
     }
 }
-

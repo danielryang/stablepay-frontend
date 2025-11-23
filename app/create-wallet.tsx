@@ -105,15 +105,35 @@ export default function CreateWalletScreen() {
             <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.header,
+                                {
+                                    backgroundColor: colors.background,
+                                    borderBottomColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Pressable onPress={() => router.back()} style={styles.backButton}>
                                 <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={[styles.headerTitle, { color: colors.text }]}>Your Recovery Phrase</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>
+                                Your Recovery Phrase
+                            </Text>
                         </View>
 
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-                            <Text style={[styles.cardTitle, { color: colors.text }]}>Write Down Your Recovery Phrase</Text>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.cardTitle, { color: colors.text }]}>
+                                Write Down Your Recovery Phrase
+                            </Text>
                             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                                 This is the only way to recover your wallet. Store it somewhere safe
                                 and never share it with anyone.
@@ -121,19 +141,57 @@ export default function CreateWalletScreen() {
 
                             <View style={styles.mnemonicGrid}>
                                 {mnemonic.map((word, index) => (
-                                    <View key={index} style={[styles.mnemonicWord, { backgroundColor: colors.backgroundTertiary }]}>
-                                        <Text style={[styles.mnemonicIndex, { color: colors.textSecondary }]}>{index + 1}</Text>
-                                        <Text style={[styles.mnemonicText, { color: colors.text }]}>{word}</Text>
+                                    <View
+                                        key={index}
+                                        style={[
+                                            styles.mnemonicWord,
+                                            { backgroundColor: colors.backgroundTertiary },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.mnemonicIndex,
+                                                { color: colors.textSecondary },
+                                            ]}
+                                        >
+                                            {index + 1}
+                                        </Text>
+                                        <Text style={[styles.mnemonicText, { color: colors.text }]}>
+                                            {word}
+                                        </Text>
                                     </View>
                                 ))}
                             </View>
 
-                            <Pressable style={[styles.copyButton, { backgroundColor: colors.buttonSecondary, borderColor: colors.border }]} onPress={handleCopyMnemonic}>
-                                <Text style={[styles.copyButtonText, { color: colors.buttonSecondaryText }]}>📋 Copy to Clipboard</Text>
+                            <Pressable
+                                style={[
+                                    styles.copyButton,
+                                    {
+                                        backgroundColor: colors.buttonSecondary,
+                                        borderColor: colors.border,
+                                    },
+                                ]}
+                                onPress={handleCopyMnemonic}
+                            >
+                                <Text
+                                    style={[
+                                        styles.copyButtonText,
+                                        { color: colors.buttonSecondaryText },
+                                    ]}
+                                >
+                                    📋 Copy to Clipboard
+                                </Text>
                             </Pressable>
 
-                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleContinueFromMnemonic}>
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>I've Written It Down</Text>
+                            <Pressable
+                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                onPress={handleContinueFromMnemonic}
+                            >
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    I've Written It Down
+                                </Text>
                             </Pressable>
                         </View>
                     </View>
@@ -148,18 +206,44 @@ export default function CreateWalletScreen() {
             <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.header,
+                                {
+                                    backgroundColor: colors.background,
+                                    borderBottomColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Pressable
                                 onPress={() => setStep("mnemonic")}
                                 style={styles.backButton}
                             >
                                 <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={[styles.headerTitle, { color: colors.text }]}>Important Warning</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>
+                                Important Warning
+                            </Text>
                         </View>
 
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-                            <View style={[styles.warningBox, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
+                            <View
+                                style={[
+                                    styles.warningBox,
+                                    {
+                                        backgroundColor: colors.warningLight,
+                                        borderColor: colors.warning,
+                                    },
+                                ]}
+                            >
                                 <Text style={styles.warningIcon}>⚠️</Text>
                                 <Text style={[styles.warningTitle, { color: colors.warning }]}>
                                     This is Your Only Way to Recover Your Wallet
@@ -175,8 +259,15 @@ export default function CreateWalletScreen() {
                                 </Text>
                             </View>
 
-                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleContinueFromWarning}>
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>I Understand, Continue</Text>
+                            <Pressable
+                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                onPress={handleContinueFromWarning}
+                            >
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    I Understand, Continue
+                                </Text>
                             </Pressable>
                         </View>
                     </View>
@@ -191,22 +282,53 @@ export default function CreateWalletScreen() {
             <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.header,
+                                {
+                                    backgroundColor: colors.background,
+                                    borderBottomColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Pressable onPress={() => setStep("warning")} style={styles.backButton}>
                                 <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={[styles.headerTitle, { color: colors.text }]}>Confirm Recovery Phrase</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>
+                                Confirm Recovery Phrase
+                            </Text>
                         </View>
 
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                                 Enter your recovery phrase to confirm you've saved it correctly
                             </Text>
 
                             <View style={styles.confirmGrid}>
                                 {mnemonic.map((_, index) => (
-                                    <View key={index} style={[styles.confirmWord, { backgroundColor: colors.backgroundTertiary }]}>
-                                        <Text style={[styles.confirmIndex, { color: colors.textSecondary }]}>{index + 1}</Text>
+                                    <View
+                                        key={index}
+                                        style={[
+                                            styles.confirmWord,
+                                            { backgroundColor: colors.backgroundTertiary },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.confirmIndex,
+                                                { color: colors.textSecondary },
+                                            ]}
+                                        >
+                                            {index + 1}
+                                        </Text>
                                         <TextInput
                                             value={confirmedWords[index] || ""}
                                             onChangeText={text => handleWordChange(index, text)}
@@ -219,8 +341,15 @@ export default function CreateWalletScreen() {
                                 ))}
                             </View>
 
-                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleVerifyMnemonic}>
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Verify</Text>
+                            <Pressable
+                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                onPress={handleVerifyMnemonic}
+                            >
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    Verify
+                                </Text>
                             </Pressable>
                         </View>
                     </View>
@@ -233,14 +362,33 @@ export default function CreateWalletScreen() {
     return (
         <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             {isCreating && (
-                <View style={[styles.fullScreenLoader, { backgroundColor: colorScheme === "dark" ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)" }]}>
+                <View
+                    style={[
+                        styles.fullScreenLoader,
+                        {
+                            backgroundColor:
+                                colorScheme === "dark"
+                                    ? "rgba(15, 23, 42, 0.95)"
+                                    : "rgba(255, 255, 255, 0.95)",
+                        },
+                    ]}
+                >
                     <ActivityIndicator size="large" color={colors.primary} />
-                    <Text style={[styles.loaderText, { color: colors.text }]}>Creating your wallet...</Text>
-                    <Text style={[styles.loaderSubtext, { color: colors.textSecondary }]}>This may take a few seconds</Text>
+                    <Text style={[styles.loaderText, { color: colors.text }]}>
+                        Creating your wallet...
+                    </Text>
+                    <Text style={[styles.loaderSubtext, { color: colors.textSecondary }]}>
+                        This may take a few seconds
+                    </Text>
                 </View>
             )}
             <View style={styles.content}>
-                <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                <View
+                    style={[
+                        styles.header,
+                        { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    ]}
+                >
                     <Pressable
                         onPress={() => setStep("confirm")}
                         style={styles.backButton}
@@ -251,8 +399,15 @@ export default function CreateWalletScreen() {
                     <Text style={[styles.headerTitle, { color: colors.text }]}>Set Password</Text>
                 </View>
 
-                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-                    <Text style={[styles.cardTitle, { color: colors.text }]}>Create a Password</Text>
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                    ]}
+                >
+                    <Text style={[styles.cardTitle, { color: colors.text }]}>
+                        Create a Password
+                    </Text>
                     <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                         This password will encrypt your wallet and be required to unlock it. Make
                         sure it's strong and memorable.
@@ -265,7 +420,14 @@ export default function CreateWalletScreen() {
                             onChangeText={setPassword}
                             placeholder="Enter password (min 8 characters)"
                             secureTextEntry
-                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.inputBackground,
+                                    borderColor: colors.inputBorder,
+                                    color: colors.inputText,
+                                },
+                            ]}
                             placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
@@ -277,7 +439,14 @@ export default function CreateWalletScreen() {
                             onChangeText={setConfirmPassword}
                             placeholder="Confirm password"
                             secureTextEntry
-                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.inputBackground,
+                                    borderColor: colors.inputBorder,
+                                    color: colors.inputText,
+                                },
+                            ]}
                             placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
@@ -286,7 +455,7 @@ export default function CreateWalletScreen() {
                         style={[
                             styles.button,
                             { backgroundColor: colors.buttonPrimary },
-                            isCreating && { opacity: 0.5 }
+                            isCreating && { opacity: 0.5 },
                         ]}
                         onPress={handleCreateWallet}
                         disabled={isCreating}
@@ -294,10 +463,16 @@ export default function CreateWalletScreen() {
                         {isCreating ? (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="small" color={colors.buttonPrimaryText} />
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Creating Wallet...</Text>
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    Creating Wallet...
+                                </Text>
                             </View>
                         ) : (
-                            <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Create Wallet</Text>
+                            <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>
+                                Create Wallet
+                            </Text>
                         )}
                     </Pressable>
                 </View>

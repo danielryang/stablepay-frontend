@@ -18,10 +18,17 @@ export default function OnboardingScreen() {
                         <Text style={styles.logoIcon}>💲</Text>
                     </View>
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
-                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome to your Solana wallet</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                        Welcome to your Solana wallet
+                    </Text>
                 </View>
 
-                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                    ]}
+                >
                     <Text style={[styles.cardTitle, { color: colors.text }]}>Get Started</Text>
                     <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                         Create a new wallet or restore an existing one
@@ -29,17 +36,40 @@ export default function OnboardingScreen() {
 
                     <View style={styles.buttonGroup}>
                         <Pressable
-                            style={[styles.primaryButton, { backgroundColor: colors.buttonPrimary }]}
+                            style={[
+                                styles.primaryButton,
+                                { backgroundColor: colors.buttonPrimary },
+                            ]}
                             onPress={() => router.push("/create-wallet")}
                         >
-                            <Text style={[styles.primaryButtonText, { color: colors.buttonPrimaryText }]}>Create New Wallet</Text>
+                            <Text
+                                style={[
+                                    styles.primaryButtonText,
+                                    { color: colors.buttonPrimaryText },
+                                ]}
+                            >
+                                Create New Wallet
+                            </Text>
                         </Pressable>
 
                         <Pressable
-                            style={[styles.secondaryButton, { backgroundColor: colors.buttonSecondary, borderColor: colors.border }]}
+                            style={[
+                                styles.secondaryButton,
+                                {
+                                    backgroundColor: colors.buttonSecondary,
+                                    borderColor: colors.border,
+                                },
+                            ]}
                             onPress={() => router.push("/restore-wallet")}
                         >
-                            <Text style={[styles.secondaryButtonText, { color: colors.buttonSecondaryText }]}>Restore Wallet</Text>
+                            <Text
+                                style={[
+                                    styles.secondaryButtonText,
+                                    { color: colors.buttonSecondaryText },
+                                ]}
+                            >
+                                Restore Wallet
+                            </Text>
                         </Pressable>
                     </View>
                 </View>

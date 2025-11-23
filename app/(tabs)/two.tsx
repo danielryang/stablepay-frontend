@@ -14,8 +14,12 @@ export default function ActivityScreen() {
                 <View style={styles.content}>
                     <View style={styles.header}>
                         <View>
-                            <Text style={[styles.title, { color: colors.text }]}>Recent Transactions</Text>
-                            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your Solana transaction history</Text>
+                            <Text style={[styles.title, { color: colors.text }]}>
+                                Recent Transactions
+                            </Text>
+                            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                                Your Solana transaction history
+                            </Text>
                         </View>
                         <Pressable onPress={refreshTransactions} style={styles.refreshButton}>
                             <Text style={styles.refreshText}>🔄</Text>
@@ -25,11 +29,15 @@ export default function ActivityScreen() {
                     {isLoading ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color={colors.primary} />
-                            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading transactions...</Text>
+                            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                                Loading transactions...
+                            </Text>
                         </View>
                     ) : transactions.length === 0 ? (
                         <View style={styles.emptyContainer}>
-                            <Text style={[styles.emptyText, { color: colors.text }]}>No transactions yet</Text>
+                            <Text style={[styles.emptyText, { color: colors.text }]}>
+                                No transactions yet
+                            </Text>
                             <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
                                 Your transaction history will appear here
                             </Text>
@@ -37,7 +45,16 @@ export default function ActivityScreen() {
                     ) : (
                         <View style={styles.transactionsList}>
                             {transactions.map(tx => (
-                                <View key={tx.id} style={[styles.transactionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                <View
+                                    key={tx.id}
+                                    style={[
+                                        styles.transactionCard,
+                                        {
+                                            backgroundColor: colors.cardBackground,
+                                            borderColor: colors.border,
+                                        },
+                                    ]}
+                                >
                                     <View style={styles.transactionHeader}>
                                         <View style={styles.headerLeft}>
                                             <View style={styles.iconContainer}>

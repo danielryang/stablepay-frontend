@@ -98,10 +98,17 @@ export default function LoginScreen() {
                         <Text style={styles.logoIcon}>💲</Text>
                     </View>
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
-                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Unlock your wallet</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                        Unlock your wallet
+                    </Text>
                 </View>
 
-                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                    ]}
+                >
                     <View style={styles.inputGroup}>
                         <Text style={[styles.label, { color: colors.text }]}>Password</Text>
                         <TextInput
@@ -109,7 +116,14 @@ export default function LoginScreen() {
                             onChangeText={setPassword}
                             placeholder="Enter your wallet password"
                             secureTextEntry
-                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.inputBackground,
+                                    borderColor: colors.inputBorder,
+                                    color: colors.inputText,
+                                },
+                            ]}
                             placeholderTextColor={colors.inputPlaceholder}
                             onSubmitEditing={handleLogin}
                             autoFocus
@@ -120,19 +134,28 @@ export default function LoginScreen() {
                         style={[
                             styles.loginButton,
                             { backgroundColor: colors.buttonPrimary },
-                            isLoggingIn && { opacity: 0.5 }
+                            isLoggingIn && { opacity: 0.5 },
                         ]}
                         disabled={isLoggingIn}
                     >
                         {isLoggingIn ? (
                             <ActivityIndicator color={colors.buttonPrimaryText} />
                         ) : (
-                            <Text style={[styles.loginButtonText, { color: colors.buttonPrimaryText }]}>Unlock Wallet</Text>
+                            <Text
+                                style={[
+                                    styles.loginButtonText,
+                                    { color: colors.buttonPrimaryText },
+                                ]}
+                            >
+                                Unlock Wallet
+                            </Text>
                         )}
                     </Pressable>
 
                     <Pressable onPress={handleSwitchAccount} style={styles.switchAccountButton}>
-                        <Text style={[styles.switchAccountText, { color: colors.textSecondary }]}>Switch Account</Text>
+                        <Text style={[styles.switchAccountText, { color: colors.textSecondary }]}>
+                            Switch Account
+                        </Text>
                     </Pressable>
                 </View>
 

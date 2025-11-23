@@ -85,15 +85,35 @@ export default function RestoreWalletScreen() {
             <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                        <View
+                            style={[
+                                styles.header,
+                                {
+                                    backgroundColor: colors.background,
+                                    borderBottomColor: colors.border,
+                                },
+                            ]}
+                        >
                             <Pressable onPress={() => router.back()} style={styles.backButton}>
                                 <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={[styles.headerTitle, { color: colors.text }]}>Restore Wallet</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>
+                                Restore Wallet
+                            </Text>
                         </View>
 
-                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-                            <Text style={[styles.cardTitle, { color: colors.text }]}>Enter Recovery Phrase</Text>
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.cardTitle, { color: colors.text }]}>
+                                Enter Recovery Phrase
+                            </Text>
                             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                                 Enter your 12-word recovery phrase to restore your wallet
                             </Text>
@@ -105,15 +125,29 @@ export default function RestoreWalletScreen() {
                                     placeholder="word1 word2 word3 ... word12"
                                     multiline
                                     numberOfLines={4}
-                                    style={[styles.mnemonicInput, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                                    style={[
+                                        styles.mnemonicInput,
+                                        {
+                                            backgroundColor: colors.inputBackground,
+                                            borderColor: colors.inputBorder,
+                                            color: colors.inputText,
+                                        },
+                                    ]}
                                     placeholderTextColor={colors.inputPlaceholder}
                                     autoCapitalize="none"
                                     textAlignVertical="top"
                                 />
                             </View>
 
-                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleMnemonicSubmit}>
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Continue</Text>
+                            <Pressable
+                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                onPress={handleMnemonicSubmit}
+                            >
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    Continue
+                                </Text>
                             </Pressable>
                         </View>
                     </View>
@@ -125,14 +159,33 @@ export default function RestoreWalletScreen() {
     return (
         <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             {isRestoring && (
-                <View style={[styles.fullScreenLoader, { backgroundColor: colorScheme === "dark" ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)" }]}>
+                <View
+                    style={[
+                        styles.fullScreenLoader,
+                        {
+                            backgroundColor:
+                                colorScheme === "dark"
+                                    ? "rgba(15, 23, 42, 0.95)"
+                                    : "rgba(255, 255, 255, 0.95)",
+                        },
+                    ]}
+                >
                     <ActivityIndicator size="large" color={colors.primary} />
-                    <Text style={[styles.loaderText, { color: colors.text }]}>Restoring your wallet...</Text>
-                    <Text style={[styles.loaderSubtext, { color: colors.textSecondary }]}>This may take a few seconds</Text>
+                    <Text style={[styles.loaderText, { color: colors.text }]}>
+                        Restoring your wallet...
+                    </Text>
+                    <Text style={[styles.loaderSubtext, { color: colors.textSecondary }]}>
+                        This may take a few seconds
+                    </Text>
                 </View>
             )}
             <View style={styles.content}>
-                <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                <View
+                    style={[
+                        styles.header,
+                        { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    ]}
+                >
                     <Pressable
                         onPress={() => setStep("mnemonic")}
                         style={styles.backButton}
@@ -143,7 +196,12 @@ export default function RestoreWalletScreen() {
                     <Text style={[styles.headerTitle, { color: colors.text }]}>Set Password</Text>
                 </View>
 
-                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                    ]}
+                >
                     <Text style={[styles.cardTitle, { color: colors.text }]}>Set a Password</Text>
                     <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                         This password will encrypt your wallet and be required to unlock it. Make
@@ -157,7 +215,14 @@ export default function RestoreWalletScreen() {
                             onChangeText={setPassword}
                             placeholder="Enter password (min 8 characters)"
                             secureTextEntry
-                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.inputBackground,
+                                    borderColor: colors.inputBorder,
+                                    color: colors.inputText,
+                                },
+                            ]}
                             placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
@@ -169,7 +234,14 @@ export default function RestoreWalletScreen() {
                             onChangeText={setConfirmPassword}
                             placeholder="Confirm password"
                             secureTextEntry
-                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.inputBackground,
+                                    borderColor: colors.inputBorder,
+                                    color: colors.inputText,
+                                },
+                            ]}
                             placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
@@ -178,7 +250,7 @@ export default function RestoreWalletScreen() {
                         style={[
                             styles.button,
                             { backgroundColor: colors.buttonPrimary },
-                            isRestoring && { opacity: 0.5 }
+                            isRestoring && { opacity: 0.5 },
                         ]}
                         onPress={handleRestoreWallet}
                         disabled={isRestoring}
@@ -186,10 +258,16 @@ export default function RestoreWalletScreen() {
                         {isRestoring ? (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="small" color={colors.buttonPrimaryText} />
-                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Restoring Wallet...</Text>
+                                <Text
+                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
+                                >
+                                    Restoring Wallet...
+                                </Text>
                             </View>
                         ) : (
-                            <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Restore Wallet</Text>
+                            <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>
+                                Restore Wallet
+                            </Text>
                         )}
                     </Pressable>
                 </View>

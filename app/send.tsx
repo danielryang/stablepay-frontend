@@ -309,7 +309,12 @@ export default function SendScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-            <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+            <View
+                style={[
+                    styles.header,
+                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                ]}
+            >
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
                     <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                 </Pressable>
@@ -318,7 +323,12 @@ export default function SendScreen() {
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
-                    <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                    <View
+                        style={[
+                            styles.card,
+                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        ]}
+                    >
                         <View style={styles.switchSection}>
                             <View style={styles.switchRow}>
                                 <View style={styles.switchLabelContainer}>
