@@ -32,8 +32,9 @@ function TabBarIcon(props: {
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const colorScheme = useColorScheme();
-    const activeColor = Colors[colorScheme ?? "light"].tint;
-    const inactiveColor = "#999";
+    const colors = Colors[colorScheme ?? "light"];
+    const activeColor = colors.tabBarActive;
+    const inactiveColor = colors.tabBarInactive;
     const indicatorPosition = useSharedValue(0);
 
     useEffect(() => {
@@ -53,9 +54,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         <View
             style={{
                 flexDirection: "row",
-                backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
+                backgroundColor: colors.tabBarBackground,
                 borderTopWidth: 1,
-                borderTopColor: colorScheme === "dark" ? "#333" : "#e5e7eb",
+                borderTopColor: colors.tabBarBorder,
                 height: 60,
             }}
         >
@@ -67,7 +68,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                         left: 0,
                         width: TAB_WIDTH,
                         height: 3,
-                        backgroundColor: "#3b82f6",
+                        backgroundColor: colors.primary,
                         borderBottomLeftRadius: 2,
                         borderBottomRightRadius: 2,
                     },

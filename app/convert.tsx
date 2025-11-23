@@ -12,11 +12,15 @@ import {
 
 import { useRouter } from "expo-router";
 
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
 
 export default function ConvertScreen() {
     const router = useRouter();
     const { addTransaction } = useTransactions();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     const [amount, setAmount] = useState("40");
     const [fromCurrency, setFromCurrency] = useState("USDC");
     const [toCurrency, setToCurrency] = useState("ARS");
@@ -66,35 +70,49 @@ export default function ConvertScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View
+                style={[
+                    styles.header,
+                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                ]}
+            >
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backText}>←</Text>
+                    <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                 </Pressable>
-                <Text style={styles.headerTitle}>Convert</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Convert</Text>
             </View>
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
-                    <View style={styles.card}>
+                    <View
+                        style={[
+                            styles.card,
+                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        ]}
+                    >
                         <View style={styles.amountSection}>
-                            <Text style={styles.amountLabel}>Amount</Text>
+                            <Text style={[styles.amountLabel, { color: colors.textSecondary }]}>
+                                Amount
+                            </Text>
                             <View style={styles.conversionContainer}>
                                 <TextInput
                                     value={amount}
                                     onChangeText={setAmount}
                                     keyboardType="numeric"
-                                    style={styles.amountInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.amountInput, { color: colors.text }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
                                 <TextInput
                                     value={fromCurrency}
                                     onChangeText={setFromCurrency}
-                                    style={styles.currencyInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
-                                <Text style={styles.equals}>=</Text>
-                                <Text style={styles.convertedValue}>
+                                <Text style={[styles.equals, { color: colors.textSecondary }]}>
+                                    =
+                                </Text>
+                                <Text style={[styles.convertedValue, { color: colors.text }]}>
                                     {convertedAmount.toLocaleString("en-US", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
@@ -103,36 +121,70 @@ export default function ConvertScreen() {
                                 <TextInput
                                     value={toCurrency}
                                     onChangeText={setToCurrency}
-                                    style={styles.currencyInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
                             </View>
                         </View>
 
-                        <View style={styles.divider} />
+                        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Total Fees Saved:</Text>
-                                <Text style={styles.feeValueSuccess}>8.50 {toCurrency}</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
+                                    Total Fees Saved:
+                                </Text>
+                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
+                                    8.50 {toCurrency}
+                                </Text>
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Transaction Fee:</Text>
-                                <Text style={styles.feeValue}>2.00 {toCurrency}</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
+                                    Transaction Fee:
+                                </Text>
+                                <Text style={[styles.feeValue, { color: colors.text }]}>
+                                    2.00 {toCurrency}
+                                </Text>
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Speed:</Text>
-                                <Text style={styles.feeValue}>2s</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
+                                    Speed:
+                                </Text>
+                                <Text style={[styles.feeValue, { color: colors.text }]}>2s</Text>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <Pressable onPress={() => router.back()} style={styles.cancelButton}>
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                        <Pressable
+                            onPress={() => router.back()}
+                            style={[
+                                styles.cancelButton,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                                Cancel
+                            </Text>
                         </Pressable>
-                        <Pressable onPress={handleConvert} style={styles.convertButton}>
-                            <Text style={styles.convertButtonText}>Convert</Text>
+                        <Pressable
+                            onPress={handleConvert}
+                            style={[
+                                styles.convertButton,
+                                { backgroundColor: colors.buttonPrimary },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.convertButtonText,
+                                    { color: colors.buttonPrimaryText },
+                                ]}
+                            >
+                                Convert
+                            </Text>
                         </Pressable>
                     </View>
                 </View>
@@ -144,7 +196,6 @@ export default function ConvertScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     header: {
         flexDirection: "row",
@@ -153,8 +204,6 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#E1E4E8",
-        backgroundColor: "#FFFFFF",
     },
     backButton: {
         marginRight: 8,
@@ -176,10 +225,8 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 24,
     },
     amountSection: {
@@ -188,7 +235,6 @@ const styles = StyleSheet.create({
     },
     amountLabel: {
         fontSize: 14,
-        color: "#737A82",
     },
     conversionContainer: {
         flexDirection: "row",
@@ -201,7 +247,6 @@ const styles = StyleSheet.create({
     amountInput: {
         fontSize: 28,
         fontWeight: "bold",
-        color: "#29343D",
         textAlign: "center",
         paddingHorizontal: 0,
         ...(Platform.OS === "web"
@@ -216,7 +261,6 @@ const styles = StyleSheet.create({
     },
     currencyInput: {
         fontSize: 18,
-        color: "#737A82",
         textAlign: "center",
         ...(Platform.OS === "web"
             ? {
@@ -231,7 +275,6 @@ const styles = StyleSheet.create({
     convertedValue: {
         fontSize: 28,
         fontWeight: "bold",
-        color: "#29343D",
         ...(Platform.OS === "web"
             ? {
                   marginLeft: 2,
@@ -241,7 +284,6 @@ const styles = StyleSheet.create({
     },
     equals: {
         fontSize: 18,
-        color: "#737A82",
         ...(Platform.OS === "web"
             ? {
                   marginLeft: 2,
@@ -251,7 +293,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#E1E4E8",
     },
     feesSection: {
         gap: 12,
@@ -262,17 +303,14 @@ const styles = StyleSheet.create({
     },
     feeLabel: {
         fontSize: 14,
-        color: "#737A82",
     },
     feeValue: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
     },
     feeValueSuccess: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#22C55E",
     },
     buttonContainer: {
         flexDirection: "row",
@@ -283,26 +321,21 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 48,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#FFFFFF",
     },
     cancelButtonText: {
-        color: "#29343D",
         fontSize: 16,
     },
     convertButton: {
         flex: 1,
         height: 48,
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
     },
     convertButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "500",
     },

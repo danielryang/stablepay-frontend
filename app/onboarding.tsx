@@ -2,45 +2,50 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useRouter } from "expo-router";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+
 export default function OnboardingScreen() {
     const router = useRouter();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    <View style={styles.logo}>
+                    <View style={[styles.logo, { backgroundColor: colors.primary }]}>
                         <Text style={styles.logoIcon}>💲</Text>
                     </View>
-                    <Text style={styles.title}>StablePay</Text>
-                    <Text style={styles.subtitle}>Welcome to your Solana wallet</Text>
+                    <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome to your Solana wallet</Text>
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Get Started</Text>
-                    <Text style={styles.cardSubtitle}>
+                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                    <Text style={[styles.cardTitle, { color: colors.text }]}>Get Started</Text>
+                    <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                         Create a new wallet or restore an existing one
                     </Text>
 
                     <View style={styles.buttonGroup}>
                         <Pressable
-                            style={styles.primaryButton}
+                            style={[styles.primaryButton, { backgroundColor: colors.buttonPrimary }]}
                             onPress={() => router.push("/create-wallet")}
                         >
-                            <Text style={styles.primaryButtonText}>Create New Wallet</Text>
+                            <Text style={[styles.primaryButtonText, { color: colors.buttonPrimaryText }]}>Create New Wallet</Text>
                         </Pressable>
 
                         <Pressable
-                            style={styles.secondaryButton}
+                            style={[styles.secondaryButton, { backgroundColor: colors.buttonSecondary, borderColor: colors.border }]}
                             onPress={() => router.push("/restore-wallet")}
                         >
-                            <Text style={styles.secondaryButtonText}>Restore Wallet</Text>
+                            <Text style={[styles.secondaryButtonText, { color: colors.buttonSecondaryText }]}>Restore Wallet</Text>
                         </Pressable>
                     </View>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>
+                    <Text style={[styles.footerText, { color: colors.textSecondary }]}>
                         Your wallet is stored securely on your device
                     </Text>
                 </View>
@@ -52,7 +57,6 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
@@ -67,7 +71,6 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     logo: {
-        backgroundColor: "#0891D1",
         borderRadius: 999,
         padding: 16,
         width: 80,
@@ -81,28 +84,22 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
         fontWeight: "bold",
-        color: "#29343D",
     },
     subtitle: {
         fontSize: 14,
-        color: "#737A82",
     },
     card: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 16,
     },
     cardTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     cardSubtitle: {
         fontSize: 14,
-        color: "#737A82",
         marginBottom: 8,
     },
     buttonGroup: {
@@ -110,26 +107,21 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     primaryButton: {
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 16,
         alignItems: "center",
     },
     primaryButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "600",
     },
     secondaryButton: {
-        backgroundColor: "#EFF1F3",
         borderRadius: 8,
         padding: 16,
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#E1E4E8",
     },
     secondaryButtonText: {
-        color: "#29343D",
         fontSize: 16,
         fontWeight: "600",
     },
@@ -138,7 +130,6 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 12,
-        color: "#737A82",
         textAlign: "center",
     },
 });

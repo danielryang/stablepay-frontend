@@ -22,10 +22,15 @@ import {
 } from "@expo-google-fonts/inter";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import {
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider as NavigationThemeProvider,
+} from "@react-navigation/native";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { OptimizerSettingsProvider } from "@/contexts/OptimizerSettingsContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
 import { WalletProvider } from "@/contexts/WalletContext";
 
@@ -75,14 +80,30 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+    return (
+        <ThemeProvider>
+            <RootLayoutNavInner />
+        </ThemeProvider>
+    );
+}
+
+function RootLayoutNavInner() {
     const colorScheme = useColorScheme();
 
     return (
         <WalletProvider>
             <TransactionProvider>
                 <OptimizerSettingsProvider>
-                    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-                        <View style={{ flex: 1, paddingTop: 30, backgroundColor: "#FFFFFF" }}>
+                    <NavigationThemeProvider
+                        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                    >
+                        <View
+                            style={{
+                                flex: 1,
+                                paddingTop: 30,
+                                backgroundColor: colorScheme === "dark" ? "#0F172A" : "#FFFFFF",
+                            }}
+                        >
                             <Stack>
                                 <Stack.Screen name="login" options={{ headerShown: false }} />
                                 <Stack.Screen name="onboarding" options={{ headerShown: false }} />
@@ -98,13 +119,11 @@ function RootLayoutNav() {
                                 <Stack.Screen name="send" options={{ headerShown: false }} />
                                 <Stack.Screen name="receive" options={{ headerShown: false }} />
                                 <Stack.Screen name="convert" options={{ headerShown: false }} />
-                                <Stack.Screen name="buy" options={{ headerShown: false }} />
-                                <Stack.Screen name="activity" options={{ headerShown: false }} />
                                 <Stack.Screen name="settings" options={{ headerShown: false }} />
                                 <Stack.Screen name="modal" options={{ presentation: "modal" }} />
                             </Stack>
                         </View>
-                    </ThemeProvider>
+                    </NavigationThemeProvider>
                 </OptimizerSettingsProvider>
             </TransactionProvider>
         </WalletProvider>

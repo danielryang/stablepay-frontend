@@ -9,6 +9,8 @@ import {
     View,
 } from "react-native";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
 import { useTransactions } from "@/contexts/TransactionContext";
 import {
@@ -47,6 +49,8 @@ const getFiatBalances = (): FiatBalance[] => {
 export default function OptimizerScreen() {
     const { settings } = useOptimizerSettings();
     const { transactions } = useTransactions();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
 
     const [loading, setLoading] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
@@ -309,11 +313,11 @@ export default function OptimizerScreen() {
 
     if (loading) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0891D1" />
-                    <Text style={styles.loadingText}>Analyzing market data...</Text>
-                    <Text style={styles.loadingSubtext}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={[styles.loadingText, { color: colors.text }]}>Analyzing market data...</Text>
+                    <Text style={[styles.loadingSubtext, { color: colors.textSecondary }]}>
                         Loading 90 days of real price data + stablecoin liquidity
                     </Text>
                 </View>
@@ -323,11 +327,11 @@ export default function OptimizerScreen() {
 
     if (aiLoading) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0891D1" />
-                    <Text style={styles.loadingText}>Enhancing with AI...</Text>
-                    <Text style={styles.loadingSubtext}>Generating explanations and insights</Text>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={[styles.loadingText, { color: colors.text }]}>Enhancing with AI...</Text>
+                    <Text style={[styles.loadingSubtext, { color: colors.textSecondary }]}>Generating explanations and insights</Text>
                 </View>
             </View>
         );
@@ -335,13 +339,13 @@ export default function OptimizerScreen() {
 
     if (error) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.errorContainer}>
-                        <Text style={styles.errorTitle}>⚠️ Error</Text>
-                        <Text style={styles.errorMessage}>{error}</Text>
-                        <Pressable style={styles.retryButton} onPress={generateReport}>
-                            <Text style={styles.retryButtonText}>Retry</Text>
+                        <Text style={[styles.errorTitle, { color: colors.error }]}>⚠️ Error</Text>
+                        <Text style={[styles.errorMessage, { color: colors.text }]}>{error}</Text>
+                        <Pressable style={[styles.retryButton, { backgroundColor: colors.buttonPrimary }]} onPress={generateReport}>
+                            <Text style={[styles.retryButtonText, { color: colors.buttonPrimaryText }]}>Retry</Text>
                         </Pressable>
                     </View>
                 </ScrollView>
@@ -359,19 +363,19 @@ export default function OptimizerScreen() {
     const timingInsights = results?.recommendations.find(r => r.type === "timing_insight");
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     {/* Header */}
-                    <View style={styles.headerCard}>
-                        <Text style={styles.headerTitle}>Allocation Optimizer</Text>
-                        <Text style={styles.headerSubtitle}>
+                    <View style={[styles.headerCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                        <Text style={[styles.headerTitle, { color: colors.text }]}>Allocation Optimizer</Text>
+                        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
                             Real data from {dataSource || "CoinGecko API"} • Analyzes timing,
                             stablecoins, and network efficiency
                         </Text>
                         {!results && (
-                            <Pressable style={styles.generateButton} onPress={generateReport}>
-                                <Text style={styles.generateButtonText}>Generate Report</Text>
+                            <Pressable style={[styles.generateButton, { backgroundColor: colors.buttonPrimary }]} onPress={generateReport}>
+                                <Text style={[styles.generateButtonText, { color: colors.buttonPrimaryText }]}>Generate Report</Text>
                             </Pressable>
                         )}
                     </View>
@@ -380,12 +384,12 @@ export default function OptimizerScreen() {
                         <>
                             {/* CORS Warning Banner (if AI failed due to CORS) */}
                             {aiEnhancedRecs.length === 0 && results.recommendations.length > 0 && (
-                                <View style={styles.corsWarningCard}>
-                                    <Text style={styles.corsWarningTitle}>
+                                <View style={[styles.corsWarningCard, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+                                    <Text style={[styles.corsWarningTitle, { color: colors.warning }]}>
                                         {" "}
                                         AI Features Limited in Browser
                                     </Text>
-                                    <Text style={styles.corsWarningText}>
+                                    <Text style={[styles.corsWarningText, { color: colors.text }]}>
                                         Anthropic API doesn't support browser CORS. AI explanations
                                         work on native devices (iOS/Android) or require a backend
                                         proxy. Algorithmic recommendations are fully functional
@@ -396,10 +400,10 @@ export default function OptimizerScreen() {
 
                             {/* AI Summary */}
                             {aiSummary && typeof aiSummary === "object" && aiSummary !== null && (
-                                <View style={styles.aiSummaryCard}>
-                                    <Text style={styles.aiSummaryTitle}>Analysis Summary</Text>
+                                <View style={[styles.aiSummaryCard, { backgroundColor: colors.infoLight, borderColor: colors.info }]}>
+                                    <Text style={[styles.aiSummaryTitle, { color: colors.primary }]}>Analysis Summary</Text>
                                     {aiSummary.summary && typeof aiSummary.summary === "string" && (
-                                        <Text style={styles.aiSummaryText}>
+                                        <Text style={[styles.aiSummaryText, { color: colors.text }]}>
                                             {aiSummary.summary}
                                         </Text>
                                     )}
@@ -407,12 +411,12 @@ export default function OptimizerScreen() {
                                         Array.isArray(aiSummary.keyInsights) &&
                                         aiSummary.keyInsights.length > 0 && (
                                             <View style={styles.aiInsightsContainer}>
-                                                <Text style={styles.aiInsightsTitle}>
+                                                <Text style={[styles.aiInsightsTitle, { color: colors.primary }]}>
                                                     Key Insights:
                                                 </Text>
                                                 {aiSummary.keyInsights.map(
                                                     (insight: string, i: number) => (
-                                                        <Text key={i} style={styles.aiInsightItem}>
+                                                        <Text key={i} style={[styles.aiInsightItem, { color: colors.text }]}>
                                                             • {insight}
                                                         </Text>
                                                     )
@@ -423,12 +427,12 @@ export default function OptimizerScreen() {
                                         Array.isArray(aiSummary.actionItems) &&
                                         aiSummary.actionItems.length > 0 && (
                                             <View style={styles.aiInsightsContainer}>
-                                                <Text style={styles.aiInsightsTitle}>
+                                                <Text style={[styles.aiInsightsTitle, { color: colors.primary }]}>
                                                     Action Items:
                                                 </Text>
                                                 {aiSummary.actionItems.map(
                                                     (item: string, i: number) => (
-                                                        <Text key={i} style={styles.aiInsightItem}>
+                                                        <Text key={i} style={[styles.aiInsightItem, { color: colors.text }]}>
                                                             • {item}
                                                         </Text>
                                                     )
@@ -440,48 +444,45 @@ export default function OptimizerScreen() {
 
                             {/* Market Sentiment */}
                             {marketSentiment && (
-                                <View style={styles.sentimentCard}>
-                                    <Text style={styles.sentimentTitle}>Market Sentiment</Text>
+                                <View style={[styles.sentimentCard, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+                                    <Text style={[styles.sentimentTitle, { color: colors.warning }]}>Market Sentiment</Text>
                                     <View style={styles.sentimentRow}>
-                                        <Text style={styles.sentimentLabel}>Sentiment:</Text>
+                                        <Text style={[styles.sentimentLabel, { color: colors.text }]}>Sentiment:</Text>
                                         <Text
                                             style={[
                                                 styles.sentimentValue,
-                                                marketSentiment.sentiment === "bullish" &&
-                                                    styles.sentimentBullish,
-                                                marketSentiment.sentiment === "bearish" &&
-                                                    styles.sentimentBearish,
+                                                { color: marketSentiment.sentiment === "bullish" ? colors.success : marketSentiment.sentiment === "bearish" ? colors.error : colors.text },
                                             ]}
                                         >
                                             {marketSentiment.sentiment.toUpperCase()}
                                         </Text>
                                     </View>
                                     <View style={styles.sentimentRow}>
-                                        <Text style={styles.sentimentLabel}>Confidence:</Text>
-                                        <Text style={styles.sentimentValue}>
+                                        <Text style={[styles.sentimentLabel, { color: colors.text }]}>Confidence:</Text>
+                                        <Text style={[styles.sentimentValue, { color: colors.text }]}>
                                             {(marketSentiment.confidence * 100).toFixed(0)}%
                                         </Text>
                                     </View>
-                                    <Text style={styles.sentimentReasoning}>
+                                    <Text style={[styles.sentimentReasoning, { color: colors.text }]}>
                                         {marketSentiment.reasoning}
                                     </Text>
                                     {marketSentiment.indicators && (
-                                        <View style={styles.sentimentIndicators}>
-                                            <Text style={styles.sentimentIndicatorText}>
+                                        <View style={[styles.sentimentIndicators, { borderTopColor: colors.warning }]}>
+                                            <Text style={[styles.sentimentIndicatorText, { color: colors.text }]}>
                                                 Price Trend:{" "}
                                                 {marketSentiment.indicators.priceTrend > 0
                                                     ? "+"
                                                     : ""}
                                                 {marketSentiment.indicators.priceTrend.toFixed(2)}%
                                             </Text>
-                                            <Text style={styles.sentimentIndicatorText}>
+                                            <Text style={[styles.sentimentIndicatorText, { color: colors.text }]}>
                                                 Volatility:{" "}
                                                 {(
                                                     marketSentiment.indicators.volatility * 100
                                                 ).toFixed(1)}
                                                 %
                                             </Text>
-                                            <Text style={styles.sentimentIndicatorText}>
+                                            <Text style={[styles.sentimentIndicatorText, { color: colors.text }]}>
                                                 Gas Trend: {marketSentiment.indicators.gasTrend}
                                             </Text>
                                         </View>
@@ -491,8 +492,8 @@ export default function OptimizerScreen() {
 
                             {/* Fiat to Stablecoin Distribution Recommendations */}
                             {fiatRecs.length > 0 && (
-                                <View style={styles.sectionCard}>
-                                    <Text style={styles.sectionTitle}>
+                                <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Fiat to Stablecoin Distribution
                                     </Text>
                                     {fiatRecs.map((rec, idx) => {
@@ -505,15 +506,15 @@ export default function OptimizerScreen() {
                                         const recId = `${rec.type}-${rec.fiatCurrency}-${idx}`;
 
                                         return (
-                                            <View key={idx} style={styles.recommendationCard}>
+                                            <View key={idx} style={[styles.recommendationCard, { backgroundColor: colors.backgroundTertiary }]}>
                                                 <View style={styles.recommendationHeader}>
                                                     <View style={styles.recommendationHeaderLeft}>
-                                                        <Text style={styles.recommendationTitle}>
+                                                        <Text style={[styles.recommendationTitle, { color: colors.text }]}>
                                                             Convert{" "}
                                                             {rec.fiatAmount?.toLocaleString()}{" "}
                                                             {rec.fiatCurrency} to Stablecoins
                                                         </Text>
-                                                        <Text style={styles.recommendationReason}>
+                                                        <Text style={[styles.recommendationReason, { color: colors.textSecondary }]}>
                                                             {rec.reason}
                                                         </Text>
                                                     </View>
@@ -521,11 +522,11 @@ export default function OptimizerScreen() {
                                                         style={[
                                                             styles.priorityBadge,
                                                             rec.priority === "high"
-                                                                ? styles.priorityHigh
-                                                                : styles.priorityMedium,
+                                                                ? { backgroundColor: colors.errorLight }
+                                                                : { backgroundColor: colors.warningLight },
                                                         ]}
                                                     >
-                                                        <Text style={styles.priorityText}>
+                                                        <Text style={[styles.priorityText, { color: colors.text }]}>
                                                             {rec.priority?.toUpperCase()}
                                                         </Text>
                                                     </View>
@@ -534,17 +535,18 @@ export default function OptimizerScreen() {
                                                 {/* Distribution Breakdown */}
                                                 {rec.distribution &&
                                                     rec.distribution.length > 0 && (
-                                                        <View style={styles.distributionContainer}>
-                                                            <Text style={styles.distributionTitle}>
+                                                        <View style={[styles.distributionContainer, { backgroundColor: colors.cardBackgroundSecondary, borderColor: colors.border }]}>
+                                                            <Text style={[styles.distributionTitle, { color: colors.text }]}>
                                                                 Recommended Distribution:
                                                             </Text>
                                                             {rec.distribution.map(
                                                                 (dist, distIdx) => (
                                                                     <View
                                                                         key={distIdx}
-                                                                        style={
-                                                                            styles.distributionItem
-                                                                        }
+                                                                        style={[
+                                                                            styles.distributionItem,
+                                                                            { borderBottomColor: colors.border }
+                                                                        ]}
                                                                     >
                                                                         <View
                                                                             style={
@@ -552,17 +554,13 @@ export default function OptimizerScreen() {
                                                                             }
                                                                         >
                                                                             <Text
-                                                                                style={
-                                                                                    styles.distributionStablecoin
-                                                                                }
+                                                                                style={[styles.distributionStablecoin, { color: colors.text }]}
                                                                             >
                                                                                 {dist.stablecoin} on{" "}
                                                                                 {dist.chain}
                                                                             </Text>
                                                                             <Text
-                                                                                style={
-                                                                                    styles.distributionPercentage
-                                                                                }
+                                                                                style={[styles.distributionPercentage, { color: colors.primary }]}
                                                                             >
                                                                                 {dist.percentage.toFixed(
                                                                                     0
@@ -571,9 +569,7 @@ export default function OptimizerScreen() {
                                                                             </Text>
                                                                         </View>
                                                                         <Text
-                                                                            style={
-                                                                                styles.distributionAmount
-                                                                            }
+                                                                            style={[styles.distributionAmount, { color: colors.textSecondary }]}
                                                                         >
                                                                             $
                                                                             {dist.amountUSD.toFixed(
@@ -582,9 +578,7 @@ export default function OptimizerScreen() {
                                                                             USD
                                                                         </Text>
                                                                         <Text
-                                                                            style={
-                                                                                styles.distributionReason
-                                                                            }
+                                                                            style={[styles.distributionReason, { color: colors.textSecondary }]}
                                                                         >
                                                                             {dist.reason}
                                                                         </Text>
@@ -615,12 +609,12 @@ export default function OptimizerScreen() {
 
                                                 {/* AI Explanation */}
                                                 {enhancedRec.aiExplanation && (
-                                                    <View style={styles.aiExplanationCard}>
-                                                        <Text style={styles.aiExplanationLabel}>
+                                                    <View style={[styles.aiExplanationCard, { backgroundColor: colors.cardBackgroundSecondary, borderLeftColor: colors.primary }]}>
+                                                        <Text style={[styles.aiExplanationLabel, { color: colors.textSecondary }]}>
                                                             AI Explanation:
                                                         </Text>
                                                         <MarkdownText
-                                                            style={styles.aiExplanationText}
+                                                            style={[styles.aiExplanationText, { color: colors.text }]}
                                                         >
                                                             {enhancedRec.aiExplanation}
                                                         </MarkdownText>
@@ -634,8 +628,8 @@ export default function OptimizerScreen() {
 
                             {/* Stablecoin Recommendations */}
                             {stablecoinRecs.length > 0 && (
-                                <View style={styles.sectionCard}>
-                                    <Text style={styles.sectionTitle}>Stablecoin Optimization</Text>
+                                <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Stablecoin Optimization</Text>
                                     {stablecoinRecs.map((rec, idx) => {
                                         const enhancedRec =
                                             aiEnhancedRecs.find(
@@ -647,14 +641,14 @@ export default function OptimizerScreen() {
                                         const recId = `${rec.type}-${rec.from}-${rec.to}-${idx}`;
 
                                         return (
-                                            <View key={idx} style={styles.recommendationCard}>
+                                            <View key={idx} style={[styles.recommendationCard, { backgroundColor: colors.backgroundTertiary }]}>
                                                 <View style={styles.recommendationHeader}>
                                                     <View style={styles.recommendationHeaderLeft}>
-                                                        <Text style={styles.recommendationTitle}>
+                                                        <Text style={[styles.recommendationTitle, { color: colors.text }]}>
                                                             Switch from {rec.from} → {rec.to} on{" "}
                                                             {rec.chain}
                                                         </Text>
-                                                        <Text style={styles.recommendationReason}>
+                                                        <Text style={[styles.recommendationReason, { color: colors.textSecondary }]}>
                                                             {rec.reason}
                                                         </Text>
                                                     </View>
@@ -662,38 +656,38 @@ export default function OptimizerScreen() {
                                                         style={[
                                                             styles.priorityBadge,
                                                             rec.priority === "high"
-                                                                ? styles.priorityHigh
-                                                                : styles.priorityMedium,
+                                                                ? { backgroundColor: colors.errorLight }
+                                                                : { backgroundColor: colors.warningLight },
                                                         ]}
                                                     >
-                                                        <Text style={styles.priorityText}>
+                                                        <Text style={[styles.priorityText, { color: colors.text }]}>
                                                             {rec.priority?.toUpperCase()}
                                                         </Text>
                                                     </View>
                                                 </View>
                                                 <View style={styles.statsGrid}>
                                                     <View style={styles.statItem}>
-                                                        <Text style={styles.statLabel}>
+                                                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                                                             Monthly Savings
                                                         </Text>
-                                                        <Text style={styles.statValue}>
+                                                        <Text style={[styles.statValue, { color: colors.text }]}>
                                                             ${rec.monthlySavings}
                                                         </Text>
                                                     </View>
                                                     <View style={styles.statItem}>
-                                                        <Text style={styles.statLabel}>
+                                                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                                                             Fee Improvement
                                                         </Text>
-                                                        <Text style={styles.statValue}>
+                                                        <Text style={[styles.statValue, { color: colors.text }]}>
                                                             {rec.details?.currentFee} →{" "}
                                                             {rec.details?.newFee}
                                                         </Text>
                                                     </View>
                                                     <View style={styles.statItem}>
-                                                        <Text style={styles.statLabel}>
+                                                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                                                             6-Month Profit
                                                         </Text>
-                                                        <Text style={styles.statValue}>
+                                                        <Text style={[styles.statValue, { color: colors.text }]}>
                                                             ${rec.sixMonthSavings}
                                                         </Text>
                                                     </View>
@@ -706,11 +700,11 @@ export default function OptimizerScreen() {
 
                                                 {/* AI Explanation */}
                                                 {enhancedRec.aiExplanation && (
-                                                    <View style={styles.aiExplanationCard}>
-                                                        <Text style={styles.aiExplanationLabel}>
+                                                    <View style={[styles.aiExplanationCard, { backgroundColor: colors.cardBackgroundSecondary, borderLeftColor: colors.primary }]}>
+                                                        <Text style={[styles.aiExplanationLabel, { color: colors.textSecondary }]}>
                                                             🤖 AI Explanation:
                                                         </Text>
-                                                        <Text style={styles.aiExplanationText}>
+                                                        <Text style={[styles.aiExplanationText, { color: colors.text }]}>
                                                             {enhancedRec.aiExplanation}
                                                         </Text>
                                                     </View>
@@ -724,7 +718,7 @@ export default function OptimizerScreen() {
                                                                 (insight: string, i: number) => (
                                                                     <Text
                                                                         key={i}
-                                                                        style={styles.aiInsightText}
+                                                                        style={[styles.aiInsightText, { color: colors.textSecondary }]}
                                                                     >
                                                                         💡 {insight}
                                                                     </Text>
@@ -738,7 +732,7 @@ export default function OptimizerScreen() {
                                                     <Pressable
                                                         style={[
                                                             styles.feedbackButton,
-                                                            styles.feedbackButtonPositive,
+                                                            { backgroundColor: colors.successLight, borderColor: colors.success },
                                                         ]}
                                                         onPress={() =>
                                                             handleUserFeedback(
@@ -748,14 +742,14 @@ export default function OptimizerScreen() {
                                                             )
                                                         }
                                                     >
-                                                        <Text style={styles.feedbackButtonText}>
+                                                        <Text style={[styles.feedbackButtonText, { color: colors.text }]}>
                                                             ✓ Helpful
                                                         </Text>
                                                     </Pressable>
                                                     <Pressable
                                                         style={[
                                                             styles.feedbackButton,
-                                                            styles.feedbackButtonNegative,
+                                                            { backgroundColor: colors.errorLight, borderColor: colors.error },
                                                         ]}
                                                         onPress={() =>
                                                             handleUserFeedback(
@@ -765,7 +759,7 @@ export default function OptimizerScreen() {
                                                             )
                                                         }
                                                     >
-                                                        <Text style={styles.feedbackButtonText}>
+                                                        <Text style={[styles.feedbackButtonText, { color: colors.text }]}>
                                                             ✗ Not helpful
                                                         </Text>
                                                     </Pressable>
@@ -778,18 +772,18 @@ export default function OptimizerScreen() {
 
                             {/* Conversion Timing Recommendations */}
                             {conversionRecs.length > 0 && (
-                                <View style={styles.sectionCard}>
-                                    <Text style={styles.sectionTitle}>
+                                <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Optimal Conversion Timing
                                     </Text>
                                     {conversionRecs.map((rec, idx) => (
-                                        <View key={idx} style={styles.timingCard}>
+                                        <View key={idx} style={[styles.timingCard, { borderLeftColor: colors.success, backgroundColor: colors.successLight }]}>
                                             <View style={styles.timingHeader}>
                                                 <View style={styles.timingHeaderLeft}>
-                                                    <Text style={styles.timingTitle}>
+                                                    <Text style={[styles.timingTitle, { color: colors.text }]}>
                                                         {rec.amount?.toFixed(0)} {rec.token} → Fiat
                                                     </Text>
-                                                    <Text style={styles.timingReason}>
+                                                    <Text style={[styles.timingReason, { color: colors.textSecondary }]}>
                                                         {rec.reason}
                                                     </Text>
                                                 </View>
@@ -797,13 +791,13 @@ export default function OptimizerScreen() {
                                                     style={[
                                                         styles.timingBadge,
                                                         rec.timing === "urgent"
-                                                            ? styles.timingUrgent
+                                                            ? { backgroundColor: colors.errorLight }
                                                             : rec.timing === "wait"
-                                                              ? styles.timingWait
-                                                              : styles.timingNow,
+                                                              ? { backgroundColor: colors.warningLight }
+                                                              : { backgroundColor: colors.successLight },
                                                     ]}
                                                 >
-                                                    <Text style={styles.timingBadgeText}>
+                                                    <Text style={[styles.timingBadgeText, { color: colors.text }]}>
                                                         {rec.timing === "wait"
                                                             ? "WAIT FOR BETTER RATE"
                                                             : rec.timing === "urgent"
@@ -812,28 +806,28 @@ export default function OptimizerScreen() {
                                                     </Text>
                                                 </View>
                                             </View>
-                                            <View style={styles.timingAdviceCard}>
-                                                <Text style={styles.timingAdviceTitle}>
+                                            <View style={[styles.timingAdviceCard, { backgroundColor: colors.cardBackground }]}>
+                                                <Text style={[styles.timingAdviceTitle, { color: colors.text }]}>
                                                     💡 {rec.timingAdvice?.recommendation}
                                                 </Text>
                                                 <View style={styles.timingAdviceGrid}>
                                                     <View style={styles.timingAdviceItem}>
-                                                        <Text style={styles.timingAdviceLabel}>
+                                                        <Text style={[styles.timingAdviceLabel, { color: colors.textSecondary }]}>
                                                             Best time to convert
                                                         </Text>
-                                                        <Text style={styles.timingAdviceValue}>
+                                                        <Text style={[styles.timingAdviceValue, { color: colors.text }]}>
                                                             {rec.timingAdvice?.bestTime}
                                                         </Text>
                                                     </View>
                                                     {rec.timingAdvice?.potentialSavings && (
                                                         <View style={styles.timingAdviceItem}>
-                                                            <Text style={styles.timingAdviceLabel}>
+                                                            <Text style={[styles.timingAdviceLabel, { color: colors.textSecondary }]}>
                                                                 Potential savings by waiting
                                                             </Text>
                                                             <Text
                                                                 style={[
                                                                     styles.timingAdviceValue,
-                                                                    styles.savingsValue,
+                                                                    { color: colors.success },
                                                                 ]}
                                                             >
                                                                 ${rec.timingAdvice.potentialSavings}
@@ -841,7 +835,7 @@ export default function OptimizerScreen() {
                                                         </View>
                                                     )}
                                                 </View>
-                                                <Text style={styles.timingPercentile}>
+                                                <Text style={[styles.timingPercentile, { color: colors.textSecondary }]}>
                                                     {rec.timingAdvice?.currentPercentile}
                                                 </Text>
                                             </View>
@@ -851,43 +845,43 @@ export default function OptimizerScreen() {
                             )}
 
                             {/* Current Holdings Analysis */}
-                            <View style={styles.sectionCard}>
-                                <Text style={styles.sectionTitle}>Current Holdings Analysis</Text>
+                            <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Current Holdings Analysis</Text>
                                 {results.analysis.map((item, idx) => (
-                                    <View key={idx} style={styles.holdingCard}>
+                                    <View key={idx} style={[styles.holdingCard, { borderColor: colors.border }]}>
                                         <View style={styles.holdingHeader}>
                                             <View style={styles.holdingHeaderLeft}>
                                                 <View style={styles.holdingTitleRow}>
-                                                    <Text style={styles.holdingChain}>
+                                                    <Text style={[styles.holdingChain, { color: colors.text }]}>
                                                         {item.chain}
                                                     </Text>
-                                                    <View style={styles.tokenBadge}>
-                                                        <Text style={styles.tokenBadgeText}>
+                                                    <View style={[styles.tokenBadge, { backgroundColor: colors.primaryLight }]}>
+                                                        <Text style={[styles.tokenBadgeText, { color: colors.primary }]}>
                                                             {item.currentToken}
                                                         </Text>
                                                     </View>
                                                 </View>
-                                                <Text style={styles.holdingAmount}>
+                                                <Text style={[styles.holdingAmount, { color: colors.primary }]}>
                                                     ${item.amount.toFixed(2)}
                                                 </Text>
                                             </View>
                                             <View style={styles.holdingCost}>
-                                                <Text style={styles.holdingCostLabel}>
+                                                <Text style={[styles.holdingCostLabel, { color: colors.textSecondary }]}>
                                                     Monthly Cost
                                                 </Text>
-                                                <Text style={styles.holdingCostValue}>
+                                                <Text style={[styles.holdingCostValue, { color: colors.text }]}>
                                                     ${item.predictedMonthlyCost.toFixed(2)}
                                                 </Text>
                                             </View>
                                         </View>
 
                                         {item.currentToken !== item.recommendedStablecoin.name && (
-                                            <View style={styles.switchWarning}>
-                                                <Text style={styles.switchWarningText}>
+                                            <View style={[styles.switchWarning, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+                                                <Text style={[styles.switchWarningText, { color: colors.warning }]}>
                                                     ⚠️ Consider switching to{" "}
                                                     {item.recommendedStablecoin.name}
                                                 </Text>
-                                                <Text style={styles.switchWarningSubtext}>
+                                                <Text style={[styles.switchWarningSubtext, { color: colors.text }]}>
                                                     {item.recommendedStablecoin.reasons.join(" • ")}
                                                 </Text>
                                             </View>
@@ -895,32 +889,32 @@ export default function OptimizerScreen() {
 
                                         <View style={styles.holdingStats}>
                                             <View style={styles.holdingStat}>
-                                                <Text style={styles.holdingStatLabel}>Avg Gas</Text>
-                                                <Text style={styles.holdingStatValue}>
+                                                <Text style={[styles.holdingStatLabel, { color: colors.textSecondary }]}>Avg Gas</Text>
+                                                <Text style={[styles.holdingStatValue, { color: colors.text }]}>
                                                     ${item.avgGasCost.toFixed(4)}
                                                 </Text>
                                             </View>
                                             <View style={styles.holdingStat}>
-                                                <Text style={styles.holdingStatLabel}>
+                                                <Text style={[styles.holdingStatLabel, { color: colors.textSecondary }]}>
                                                     Current Gas
                                                 </Text>
-                                                <Text style={styles.holdingStatValue}>
+                                                <Text style={[styles.holdingStatValue, { color: colors.text }]}>
                                                     ${item.currentGasCost.toFixed(4)}
                                                 </Text>
                                             </View>
                                             <View style={styles.holdingStat}>
-                                                <Text style={styles.holdingStatLabel}>
+                                                <Text style={[styles.holdingStatLabel, { color: colors.textSecondary }]}>
                                                     Volatility
                                                 </Text>
-                                                <Text style={styles.holdingStatValue}>
+                                                <Text style={[styles.holdingStatValue, { color: colors.text }]}>
                                                     {(item.volatility * 100).toFixed(1)}%
                                                 </Text>
                                             </View>
                                             <View style={styles.holdingStat}>
-                                                <Text style={styles.holdingStatLabel}>
+                                                <Text style={[styles.holdingStatLabel, { color: colors.textSecondary }]}>
                                                     Cost/Balance
                                                 </Text>
-                                                <Text style={styles.holdingStatValue}>
+                                                <Text style={[styles.holdingStatValue, { color: colors.text }]}>
                                                     {item.costPercentage.toFixed(2)}%
                                                 </Text>
                                             </View>
@@ -931,12 +925,12 @@ export default function OptimizerScreen() {
 
                             {/* Bridge Recommendations */}
                             {bridgeRecs.length > 0 && (
-                                <View style={styles.sectionCard}>
-                                    <Text style={styles.sectionTitle}>Bridge Recommendations</Text>
+                                <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Bridge Recommendations</Text>
                                     {bridgeRecs.map((rec, idx) => (
-                                        <View key={idx} style={styles.bridgeCard}>
+                                        <View key={idx} style={[styles.bridgeCard, { borderLeftColor: colors.primary, backgroundColor: colors.primaryLight }]}>
                                             <View style={styles.bridgeHeader}>
-                                                <Text style={styles.bridgeTitle}>
+                                                <Text style={[styles.bridgeTitle, { color: colors.text }]}>
                                                     Bridge ${rec.amount?.toFixed(2)} from {rec.from}{" "}
                                                     → {rec.to}
                                                 </Text>
@@ -944,51 +938,51 @@ export default function OptimizerScreen() {
                                                     style={[
                                                         styles.priorityBadge,
                                                         rec.priority === "high"
-                                                            ? styles.priorityHigh
-                                                            : styles.priorityMedium,
+                                                            ? { backgroundColor: colors.errorLight }
+                                                            : { backgroundColor: colors.warningLight },
                                                     ]}
                                                 >
-                                                    <Text style={styles.priorityText}>
+                                                    <Text style={[styles.priorityText, { color: colors.text }]}>
                                                         {rec.priority?.toUpperCase()}
                                                     </Text>
                                                 </View>
                                             </View>
-                                            <View style={styles.bridgeStats}>
+                                            <View style={[styles.bridgeStats, { backgroundColor: colors.cardBackground }]}>
                                                 <View style={styles.bridgeStat}>
-                                                    <Text style={styles.bridgeStatLabel}>Cost</Text>
-                                                    <Text style={styles.bridgeStatValue}>
+                                                    <Text style={[styles.bridgeStatLabel, { color: colors.textSecondary }]}>Cost</Text>
+                                                    <Text style={[styles.bridgeStatValue, { color: colors.text }]}>
                                                         ${rec.cost}
                                                     </Text>
                                                 </View>
                                                 <View style={styles.bridgeStat}>
-                                                    <Text style={styles.bridgeStatLabel}>
+                                                    <Text style={[styles.bridgeStatLabel, { color: colors.textSecondary }]}>
                                                         Monthly Savings
                                                     </Text>
                                                     <Text
                                                         style={[
                                                             styles.bridgeStatValue,
-                                                            styles.savingsValue,
+                                                            { color: colors.success },
                                                         ]}
                                                     >
                                                         ${rec.monthlySavings}
                                                     </Text>
                                                 </View>
                                                 <View style={styles.bridgeStat}>
-                                                    <Text style={styles.bridgeStatLabel}>
+                                                    <Text style={[styles.bridgeStatLabel, { color: colors.textSecondary }]}>
                                                         Break Even
                                                     </Text>
-                                                    <Text style={styles.bridgeStatValue}>
+                                                    <Text style={[styles.bridgeStatValue, { color: colors.text }]}>
                                                         {rec.breakEvenMonths}mo
                                                     </Text>
                                                 </View>
                                                 <View style={styles.bridgeStat}>
-                                                    <Text style={styles.bridgeStatLabel}>
+                                                    <Text style={[styles.bridgeStatLabel, { color: colors.textSecondary }]}>
                                                         6-Month Profit
                                                     </Text>
                                                     <Text
                                                         style={[
                                                             styles.bridgeStatValue,
-                                                            styles.savingsValue,
+                                                            { color: colors.success },
                                                         ]}
                                                     >
                                                         ${rec.sixMonthSavings}
@@ -996,7 +990,7 @@ export default function OptimizerScreen() {
                                                 </View>
                                             </View>
                                             {rec.timingAdvice && (
-                                                <Text style={styles.bridgeAdvice}>
+                                                <Text style={[styles.bridgeAdvice, { color: colors.text }]}>
                                                     💡{" "}
                                                     {typeof rec.timingAdvice === "string"
                                                         ? rec.timingAdvice
@@ -1011,49 +1005,49 @@ export default function OptimizerScreen() {
 
                             {/* Timing Insights */}
                             {timingInsights && (
-                                <View style={styles.sectionCard}>
-                                    <Text style={styles.sectionTitle}>Market Timing Insights</Text>
+                                <View style={[styles.sectionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Market Timing Insights</Text>
                                     {timingInsights.insights?.map((insight, idx) => (
-                                        <View key={idx} style={styles.insightCard}>
-                                            <Text style={styles.insightChain}>{insight.chain}</Text>
+                                        <View key={idx} style={[styles.insightCard, { borderColor: colors.border }]}>
+                                            <Text style={[styles.insightChain, { color: colors.text }]}>{insight.chain}</Text>
                                             <View style={styles.insightRow}>
-                                                <Text style={styles.insightLabel}>Best day:</Text>
+                                                <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Best day:</Text>
                                                 <Text
                                                     style={[
                                                         styles.insightValue,
-                                                        styles.insightGood,
+                                                        { color: colors.success },
                                                     ]}
                                                 >
                                                     {insight.bestDay}
                                                 </Text>
                                             </View>
                                             <View style={styles.insightRow}>
-                                                <Text style={styles.insightLabel}>Worst day:</Text>
+                                                <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Worst day:</Text>
                                                 <Text
-                                                    style={[styles.insightValue, styles.insightBad]}
+                                                    style={[styles.insightValue, { color: colors.error }]}
                                                 >
                                                     {insight.worstDay}
                                                 </Text>
                                             </View>
                                             <View style={styles.insightRow}>
-                                                <Text style={styles.insightLabel}>Best time:</Text>
-                                                <Text style={styles.insightValue}>
+                                                <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Best time:</Text>
+                                                <Text style={[styles.insightValue, { color: colors.text }]}>
                                                     {insight.bestTimeOfDay}
                                                 </Text>
                                             </View>
                                             <View style={styles.insightRow}>
-                                                <Text style={styles.insightLabel}>Avoid:</Text>
-                                                <Text style={styles.insightValue}>
+                                                <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Avoid:</Text>
+                                                <Text style={[styles.insightValue, { color: colors.text }]}>
                                                     {insight.avoidTimeOfDay}
                                                 </Text>
                                             </View>
-                                            <View style={styles.insightDivider} />
-                                            <Text style={styles.insightRecommendation}>
+                                            <View style={[styles.insightDivider, { backgroundColor: colors.border }]} />
+                                            <Text style={[styles.insightRecommendation, { color: colors.text }]}>
                                                 {insight.weekendVsWeekday}
                                             </Text>
                                             {insight.volatilityWarning && (
-                                                <View style={styles.volatilityWarning}>
-                                                    <Text style={styles.volatilityWarningText}>
+                                                <View style={[styles.volatilityWarning, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+                                                    <Text style={[styles.volatilityWarningText, { color: colors.warning }]}>
                                                         ⚠️ {insight.volatilityWarning}
                                                     </Text>
                                                 </View>
@@ -1065,16 +1059,16 @@ export default function OptimizerScreen() {
 
                             {/* Total Savings */}
                             {results.totalPotentialSavings > 0 && (
-                                <View style={styles.savingsCard}>
-                                    <Text style={styles.savingsTitle}>Total Potential Savings</Text>
-                                    <Text style={styles.savingsAmount}>
+                                <View style={[styles.savingsCard, { backgroundColor: colors.success }]}>
+                                    <Text style={[styles.savingsTitle, { color: colors.textInverse }]}>Total Potential Savings</Text>
+                                    <Text style={[styles.savingsAmount, { color: colors.textInverse }]}>
                                         ${results.totalPotentialSavings.toFixed(2)}
                                     </Text>
-                                    <Text style={styles.savingsSubtitle}>
+                                    <Text style={[styles.savingsSubtitle, { color: colors.textInverse }]}>
                                         Over 6 months by optimizing your stablecoins, timing, and
                                         network selection
                                     </Text>
-                                    <Text style={styles.savingsNote}>
+                                    <Text style={[styles.savingsNote, { color: colors.textInverse }]}>
                                         * Based on 90 days of real market data from{" "}
                                         {dataSource || "CoinGecko API"}
                                     </Text>
@@ -1082,28 +1076,33 @@ export default function OptimizerScreen() {
                             )}
 
                             {/* Interactive Q&A */}
-                            <View style={styles.qaSection}>
-                                <Text style={styles.qaTitle}>Ask about your portfolio</Text>
+                            <View style={[styles.qaSection, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                                <Text style={[styles.qaTitle, { color: colors.text }]}>Ask about your portfolio</Text>
                                 <TextInput
                                     value={question}
                                     onChangeText={setQuestion}
                                     placeholder="e.g., Should I switch to USDT?"
-                                    style={styles.qaInput}
+                                    style={[styles.qaInput, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                     multiline
                                 />
                                 <Pressable
-                                    style={[styles.qaButton, answering && styles.qaButtonDisabled]}
+                                    style={[
+                                        styles.qaButton,
+                                        { backgroundColor: colors.buttonPrimary },
+                                        answering && { backgroundColor: colors.buttonDisabled, opacity: 0.6 }
+                                    ]}
                                     onPress={handleAskQuestion}
                                     disabled={answering || !question.trim()}
                                 >
-                                    <Text style={styles.qaButtonText}>
+                                    <Text style={[styles.qaButtonText, { color: colors.buttonPrimaryText }]}>
                                         {answering ? "Thinking..." : "Ask AI"}
                                     </Text>
                                 </Pressable>
                                 {aiAnswer && (
-                                    <View style={styles.qaAnswer}>
-                                        <Text style={styles.qaAnswerLabel}>AI Answer:</Text>
-                                        <MarkdownText style={styles.qaAnswerText}>
+                                    <View style={[styles.qaAnswer, { backgroundColor: colors.primaryLight, borderLeftColor: colors.primary }]}>
+                                        <Text style={[styles.qaAnswerLabel, { color: colors.primary }]}>AI Answer:</Text>
+                                        <MarkdownText style={[styles.qaAnswerText, { color: colors.text }]}>
                                             {aiAnswer}
                                         </MarkdownText>
                                     </View>
@@ -1120,7 +1119,6 @@ export default function OptimizerScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     scrollView: {
         flex: 1,
@@ -1138,11 +1136,9 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
     },
     loadingSubtext: {
         fontSize: 14,
-        color: "#737A82",
         textAlign: "center",
         paddingHorizontal: 32,
     },
@@ -1154,69 +1150,55 @@ const styles = StyleSheet.create({
     errorTitle: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#EF4444",
     },
     errorMessage: {
         fontSize: 16,
-        color: "#29343D",
         textAlign: "center",
     },
     retryButton: {
         paddingHorizontal: 24,
         paddingVertical: 12,
-        backgroundColor: "#0891D1",
         borderRadius: 8,
     },
     retryButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "600",
     },
     headerCard: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 12,
     },
     headerTitle: {
         fontSize: 28,
         fontWeight: "bold",
-        color: "#29343D",
     },
     headerSubtitle: {
         fontSize: 14,
-        color: "#737A82",
     },
     generateButton: {
         marginTop: 8,
         paddingVertical: 16,
-        backgroundColor: "#0891D1",
         borderRadius: 12,
         alignItems: "center",
     },
     generateButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "600",
     },
     sectionCard: {
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         padding: 16,
         gap: 12,
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#29343D",
         marginBottom: 4,
     },
     recommendationCard: {
-        backgroundColor: "#F3F4F6",
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -1232,11 +1214,9 @@ const styles = StyleSheet.create({
     recommendationTitle: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
     },
     recommendationReason: {
         fontSize: 14,
-        color: "#737A82",
         marginTop: 4,
     },
     priorityBadge: {
@@ -1244,16 +1224,9 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 12,
     },
-    priorityHigh: {
-        backgroundColor: "#FEE2E2",
-    },
-    priorityMedium: {
-        backgroundColor: "#FEF3C7",
-    },
     priorityText: {
         fontSize: 10,
         fontWeight: "bold",
-        color: "#29343D",
     },
     statsGrid: {
         flexDirection: "row",
@@ -1265,23 +1238,18 @@ const styles = StyleSheet.create({
     },
     statLabel: {
         fontSize: 12,
-        color: "#737A82",
         marginBottom: 4,
     },
     statValue: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     reasonText: {
         fontSize: 12,
-        color: "#29343D",
         marginTop: 4,
     },
     timingCard: {
         borderLeftWidth: 4,
-        borderLeftColor: "#22C55E",
-        backgroundColor: "#F0FDF4",
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -1297,11 +1265,9 @@ const styles = StyleSheet.create({
     timingTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     timingReason: {
         fontSize: 14,
-        color: "#737A82",
         marginTop: 4,
     },
     timingBadge: {
@@ -1309,22 +1275,11 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 12,
     },
-    timingUrgent: {
-        backgroundColor: "#FEE2E2",
-    },
-    timingWait: {
-        backgroundColor: "#FEF3C7",
-    },
-    timingNow: {
-        backgroundColor: "#DCFCE7",
-    },
     timingBadgeText: {
         fontSize: 10,
         fontWeight: "bold",
-        color: "#29343D",
     },
     timingAdviceCard: {
-        backgroundColor: "#FFFFFF",
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -1332,7 +1287,6 @@ const styles = StyleSheet.create({
     timingAdviceTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     timingAdviceGrid: {
         flexDirection: "row",
@@ -1343,25 +1297,18 @@ const styles = StyleSheet.create({
     },
     timingAdviceLabel: {
         fontSize: 12,
-        color: "#737A82",
         marginBottom: 4,
     },
     timingAdviceValue: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
-    },
-    savingsValue: {
-        color: "#22C55E",
     },
     timingPercentile: {
         fontSize: 12,
-        color: "#737A82",
         marginTop: 4,
     },
     holdingCard: {
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -1383,53 +1330,43 @@ const styles = StyleSheet.create({
     holdingChain: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
         textTransform: "capitalize",
     },
     tokenBadge: {
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: "#E0F2FE",
         borderRadius: 6,
     },
     tokenBadgeText: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#0891D1",
     },
     holdingAmount: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#0891D1",
     },
     holdingCost: {
         alignItems: "flex-end",
     },
     holdingCostLabel: {
         fontSize: 12,
-        color: "#737A82",
         marginBottom: 4,
     },
     holdingCostValue: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     switchWarning: {
-        backgroundColor: "#FEF3C7",
         borderWidth: 1,
-        borderColor: "#FCD34D",
         borderRadius: 8,
         padding: 12,
     },
     switchWarningText: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#92400E",
     },
     switchWarningSubtext: {
         fontSize: 12,
-        color: "#92400E",
         marginTop: 4,
     },
     holdingStats: {
@@ -1441,18 +1378,14 @@ const styles = StyleSheet.create({
     },
     holdingStatLabel: {
         fontSize: 12,
-        color: "#737A82",
         marginBottom: 4,
     },
     holdingStatValue: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
     },
     bridgeCard: {
         borderLeftWidth: 4,
-        borderLeftColor: "#0891D1",
-        backgroundColor: "#EFF6FF",
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -1465,13 +1398,11 @@ const styles = StyleSheet.create({
     bridgeTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
         flex: 1,
     },
     bridgeStats: {
         flexDirection: "row",
         gap: 12,
-        backgroundColor: "#FFFFFF",
         borderRadius: 8,
         padding: 12,
     },
@@ -1480,21 +1411,17 @@ const styles = StyleSheet.create({
     },
     bridgeStatLabel: {
         fontSize: 12,
-        color: "#737A82",
         marginBottom: 4,
     },
     bridgeStatValue: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
     },
     bridgeAdvice: {
         fontSize: 14,
-        color: "#29343D",
     },
     insightCard: {
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 16,
         gap: 8,
@@ -1502,7 +1429,6 @@ const styles = StyleSheet.create({
     insightChain: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
         textTransform: "capitalize",
         marginBottom: 4,
     },
@@ -1512,42 +1438,28 @@ const styles = StyleSheet.create({
     },
     insightLabel: {
         fontSize: 14,
-        color: "#737A82",
     },
     insightValue: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
-    },
-    insightGood: {
-        color: "#22C55E",
-    },
-    insightBad: {
-        color: "#EF4444",
     },
     insightDivider: {
         height: 1,
-        backgroundColor: "#E1E4E8",
         marginVertical: 8,
     },
     insightRecommendation: {
         fontSize: 14,
-        color: "#29343D",
     },
     volatilityWarning: {
-        backgroundColor: "#FEF3C7",
         borderWidth: 1,
-        borderColor: "#FCD34D",
         borderRadius: 6,
         padding: 8,
         marginTop: 8,
     },
     volatilityWarningText: {
         fontSize: 12,
-        color: "#92400E",
     },
     savingsCard: {
-        backgroundColor: "#22C55E",
         borderRadius: 12,
         padding: 24,
         alignItems: "center",
@@ -1556,41 +1468,33 @@ const styles = StyleSheet.create({
     savingsTitle: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#FFFFFF",
     },
     savingsAmount: {
         fontSize: 48,
         fontWeight: "bold",
-        color: "#FFFFFF",
     },
     savingsSubtitle: {
         fontSize: 16,
-        color: "#D1FAE5",
         textAlign: "center",
     },
     savingsNote: {
         fontSize: 12,
-        color: "#A7F3D0",
         marginTop: 8,
         textAlign: "center",
     },
     aiSummaryCard: {
-        backgroundColor: "#EFF6FF",
         borderRadius: 12,
         padding: 20,
         borderWidth: 1,
-        borderColor: "#DBEAFE",
         marginBottom: 16,
     },
     aiSummaryTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#1E40AF",
         marginBottom: 12,
     },
     aiSummaryText: {
         fontSize: 15,
-        color: "#1E3A8A",
         lineHeight: 22,
         marginBottom: 12,
     },
@@ -1600,27 +1504,22 @@ const styles = StyleSheet.create({
     aiInsightsTitle: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#1E40AF",
         marginBottom: 8,
     },
     aiInsightItem: {
         fontSize: 14,
-        color: "#1E3A8A",
         marginLeft: 8,
         marginBottom: 4,
     },
     sentimentCard: {
-        backgroundColor: "#FEF3C7",
         borderRadius: 12,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#FCD34D",
         marginBottom: 16,
     },
     sentimentTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#92400E",
         marginBottom: 12,
     },
     sentimentRow: {
@@ -1630,23 +1529,14 @@ const styles = StyleSheet.create({
     },
     sentimentLabel: {
         fontSize: 14,
-        color: "#92400E",
         fontWeight: "600",
     },
     sentimentValue: {
         fontSize: 14,
-        color: "#92400E",
         fontWeight: "bold",
-    },
-    sentimentBullish: {
-        color: "#22C55E",
-    },
-    sentimentBearish: {
-        color: "#EF4444",
     },
     sentimentReasoning: {
         fontSize: 13,
-        color: "#78350F",
         marginTop: 8,
         lineHeight: 18,
     },
@@ -1654,30 +1544,24 @@ const styles = StyleSheet.create({
         marginTop: 12,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: "#FCD34D",
     },
     sentimentIndicatorText: {
         fontSize: 12,
-        color: "#78350F",
         marginBottom: 4,
     },
     aiExplanationCard: {
-        backgroundColor: "#F9FAFB",
         borderRadius: 8,
         padding: 12,
         marginTop: 12,
         borderLeftWidth: 3,
-        borderLeftColor: "#0891D1",
     },
     aiExplanationLabel: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#6B7280",
         marginBottom: 6,
     },
     aiExplanationText: {
         fontSize: 14,
-        color: "#29343D",
         lineHeight: 20,
     },
     aiInsightsList: {
@@ -1717,83 +1601,64 @@ const styles = StyleSheet.create({
         color: "#29343D",
     },
     qaSection: {
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         marginTop: 16,
     },
     qaTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#29343D",
         marginBottom: 12,
     },
     qaInput: {
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: "#29343D",
-        backgroundColor: "#FAFAFA",
         minHeight: 60,
         marginBottom: 12,
         textAlignVertical: "top",
     },
     qaButton: {
-        backgroundColor: "#0891D1",
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: "center",
     },
-    qaButtonDisabled: {
-        backgroundColor: "#9CA3AF",
-    },
     qaButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "600",
     },
     qaAnswer: {
         marginTop: 16,
         padding: 12,
-        backgroundColor: "#F0F9FF",
         borderRadius: 8,
         borderLeftWidth: 3,
-        borderLeftColor: "#0891D1",
     },
     qaAnswerLabel: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#0891D1",
         marginBottom: 6,
     },
     qaAnswerText: {
         fontSize: 14,
-        color: "#29343D",
         lineHeight: 20,
     },
     distributionContainer: {
         marginTop: 12,
         padding: 12,
-        backgroundColor: "#F9FAFB",
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
     },
     distributionTitle: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
         marginBottom: 12,
     },
     distributionItem: {
         marginBottom: 12,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#E1E4E8",
     },
     distributionHeader: {
         flexDirection: "row",
@@ -1804,21 +1669,17 @@ const styles = StyleSheet.create({
     distributionStablecoin: {
         fontSize: 15,
         fontWeight: "600",
-        color: "#29343D",
     },
     distributionPercentage: {
         fontSize: 15,
         fontWeight: "bold",
-        color: "#0891D1",
     },
     distributionAmount: {
         fontSize: 14,
-        color: "#6B7280",
         marginBottom: 4,
     },
     distributionReason: {
         fontSize: 13,
-        color: "#6B7280",
         lineHeight: 18,
     },
     corsWarningCard: {

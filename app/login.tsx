@@ -11,11 +11,15 @@ import {
 
 import { useRouter } from "expo-router";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useWallet } from "@/contexts/WalletContext";
 
 export default function LoginScreen() {
     const router = useRouter();
     const { login, isInitialized, isLoading, hasWallet, keypair, switchAccount } = useWallet();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     const [password, setPassword] = useState("");
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -80,56 +84,60 @@ export default function LoginScreen() {
 
     if (isLoading || !isInitialized) {
         return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0891D1" />
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    <View style={styles.logo}>
+                    <View style={[styles.logo, { backgroundColor: colors.primary }]}>
                         <Text style={styles.logoIcon}>💲</Text>
                     </View>
-                    <Text style={styles.title}>StablePay</Text>
-                    <Text style={styles.subtitle}>Unlock your wallet</Text>
+                    <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Unlock your wallet</Text>
                 </View>
 
-                <View style={styles.card}>
+                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Password</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Password</Text>
                         <TextInput
                             value={password}
                             onChangeText={setPassword}
                             placeholder="Enter your wallet password"
                             secureTextEntry
-                            style={styles.input}
-                            placeholderTextColor="#737A82"
+                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            placeholderTextColor={colors.inputPlaceholder}
                             onSubmitEditing={handleLogin}
                             autoFocus
                         />
                     </View>
                     <Pressable
                         onPress={handleLogin}
-                        style={[styles.loginButton, isLoggingIn && styles.loginButtonDisabled]}
+                        style={[
+                            styles.loginButton,
+                            { backgroundColor: colors.buttonPrimary },
+                            isLoggingIn && { opacity: 0.5 }
+                        ]}
                         disabled={isLoggingIn}
                     >
                         {isLoggingIn ? (
-                            <ActivityIndicator color="#FFFFFF" />
+                            <ActivityIndicator color={colors.buttonPrimaryText} />
                         ) : (
-                            <Text style={styles.loginButtonText}>Unlock Wallet</Text>
+                            <Text style={[styles.loginButtonText, { color: colors.buttonPrimaryText }]}>Unlock Wallet</Text>
                         )}
                     </Pressable>
 
                     <Pressable onPress={handleSwitchAccount} style={styles.switchAccountButton}>
-                        <Text style={styles.switchAccountText}>Switch Account</Text>
+                        <Text style={[styles.switchAccountText, { color: colors.textSecondary }]}>Switch Account</Text>
                     </Pressable>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>
+                    <Text style={[styles.footerText, { color: colors.textSecondary }]}>
                         Your wallet is encrypted and stored securely on your device
                     </Text>
                 </View>
@@ -141,7 +149,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
@@ -156,7 +163,6 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     logo: {
-        backgroundColor: "#0891D1",
         borderRadius: 999,
         padding: 16,
         width: 80,
@@ -170,18 +176,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
         fontWeight: "bold",
-        color: "#29343D",
     },
     subtitle: {
         fontSize: 14,
-        color: "#737A82",
     },
     card: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 16,
     },
     inputGroup: {
@@ -190,30 +192,21 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
     },
     input: {
-        backgroundColor: "#E1E4E8",
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: "#29343D",
     },
     loginButton: {
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 12,
         alignItems: "center",
         minHeight: 48,
         justifyContent: "center",
     },
-    loginButtonDisabled: {
-        opacity: 0.5,
-    },
     loginButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "500",
     },
@@ -224,7 +217,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     switchAccountText: {
-        color: "#737A82",
         fontSize: 14,
         fontWeight: "500",
     },
@@ -233,7 +225,6 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 14,
-        color: "#737A82",
     },
     signUpLink: {
         color: "#0891D1",

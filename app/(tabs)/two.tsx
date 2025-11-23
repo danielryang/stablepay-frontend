@@ -1,17 +1,21 @@
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useTransactions } from "@/contexts/TransactionContext";
 
 export default function ActivityScreen() {
     const { transactions, isLoading, refreshTransactions } = useTransactions();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     <View style={styles.header}>
                         <View>
-                            <Text style={styles.title}>Recent Transactions</Text>
-                            <Text style={styles.subtitle}>Your Solana transaction history</Text>
+                            <Text style={[styles.title, { color: colors.text }]}>Recent Transactions</Text>
+                            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your Solana transaction history</Text>
                         </View>
                         <Pressable onPress={refreshTransactions} style={styles.refreshButton}>
                             <Text style={styles.refreshText}>🔄</Text>
@@ -20,20 +24,20 @@ export default function ActivityScreen() {
 
                     {isLoading ? (
                         <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#0891D1" />
-                            <Text style={styles.loadingText}>Loading transactions...</Text>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading transactions...</Text>
                         </View>
                     ) : transactions.length === 0 ? (
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>No transactions yet</Text>
-                            <Text style={styles.emptySubtext}>
+                            <Text style={[styles.emptyText, { color: colors.text }]}>No transactions yet</Text>
+                            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
                                 Your transaction history will appear here
                             </Text>
                         </View>
                     ) : (
                         <View style={styles.transactionsList}>
                             {transactions.map(tx => (
-                                <View key={tx.id} style={styles.transactionCard}>
+                                <View key={tx.id} style={[styles.transactionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                                     <View style={styles.transactionHeader}>
                                         <View style={styles.headerLeft}>
                                             <View style={styles.iconContainer}>
@@ -125,7 +129,6 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     scrollView: {
         flex: 1,
@@ -186,10 +189,8 @@ const styles = StyleSheet.create({
     },
     transactionCard: {
         padding: 16,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
     },
     transactionHeader: {
         flexDirection: "row",

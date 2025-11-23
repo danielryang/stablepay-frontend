@@ -2,11 +2,15 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 import { useRouter } from "expo-router";
 
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
 
 export default function HomeScreen() {
     const router = useRouter();
     const { publicKeyString, balance, refreshBalance, isLoading } = useWallet();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
 
     const formatAddress = (address: string | null) => {
         if (!address) return "Not available";
@@ -19,12 +23,19 @@ export default function HomeScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View
+                style={[
+                    styles.header,
+                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                ]}
+            >
                 <View>
-                    <Text style={styles.headerTitle}>Solana Wallet</Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Solana Wallet</Text>
                     {publicKeyString && (
-                        <Text style={styles.headerSubtitle}>{formatAddress(publicKeyString)}</Text>
+                        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                            {formatAddress(publicKeyString)}
+                        </Text>
                     )}
                 </View>
                 <Pressable onPress={() => router.push("/settings")}>
@@ -34,80 +45,131 @@ export default function HomeScreen() {
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.mainContent}>
-                    <View style={styles.balanceCard}>
-                        <Text style={styles.balanceLabel}>USDC Balance</Text>
+                    <View
+                        style={[
+                            styles.balanceCard,
+                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        ]}
+                    >
+                        <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>
+                            USDC Balance
+                        </Text>
                         {isLoading ? (
                             <ActivityIndicator
                                 size="small"
-                                color="#0891D1"
+                                color={colors.primary}
                                 style={{ marginTop: 8 }}
                             />
                         ) : (
-                            <Text style={styles.balanceAmount}>${formatBalance(balance)}</Text>
+                            <Text style={[styles.balanceAmount, { color: colors.text }]}>
+                                ${formatBalance(balance)}
+                            </Text>
                         )}
                         {publicKeyString && (
                             <Pressable onPress={refreshBalance} style={styles.refreshButton}>
-                                <Text style={styles.refreshText}>🔄 Refresh</Text>
+                                <Text style={[styles.refreshText, { color: colors.primary }]}>
+                                    🔄 Refresh
+                                </Text>
                             </Pressable>
                         )}
                     </View>
 
                     <View style={styles.actionsGrid}>
                         <Pressable
-                            style={styles.actionButton}
+                            style={[
+                                styles.actionButton,
+                                { backgroundColor: colors.cardBackground },
+                            ]}
                             onPress={() => router.push("/convert")}
                         >
-                            <View style={styles.actionIcon}>
+                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
                                 <Text style={styles.actionIconText}>⟳</Text>
                             </View>
-                            <Text style={styles.actionLabel}>Convert</Text>
-                        </Pressable>
-
-                        <Pressable style={styles.actionButton} onPress={() => router.push("/send")}>
-                            <View style={styles.actionIcon}>
-                                <Text style={styles.actionIconText}>↗</Text>
-                            </View>
-                            <Text style={styles.actionLabel}>Send</Text>
+                            <Text style={[styles.actionLabel, { color: colors.text }]}>
+                                Convert
+                            </Text>
                         </Pressable>
 
                         <Pressable
-                            style={styles.actionButton}
+                            style={[
+                                styles.actionButton,
+                                { backgroundColor: colors.cardBackground },
+                            ]}
+                            onPress={() => router.push("/send")}
+                        >
+                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
+                                <Text style={styles.actionIconText}>↗</Text>
+                            </View>
+                            <Text style={[styles.actionLabel, { color: colors.text }]}>Send</Text>
+                        </Pressable>
+
+                        <Pressable
+                            style={[
+                                styles.actionButton,
+                                { backgroundColor: colors.cardBackground },
+                            ]}
                             onPress={() => router.push("/receive")}
                         >
-                            <View style={styles.actionIcon}>
+                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
                                 <Text style={styles.actionIconText}>↙</Text>
                             </View>
-                            <Text style={styles.actionLabel}>Receive</Text>
+                            <Text style={[styles.actionLabel, { color: colors.text }]}>
+                                Receive
+                            </Text>
                         </Pressable>
                     </View>
 
                     <View style={styles.tokensSection}>
-                        <Text style={styles.sectionTitle}>Tokens</Text>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tokens</Text>
 
-                        <View style={styles.tokenCard}>
+                        <View
+                            style={[
+                                styles.tokenCard,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.tokenInfo}>
                                 <View
                                     style={[
                                         styles.tokenIconContainer,
-                                        { backgroundColor: "#E0F2FE" },
+                                        { backgroundColor: colors.primaryLight },
                                     ]}
                                 >
-                                    <Text style={styles.tokenIconText}>$</Text>
+                                    <Text style={[styles.tokenIconText, { color: colors.primary }]}>
+                                        $
+                                    </Text>
                                 </View>
                                 <View>
-                                    <Text style={styles.tokenName}>USDC</Text>
-                                    <Text style={styles.tokenSubtext}>USD Coin • Ethereum</Text>
+                                    <Text style={[styles.tokenName, { color: colors.text }]}>
+                                        USDC
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.tokenSubtext,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        USD Coin • Ethereum
+                                    </Text>
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
                                 {isLoading ? (
-                                    <ActivityIndicator size="small" color="#0891D1" />
+                                    <ActivityIndicator size="small" color={colors.primary} />
                                 ) : (
                                     <>
-                                        <Text style={styles.tokenAmount}>
+                                        <Text style={[styles.tokenAmount, { color: colors.text }]}>
                                             ${formatBalance(balance)}
                                         </Text>
-                                        <Text style={styles.tokenSubtext}>
+                                        <Text
+                                            style={[
+                                                styles.tokenSubtext,
+                                                { color: colors.textSecondary },
+                                            ]}
+                                        >
                                             {formatBalance(balance)} USDC
                                         </Text>
                                     </>
@@ -115,49 +177,95 @@ export default function HomeScreen() {
                             </View>
                         </View>
 
-                        <View style={styles.tokenCard}>
+                        <View
+                            style={[
+                                styles.tokenCard,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.tokenInfo}>
                                 <View
                                     style={[
                                         styles.tokenIconContainer,
-                                        { backgroundColor: "#DCFCE7" },
+                                        { backgroundColor: colors.successLight },
                                     ]}
                                 >
-                                    <Text style={[styles.tokenIconText, { color: "#22C55E" }]}>
+                                    <Text style={[styles.tokenIconText, { color: colors.success }]}>
                                         T
                                     </Text>
                                 </View>
                                 <View>
-                                    <Text style={styles.tokenName}>USDT</Text>
-                                    <Text style={styles.tokenSubtext}>Tether • Polygon</Text>
+                                    <Text style={[styles.tokenName, { color: colors.text }]}>
+                                        USDT
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.tokenSubtext,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        Tether • Polygon
+                                    </Text>
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
-                                <Text style={styles.tokenAmount}>$700</Text>
-                                <Text style={styles.tokenSubtext}>700 USDT</Text>
+                                <Text style={[styles.tokenAmount, { color: colors.text }]}>
+                                    $700
+                                </Text>
+                                <Text
+                                    style={[styles.tokenSubtext, { color: colors.textSecondary }]}
+                                >
+                                    700 USDT
+                                </Text>
                             </View>
                         </View>
 
-                        <View style={styles.tokenCard}>
+                        <View
+                            style={[
+                                styles.tokenCard,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
                             <View style={styles.tokenInfo}>
                                 <View
                                     style={[
                                         styles.tokenIconContainer,
-                                        { backgroundColor: "#FEF3C7" },
+                                        { backgroundColor: colors.warningLight },
                                     ]}
                                 >
-                                    <Text style={[styles.tokenIconText, { color: "#D97706" }]}>
+                                    <Text style={[styles.tokenIconText, { color: colors.warning }]}>
                                         ₱
                                     </Text>
                                 </View>
                                 <View>
-                                    <Text style={styles.tokenName}>ARS</Text>
-                                    <Text style={styles.tokenSubtext}>Argentine Peso</Text>
+                                    <Text style={[styles.tokenName, { color: colors.text }]}>
+                                        ARS
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.tokenSubtext,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        Argentine Peso
+                                    </Text>
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
-                                <Text style={styles.tokenAmount}>₱50,000</Text>
-                                <Text style={styles.tokenSubtext}>50,000 ARS</Text>
+                                <Text style={[styles.tokenAmount, { color: colors.text }]}>
+                                    ₱50,000
+                                </Text>
+                                <Text
+                                    style={[styles.tokenSubtext, { color: colors.textSecondary }]}
+                                >
+                                    50,000 ARS
+                                </Text>
                             </View>
                         </View>
                     </View>
@@ -170,7 +278,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     header: {
         flexDirection: "row",
@@ -180,17 +287,13 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#E1E4E8",
-        backgroundColor: "#FFFFFF",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     headerSubtitle: {
         fontSize: 12,
-        color: "#737A82",
         marginTop: 2,
         fontFamily: "monospace",
     },
@@ -206,20 +309,16 @@ const styles = StyleSheet.create({
     },
     balanceCard: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
     },
     balanceLabel: {
         fontSize: 14,
-        color: "#737A82",
         marginBottom: 8,
     },
     balanceAmount: {
         fontSize: 48,
         fontWeight: "bold",
-        color: "#29343D",
     },
     refreshButton: {
         marginTop: 8,
@@ -228,7 +327,6 @@ const styles = StyleSheet.create({
     },
     refreshText: {
         fontSize: 12,
-        color: "#0891D1",
         fontWeight: "500",
     },
     actionsGrid: {
@@ -242,10 +340,8 @@ const styles = StyleSheet.create({
         gap: 8,
         padding: 16,
         borderRadius: 12,
-        backgroundColor: "#EFF1F3",
     },
     actionIcon: {
-        backgroundColor: "#0891D1",
         borderRadius: 999,
         padding: 12,
         width: 48,
@@ -261,7 +357,6 @@ const styles = StyleSheet.create({
     actionLabel: {
         fontSize: 12,
         fontWeight: "500",
-        color: "#29343D",
     },
     tokensSection: {
         gap: 16,
@@ -270,14 +365,11 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
     },
     tokenCard: {
         padding: 16,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -297,16 +389,13 @@ const styles = StyleSheet.create({
     tokenIconText: {
         fontSize: 14,
         fontWeight: "bold",
-        color: "#0891D1",
     },
     tokenName: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     tokenSubtext: {
         fontSize: 14,
-        color: "#737A82",
         marginTop: 2,
     },
     tokenBalance: {
@@ -315,10 +404,8 @@ const styles = StyleSheet.create({
     tokenAmount: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     fiatLabel: {
         fontSize: 14,
-        color: "#737A82",
     },
 });

@@ -13,11 +13,15 @@ import {
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useWallet } from "@/contexts/WalletContext";
 
 export default function CreateWalletScreen() {
     const router = useRouter();
     const { generateMnemonic, createWallet } = useWallet();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     const [step, setStep] = useState<"mnemonic" | "warning" | "confirm" | "password">("mnemonic");
     const [mnemonic, setMnemonic] = useState<string[]>([]);
     const [confirmedWords, setConfirmedWords] = useState<string[]>([]);
@@ -98,38 +102,38 @@ export default function CreateWalletScreen() {
     // Step 1: Show mnemonic
     if (step === "mnemonic") {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={styles.header}>
+                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                             <Pressable onPress={() => router.back()} style={styles.backButton}>
-                                <Text style={styles.backText}>←</Text>
+                                <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={styles.headerTitle}>Your Recovery Phrase</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>Your Recovery Phrase</Text>
                         </View>
 
-                        <View style={styles.card}>
-                            <Text style={styles.cardTitle}>Write Down Your Recovery Phrase</Text>
-                            <Text style={styles.cardSubtitle}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                            <Text style={[styles.cardTitle, { color: colors.text }]}>Write Down Your Recovery Phrase</Text>
+                            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                                 This is the only way to recover your wallet. Store it somewhere safe
                                 and never share it with anyone.
                             </Text>
 
                             <View style={styles.mnemonicGrid}>
                                 {mnemonic.map((word, index) => (
-                                    <View key={index} style={styles.mnemonicWord}>
-                                        <Text style={styles.mnemonicIndex}>{index + 1}</Text>
-                                        <Text style={styles.mnemonicText}>{word}</Text>
+                                    <View key={index} style={[styles.mnemonicWord, { backgroundColor: colors.backgroundTertiary }]}>
+                                        <Text style={[styles.mnemonicIndex, { color: colors.textSecondary }]}>{index + 1}</Text>
+                                        <Text style={[styles.mnemonicText, { color: colors.text }]}>{word}</Text>
                                     </View>
                                 ))}
                             </View>
 
-                            <Pressable style={styles.copyButton} onPress={handleCopyMnemonic}>
-                                <Text style={styles.copyButtonText}>📋 Copy to Clipboard</Text>
+                            <Pressable style={[styles.copyButton, { backgroundColor: colors.buttonSecondary, borderColor: colors.border }]} onPress={handleCopyMnemonic}>
+                                <Text style={[styles.copyButtonText, { color: colors.buttonSecondaryText }]}>📋 Copy to Clipboard</Text>
                             </Pressable>
 
-                            <Pressable style={styles.button} onPress={handleContinueFromMnemonic}>
-                                <Text style={styles.buttonText}>I've Written It Down</Text>
+                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleContinueFromMnemonic}>
+                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>I've Written It Down</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -141,38 +145,38 @@ export default function CreateWalletScreen() {
     // Step 2: Warning
     if (step === "warning") {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={styles.header}>
+                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                             <Pressable
                                 onPress={() => setStep("mnemonic")}
                                 style={styles.backButton}
                             >
-                                <Text style={styles.backText}>←</Text>
+                                <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={styles.headerTitle}>Important Warning</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>Important Warning</Text>
                         </View>
 
-                        <View style={styles.card}>
-                            <View style={styles.warningBox}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                            <View style={[styles.warningBox, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
                                 <Text style={styles.warningIcon}>⚠️</Text>
-                                <Text style={styles.warningTitle}>
+                                <Text style={[styles.warningTitle, { color: colors.warning }]}>
                                     This is Your Only Way to Recover Your Wallet
                                 </Text>
-                                <Text style={styles.warningText}>
+                                <Text style={[styles.warningText, { color: colors.text }]}>
                                     If you lose your recovery phrase, you will permanently lose
                                     access to your wallet and all funds.
                                 </Text>
-                                <Text style={styles.warningText}>
+                                <Text style={[styles.warningText, { color: colors.text }]}>
                                     • Store it in a secure location{"\n"}• Never share it with
                                     anyone{"\n"}• Never store it digitally (screenshots, cloud
                                     storage, etc.){"\n"}• Write it down on paper and keep it safe
                                 </Text>
                             </View>
 
-                            <Pressable style={styles.button} onPress={handleContinueFromWarning}>
-                                <Text style={styles.buttonText}>I Understand, Continue</Text>
+                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleContinueFromWarning}>
+                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>I Understand, Continue</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -184,39 +188,39 @@ export default function CreateWalletScreen() {
     // Step 3: Confirm mnemonic
     if (step === "confirm") {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.content}>
-                        <View style={styles.header}>
+                        <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                             <Pressable onPress={() => setStep("warning")} style={styles.backButton}>
-                                <Text style={styles.backText}>←</Text>
+                                <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
-                            <Text style={styles.headerTitle}>Confirm Recovery Phrase</Text>
+                            <Text style={[styles.headerTitle, { color: colors.text }]}>Confirm Recovery Phrase</Text>
                         </View>
 
-                        <View style={styles.card}>
-                            <Text style={styles.cardSubtitle}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                                 Enter your recovery phrase to confirm you've saved it correctly
                             </Text>
 
                             <View style={styles.confirmGrid}>
                                 {mnemonic.map((_, index) => (
-                                    <View key={index} style={styles.confirmWord}>
-                                        <Text style={styles.confirmIndex}>{index + 1}</Text>
+                                    <View key={index} style={[styles.confirmWord, { backgroundColor: colors.backgroundTertiary }]}>
+                                        <Text style={[styles.confirmIndex, { color: colors.textSecondary }]}>{index + 1}</Text>
                                         <TextInput
                                             value={confirmedWords[index] || ""}
                                             onChangeText={text => handleWordChange(index, text)}
                                             placeholder={`Word ${index + 1}`}
-                                            style={styles.confirmInput}
-                                            placeholderTextColor="#737A82"
+                                            style={[styles.confirmInput, { color: colors.text }]}
+                                            placeholderTextColor={colors.inputPlaceholder}
                                             autoCapitalize="none"
                                         />
                                     </View>
                                 ))}
                             </View>
 
-                            <Pressable style={styles.button} onPress={handleVerifyMnemonic}>
-                                <Text style={styles.buttonText}>Verify</Text>
+                            <Pressable style={[styles.button, { backgroundColor: colors.buttonPrimary }]} onPress={handleVerifyMnemonic}>
+                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Verify</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -227,69 +231,73 @@ export default function CreateWalletScreen() {
 
     // Step 4: Set password
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             {isCreating && (
-                <View style={styles.fullScreenLoader}>
-                    <ActivityIndicator size="large" color="#0891D1" />
-                    <Text style={styles.loaderText}>Creating your wallet...</Text>
-                    <Text style={styles.loaderSubtext}>This may take a few seconds</Text>
+                <View style={[styles.fullScreenLoader, { backgroundColor: colorScheme === "dark" ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)" }]}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={[styles.loaderText, { color: colors.text }]}>Creating your wallet...</Text>
+                    <Text style={[styles.loaderSubtext, { color: colors.textSecondary }]}>This may take a few seconds</Text>
                 </View>
             )}
             <View style={styles.content}>
-                <View style={styles.header}>
+                <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                     <Pressable
                         onPress={() => setStep("confirm")}
                         style={styles.backButton}
                         disabled={isCreating}
                     >
-                        <Text style={styles.backText}>←</Text>
+                        <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                     </Pressable>
-                    <Text style={styles.headerTitle}>Set Password</Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Set Password</Text>
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Create a Password</Text>
-                    <Text style={styles.cardSubtitle}>
+                <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+                    <Text style={[styles.cardTitle, { color: colors.text }]}>Create a Password</Text>
+                    <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                         This password will encrypt your wallet and be required to unlock it. Make
                         sure it's strong and memorable.
                     </Text>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Password</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Password</Text>
                         <TextInput
                             value={password}
                             onChangeText={setPassword}
                             placeholder="Enter password (min 8 characters)"
                             secureTextEntry
-                            style={styles.input}
-                            placeholderTextColor="#737A82"
+                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Confirm Password</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
                         <TextInput
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             placeholder="Confirm password"
                             secureTextEntry
-                            style={styles.input}
-                            placeholderTextColor="#737A82"
+                            style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.inputBorder, color: colors.inputText }]}
+                            placeholderTextColor={colors.inputPlaceholder}
                         />
                     </View>
 
                     <Pressable
-                        style={[styles.button, isCreating && styles.buttonDisabled]}
+                        style={[
+                            styles.button,
+                            { backgroundColor: colors.buttonPrimary },
+                            isCreating && { opacity: 0.5 }
+                        ]}
                         onPress={handleCreateWallet}
                         disabled={isCreating}
                     >
                         {isCreating ? (
                             <View style={styles.loadingContainer}>
-                                <ActivityIndicator size="small" color="#FFFFFF" />
-                                <Text style={styles.buttonText}>Creating Wallet...</Text>
+                                <ActivityIndicator size="small" color={colors.buttonPrimaryText} />
+                                <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Creating Wallet...</Text>
                             </View>
                         ) : (
-                            <Text style={styles.buttonText}>Create Wallet</Text>
+                            <Text style={[styles.buttonText, { color: colors.buttonPrimaryText }]}>Create Wallet</Text>
                         )}
                     </Pressable>
                 </View>
@@ -301,7 +309,6 @@ export default function CreateWalletScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     scrollView: {
         flex: 1,
@@ -313,35 +320,33 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginBottom: 24,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
     },
     backButton: {
         marginRight: 12,
     },
     backText: {
         fontSize: 24,
-        color: "#29343D",
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#29343D",
     },
     card: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 16,
     },
     cardTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     cardSubtitle: {
         fontSize: 14,
-        color: "#737A82",
         marginBottom: 8,
         lineHeight: 20,
     },
@@ -351,51 +356,37 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
     },
     input: {
-        backgroundColor: "#EFF1F3",
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: "#29343D",
     },
     button: {
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 16,
         alignItems: "center",
         marginTop: 8,
     },
-    buttonDisabled: {
-        opacity: 0.5,
-    },
     buttonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "600",
     },
     copyButton: {
-        backgroundColor: "#EFF1F3",
         borderRadius: 8,
         padding: 12,
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#E1E4E8",
     },
     copyButtonText: {
-        color: "#29343D",
         fontSize: 14,
         fontWeight: "500",
     },
     warningBox: {
-        backgroundColor: "#FEF3C7",
         borderRadius: 12,
         padding: 20,
         borderWidth: 2,
-        borderColor: "#F59E0B",
         gap: 12,
     },
     warningIcon: {
@@ -405,12 +396,10 @@ const styles = StyleSheet.create({
     warningTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#92400E",
         textAlign: "center",
     },
     warningText: {
         fontSize: 14,
-        color: "#78350F",
         lineHeight: 20,
     },
     mnemonicGrid: {
@@ -422,7 +411,6 @@ const styles = StyleSheet.create({
     mnemonicWord: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#EFF1F3",
         borderRadius: 8,
         padding: 12,
         minWidth: "30%",
@@ -430,13 +418,11 @@ const styles = StyleSheet.create({
     },
     mnemonicIndex: {
         fontSize: 12,
-        color: "#737A82",
         fontWeight: "600",
     },
     mnemonicText: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
     },
     confirmGrid: {
         flexDirection: "row",
@@ -447,7 +433,6 @@ const styles = StyleSheet.create({
     confirmWord: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#EFF1F3",
         borderRadius: 8,
         padding: 8,
         minWidth: "30%",
@@ -455,13 +440,11 @@ const styles = StyleSheet.create({
     },
     confirmIndex: {
         fontSize: 12,
-        color: "#737A82",
         fontWeight: "600",
     },
     confirmInput: {
         flex: 1,
         fontSize: 14,
-        color: "#29343D",
         padding: 4,
     },
     loadingContainer: {
@@ -475,7 +458,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
         zIndex: 1000,
         justifyContent: "center",
         alignItems: "center",
@@ -484,10 +466,8 @@ const styles = StyleSheet.create({
     loaderText: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
     },
     loaderSubtext: {
         fontSize: 14,
-        color: "#737A82",
     },
 });

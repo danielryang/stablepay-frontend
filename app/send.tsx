@@ -15,6 +15,8 @@ import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useTransactions } from "@/contexts/TransactionContext";
 import { fetchFeeInfo } from "@/utils/feeApi";
 
@@ -26,6 +28,8 @@ if (Platform.OS === "web") {
 export default function SendScreen() {
     const router = useRouter();
     const { addTransaction } = useTransactions();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     const [sendToPayPal, setSendToPayPal] = useState(false);
     const [payPalConnected, setPayPalConnected] = useState(false);
     const [payPalEmail, setPayPalEmail] = useState("");
@@ -304,17 +308,17 @@ export default function SendScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backText}>←</Text>
+                    <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                 </Pressable>
-                <Text style={styles.headerTitle}>Sending Page</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Sending Page</Text>
             </View>
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
-                    <View style={styles.card}>
+                    <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                         <View style={styles.switchSection}>
                             <View style={styles.switchRow}>
                                 <View style={styles.switchLabelContainer}>

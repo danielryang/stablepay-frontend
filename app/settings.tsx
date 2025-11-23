@@ -12,13 +12,19 @@ import {
 
 import { useRouter } from "expo-router";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useWallet } from "@/contexts/WalletContext";
 
 export default function SettingsScreen() {
     const router = useRouter();
     const { logout, publicKeyString } = useWallet();
     const { settings, updateSettings } = useOptimizerSettings();
+    const { theme, setTheme } = useTheme();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme];
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
     // Local state for optimizer settings (for editing)
@@ -66,65 +72,65 @@ export default function SettingsScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                 <View style={styles.headerLeft}>
                     <Pressable onPress={() => router.back()} style={styles.backButton}>
-                        <Text style={styles.backText}>←</Text>
+                        <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                     </Pressable>
-                    <Text style={styles.headerTitle}>Settings</Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
                 </View>
             </View>
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     <View style={styles.section}>
-                        <View style={styles.card}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                             <View style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>👤</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>👤</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Wallet Address</Text>
-                                    <Text style={styles.settingSubtitle}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Wallet Address</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
                                         {formatAddress(publicKeyString)}
                                     </Text>
                                 </View>
                             </View>
 
-                            <View style={styles.divider} />
+                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>🔔</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🔔</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Notifications</Text>
-                                    <Text style={styles.settingSubtitle}>Push notifications</Text>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Notifications</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>Push notifications</Text>
                                 </View>
                                 <Switch
                                     value={notificationsEnabled}
                                     onValueChange={setNotificationsEnabled}
-                                    trackColor={{ false: "#E1E4E8", true: "#0891D1" }}
-                                    thumbColor={notificationsEnabled ? "#FFFFFF" : "#FFFFFF"}
+                                    trackColor={{ false: colors.border, true: colors.primary }}
+                                    thumbColor={colors.textInverse}
                                 />
                             </View>
 
-                            <View style={styles.divider} />
+                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>🛡</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🛡</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Security</Text>
-                                    <Text style={styles.settingSubtitle}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Security</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
                                         Password and biometric settings
                                     </Text>
                                 </View>
                             </Pressable>
 
-                            <View style={styles.divider} />
+                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>🌍</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>🌍</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Language & Region</Text>
-                                    <Text style={styles.settingSubtitle}>English (US)</Text>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Language & Region</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>English (US)</Text>
                                 </View>
                             </Pressable>
                         </View>
@@ -132,32 +138,33 @@ export default function SettingsScreen() {
 
                     {/* Optimizer Settings Section */}
                     <View style={styles.section}>
-                        <View style={styles.card}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                             <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionHeaderText}>
+                                <Text style={[styles.sectionHeaderText, { color: colors.text }]}>
                                     📊 Smart Allocation Optimizer
                                 </Text>
                             </View>
 
-                            <View style={styles.divider} />
+                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>💰</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>💰</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Minimum Monthly Expenses
                                     </Text>
-                                    <Text style={styles.settingSubtitle}>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
                                         Minimum spending threshold (default: $800)
                                     </Text>
                                 </View>
-                                <View style={styles.inputContainer}>
-                                    <Text style={styles.inputPrefix}>$</Text>
+                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
+                                    <Text style={[styles.inputPrefix, { color: colors.text }]}>$</Text>
                                     <TextInput
-                                        style={styles.numberInput}
+                                        style={[styles.numberInput, { color: colors.text }]}
                                         value={minMonthlyExpenses}
                                         onChangeText={setMinMonthlyExpenses}
                                         keyboardType="numeric"
+                                        placeholderTextColor={colors.inputPlaceholder}
                                         onBlur={() => {
                                             const value = parseInt(minMonthlyExpenses) || 800;
                                             updateSettings({ minimumMonthlyExpenses: value });
@@ -166,22 +173,23 @@ export default function SettingsScreen() {
                                 </View>
                             </View>
 
-                            <View style={styles.divider} />
+                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={styles.settingIcon}>📈</Text>
+                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>📈</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Spending Percentage</Text>
-                                    <Text style={styles.settingSubtitle}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Spending Percentage</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
                                         % of balance spent monthly (default: 15%)
                                     </Text>
                                 </View>
-                                <View style={styles.inputContainer}>
+                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
                                     <TextInput
-                                        style={styles.numberInput}
+                                        style={[styles.numberInput, { color: colors.text }]}
                                         value={spendingPercent}
                                         onChangeText={setSpendingPercent}
                                         keyboardType="numeric"
+                                        placeholderTextColor={colors.inputPlaceholder}
                                         onBlur={() => {
                                             const value = parseFloat(spendingPercent) || 15;
                                             const decimalValue = Math.max(
@@ -192,35 +200,41 @@ export default function SettingsScreen() {
                                             setSpendingPercent(value.toString());
                                         }}
                                     />
-                                    <Text style={styles.inputSuffix}>%</Text>
+                                    <Text style={[styles.inputSuffix, { color: colors.text }]}>%</Text>
                                 </View>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <View style={styles.card}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                             <View style={styles.settingItem}>
-                                <View style={styles.iconContainer}>
-                                    <Text style={styles.iconText}>🌓</Text>
+                                <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
+                                    <Text style={[styles.iconText, { color: colors.primary }]}>🌓</Text>
                                 </View>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Theme</Text>
-                                    <Text style={styles.settingSubtitle}>
-                                        Toggle dark/light mode
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>Theme</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                                        {theme === "dark" ? "Dark mode" : "Light mode"}
                                     </Text>
                                 </View>
+                                <Switch
+                                    value={theme === "dark"}
+                                    onValueChange={(value) => setTheme(value ? "dark" : "light")}
+                                    trackColor={{ false: colors.border, true: colors.primary }}
+                                    thumbColor={theme === "dark" ? colors.textInverse : colors.textInverse}
+                                />
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <View style={styles.card}>
+                        <View style={[styles.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                             <Pressable onPress={handleLogout} style={styles.settingItem}>
-                                <Text style={styles.destructiveIcon}>🚪</Text>
+                                <Text style={[styles.destructiveIcon, { color: colors.error }]}>🚪</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.destructiveText}>Lock Wallet</Text>
-                                    <Text style={styles.settingSubtitle}>
+                                    <Text style={[styles.destructiveText, { color: colors.error }]}>Lock Wallet</Text>
+                                    <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
                                         Lock your wallet and require password to unlock
                                     </Text>
                                 </View>
@@ -229,7 +243,7 @@ export default function SettingsScreen() {
                     </View>
 
                     <View style={styles.versionContainer}>
-                        <Text style={styles.versionText}>Version 1.0.0</Text>
+                        <Text style={[styles.versionText, { color: colors.textSecondary }]}>Version 1.0.0</Text>
                     </View>
                 </View>
             </ScrollView>
@@ -240,7 +254,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     header: {
         flexDirection: "row",
@@ -250,8 +263,6 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#E1E4E8",
-        backgroundColor: "#FFFFFF",
     },
     headerLeft: {
         flexDirection: "row",
@@ -280,10 +291,8 @@ const styles = StyleSheet.create({
         gap: 0,
     },
     card: {
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         overflow: "hidden",
     },
     settingItem: {
@@ -294,10 +303,8 @@ const styles = StyleSheet.create({
     },
     settingIcon: {
         fontSize: 18,
-        color: "#737A82",
     },
     iconContainer: {
-        backgroundColor: "#E0F2FE",
         borderRadius: 999,
         padding: 8,
         width: 36,
@@ -307,7 +314,6 @@ const styles = StyleSheet.create({
     },
     iconText: {
         fontSize: 14,
-        color: "#0891D1",
     },
     settingContent: {
         flex: 1,
@@ -315,26 +321,21 @@ const styles = StyleSheet.create({
     settingTitle: {
         fontSize: 16,
         fontWeight: "500",
-        color: "#29343D",
     },
     settingSubtitle: {
         fontSize: 14,
-        color: "#737A82",
         marginTop: 2,
     },
     divider: {
         height: 1,
-        backgroundColor: "#E1E4E8",
         marginLeft: 16,
     },
     destructiveIcon: {
         fontSize: 18,
-        color: "#EF4444",
     },
     destructiveText: {
         fontSize: 16,
         fontWeight: "500",
-        color: "#EF4444",
     },
     versionContainer: {
         alignItems: "center",
@@ -342,7 +343,6 @@ const styles = StyleSheet.create({
     },
     versionText: {
         fontSize: 14,
-        color: "#737A82",
     },
     sectionHeader: {
         padding: 16,
@@ -351,12 +351,10 @@ const styles = StyleSheet.create({
     sectionHeaderText: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
     },
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F3F4F6",
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -365,19 +363,16 @@ const styles = StyleSheet.create({
     inputPrefix: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
         marginRight: 4,
     },
     inputSuffix: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
         marginLeft: 4,
     },
     numberInput: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
         minWidth: 50,
         textAlign: "right",
     },
