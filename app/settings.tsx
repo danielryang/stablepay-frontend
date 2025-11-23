@@ -161,6 +161,31 @@ export default function SettingsScreen() {
                                     </Text>
                                 </View>
                             </Pressable>
+
+                            <View style={styles.divider} />
+
+                            <Pressable 
+                                style={styles.settingItem}
+                                onPress={() => {
+                                    // TODO: Implement PayPal linking functionality
+                                    console.log("Link PayPal pressed");
+                                }}
+                            >
+                                <FontAwesome name="paypal" size={22} color={colors.textSecondary} />
+                                <View style={styles.settingContent}>
+                                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                                        Link your PayPal
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.settingSubtitle,
+                                            { color: colors.textSecondary },
+                                        ]}
+                                    >
+                                        Connect your PayPal account
+                                    </Text>
+                                </View>
+                            </Pressable>
                         </View>
                     </View>
 

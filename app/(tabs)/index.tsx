@@ -1,5 +1,6 @@
 import {
     ActivityIndicator,
+    Animated,
     Image,
     Pressable,
     ScrollView,
@@ -9,6 +10,7 @@ import {
 } from "react-native";
 
 import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -16,17 +18,129 @@ import { WalletHeader } from "@/components/WalletHeader";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
+import { getStoredARSBalance, getStoredARSExchangeRate } from "@/utils/arsExchangeRate";
+import { fetchFiatExchangeRate } from "@/utils/realDataFetcher";
 
 export default function HomeScreen() {
     const router = useRouter();
     const { publicKeyString, balance, refreshBalance, isLoading } = useWallet();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme];
+    const [arsRate, setArsRate] = useState<number | null>(null);
+    const [arsBalance, setArsBalance] = useState<number>(50000);
+    const [isLoadingRate, setIsLoadingRate] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+
+    // Load ARS exchange rate and balance on mount
+    useEffect(() => {
+        const loadARSData = async () => {
+            setIsLoadingRate(true);
+            try {
+                // Load ARS balance from storage
+                const balance = await getStoredARSBalance();
+                setArsBalance(balance);
+
+                // Try to get stored rate first
+                let rate = await getStoredARSExchangeRate();
+
+                // If no stored rate or expired, fetch new one
+                if (rate === null) {
+                    try {
+                        const exchangeRate = await fetchFiatExchangeRate("ARS");
+                        rate = exchangeRate.usdRate;
+                    } catch (error) {
+                        console.warn("Failed to fetch ARS rate, using default:", error);
+                        rate = 1100; // Fallback default
+                    }
+                }
+
+                setArsRate(rate);
+            } catch (error) {
+                console.error("Error loading ARS data:", error);
+                setArsRate(1100); // Fallback default
+            } finally {
+                setIsLoadingRate(false);
+            }
+        };
+
+        loadARSData();
+    }, []);
 
     const formatBalance = (bal: number | null) => {
         if (bal === null) return "0.00";
         return bal.toFixed(4);
     };
+
+    const formatARS = (amount: number) => {
+        return new Intl.NumberFormat("es-AR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    };
+
+    // Calculate portfolio worth in ARS
+    // Portfolio worth = (USDC balance in USD + ARS balance converted to USD) * ARS rate
+    const calculatePortfolioWorth = (): number => {
+        if (arsRate === null || balance === null) return 0;
+        const usdcBalanceUSD = balance || 0;
+        const arsBalanceUSD = arsBalance / arsRate;
+        const totalUSD = usdcBalanceUSD + arsBalanceUSD;
+        return totalUSD * arsRate;
+    };
+
+    // Convert USDC balance to ARS
+    const getUSDCBalanceInARS = (): number => {
+        if (arsRate === null || balance === null) return 0;
+        return balance * arsRate;
+    };
+
+    // Handle refresh with animation
+    const handleRefresh = async () => {
+        if (isRefreshing) return; // Prevent multiple simultaneous refreshes
+
+        setIsRefreshing(true);
+
+        // Start rotation animation
+        rotateAnim.setValue(0);
+        Animated.loop(
+            Animated.timing(rotateAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            })
+        ).start();
+
+        try {
+            // Refresh balance
+            await refreshBalance();
+
+            // Optionally refresh ARS rate
+            try {
+                const exchangeRate = await fetchFiatExchangeRate("ARS");
+                setArsRate(exchangeRate.usdRate);
+            } catch (error) {
+                console.warn("Failed to refresh ARS rate:", error);
+            }
+        } finally {
+            // Stop animation after a short delay
+            setTimeout(() => {
+                Animated.timing(rotateAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                }).start(() => {
+                    setIsRefreshing(false);
+                });
+            }, 500);
+        }
+    };
+
+    // Interpolate rotation value
+    const rotation = rotateAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0deg", "360deg"],
+    });
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -36,9 +150,9 @@ export default function HomeScreen() {
                 <View style={styles.mainContent}>
                     <View style={[styles.balanceCard, { backgroundColor: colors.cardBackground }]}>
                         <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>
-                            USDC Balance
+                            Portfolio Worth
                         </Text>
-                        {isLoading ? (
+                        {isLoading || isLoadingRate ? (
                             <ActivityIndicator
                                 size="small"
                                 color={colors.primary}
@@ -46,18 +160,28 @@ export default function HomeScreen() {
                             />
                         ) : (
                             <Text style={[styles.balanceAmount, { color: colors.text }]}>
-                                ${formatBalance(balance)}
+                                ₱{formatARS(calculatePortfolioWorth())}
                             </Text>
                         )}
                         {publicKeyString && (
-                            <Pressable onPress={refreshBalance} style={styles.refreshButton}>
+                            <Pressable
+                                onPress={handleRefresh}
+                                style={styles.refreshButton}
+                                disabled={isRefreshing}
+                            >
                                 <View style={styles.refreshButtonContent}>
-                                    <FontAwesome
-                                        name="refresh"
-                                        size={12}
-                                        color={colors.primary}
-                                        style={{ marginRight: 4 }}
-                                    />
+                                    <Animated.View
+                                        style={{
+                                            transform: [{ rotate: rotation }],
+                                        }}
+                                    >
+                                        <FontAwesome
+                                            name="refresh"
+                                            size={12}
+                                            color={colors.primary}
+                                            style={{ marginRight: 4 }}
+                                        />
+                                    </Animated.View>
                                     <Text style={[styles.refreshText, { color: colors.primary }]}>
                                         Refresh
                                     </Text>
@@ -153,12 +277,12 @@ export default function HomeScreen() {
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
-                                {isLoading ? (
+                                {isLoading || isLoadingRate ? (
                                     <ActivityIndicator size="small" color={colors.primary} />
                                 ) : (
                                     <>
                                         <Text style={[styles.tokenAmount, { color: colors.text }]}>
-                                            ${formatBalance(balance)}
+                                            ₱{formatARS(getUSDCBalanceInARS())}
                                         </Text>
                                         <Text
                                             style={[
@@ -208,14 +332,23 @@ export default function HomeScreen() {
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
-                                <Text style={[styles.tokenAmount, { color: colors.text }]}>
-                                    ₱50,000
-                                </Text>
-                                <Text
-                                    style={[styles.tokenSubtext, { color: colors.textSecondary }]}
-                                >
-                                    50,000 ARS
-                                </Text>
+                                {isLoadingRate ? (
+                                    <ActivityIndicator size="small" color={colors.primary} />
+                                ) : (
+                                    <>
+                                        <Text style={[styles.tokenAmount, { color: colors.text }]}>
+                                            ₱{formatARS(arsBalance)}
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.tokenSubtext,
+                                                { color: colors.textSecondary },
+                                            ]}
+                                        >
+                                            {formatARS(arsBalance)} ARS
+                                        </Text>
+                                    </>
+                                )}
                             </View>
                         </View>
                     </View>

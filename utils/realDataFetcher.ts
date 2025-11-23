@@ -3,6 +3,8 @@
  * Tracks: USDC, USDT, DAI, and their liquidity/fees across chains
  */
 
+import { storeARSExchangeRate } from "./arsExchangeRate";
+
 export interface ChainHistoricalData {
     date: string;
     tokenPrice: number;
@@ -920,11 +922,10 @@ export async function fetchFiatExchangeRate(fiatCurrency: string): Promise<FiatE
     }
 
     const baseUrl = "https://api.coingecko.com";
+    const fiatCode = fiatCurrency.toLowerCase();
 
+    // Try primary endpoint first
     try {
-        // CoinGecko uses lowercase currency codes
-        const fiatCode = fiatCurrency.toLowerCase();
-
         // Fetch exchange rate: 1 USD = X fiatCurrency
         const url = `${baseUrl}/api/v3/exchange_rates`;
         console.log(`🌍 Fetching fiat exchange rate for ${fiatCurrency}...`);
@@ -935,57 +936,56 @@ export async function fetchFiatExchangeRate(fiatCurrency: string): Promise<FiatE
             mode: "cors",
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            let errorDetails = `HTTP ${response.status}`;
-            try {
-                const errorData = JSON.parse(errorText);
-                errorDetails = errorData.error || errorDetails;
-            } catch {
-                errorDetails = errorText.substring(0, 200);
+        if (response.ok) {
+            const data = await response.json();
+
+            // CoinGecko exchange_rates endpoint returns rates object
+            // Format: { rates: { ars: { value: 1000, unit: 'ARS' }, ... } }
+            // Note: The value might be inverted or in a different format
+            if (data.rates && data.rates[fiatCode]) {
+                let rate = data.rates[fiatCode].value;
+
+                // Validate rate - ARS should be around 1000-2000 per USD (not millions)
+                // If rate is too high, it might be inverted (1 ARS = X USD instead of 1 USD = X ARS)
+                if (rate > 100000) {
+                    console.warn(
+                        `⚠️ Exchange rate seems inverted (${rate}). Trying inverse calculation...`
+                    );
+                    // If rate is too high, try inverse: 1 / rate
+                    rate = 1 / rate;
+                }
+
+                // Final validation - ARS should be reasonable (between 100 and 10000 per USD)
+                if (rate >= 100 && rate <= 10000) {
+                    console.log(`✅ Fetched exchange rate: 1 USD = ${rate.toFixed(2)} ${fiatCurrency}`);
+
+                    // Store ARS rate if this is ARS
+                    if (fiatCode === "ars") {
+                        await storeARSExchangeRate(rate);
+                    }
+
+                    return {
+                        fiatCurrency: fiatCurrency.toUpperCase(),
+                        usdRate: rate, // 1 USD = rate ARS
+                        timestamp: new Date().toISOString(),
+                    };
+                }
             }
-            throw new Error(`Failed to fetch exchange rate for ${fiatCurrency}: ${errorDetails}`);
-        }
-
-        const data = await response.json();
-
-        // CoinGecko exchange_rates endpoint returns rates object
-        // Format: { rates: { ars: { value: 1000, unit: 'ARS' }, ... } }
-        // Note: The value might be inverted or in a different format
-        if (data.rates && data.rates[fiatCode]) {
-            let rate = data.rates[fiatCode].value;
-
-            // Validate rate - ARS should be around 1000-2000 per USD (not millions)
-            // If rate is too high, it might be inverted (1 ARS = X USD instead of 1 USD = X ARS)
-            if (rate > 100000) {
-                console.warn(
-                    `⚠️ Exchange rate seems inverted (${rate}). Trying inverse calculation...`
-                );
-                // If rate is too high, try inverse: 1 / rate
-                rate = 1 / rate;
-            }
-
-            // Final validation - ARS should be reasonable (between 100 and 10000 per USD)
-            if (rate < 100 || rate > 10000) {
-                console.warn(
-                    `⚠️ Exchange rate ${rate} seems invalid for ${fiatCurrency}. Using fallback...`
-                );
-                // Don't return here, let it fall through to fallback
+        } else {
+            // If we get rate limited (429) or other errors, log and try fallback
+            if (response.status === 429) {
+                console.warn(`⚠️ Rate limited by CoinGecko API (429). Trying fallback methods...`);
             } else {
-                console.log(`✅ Fetched exchange rate: 1 USD = ${rate.toFixed(2)} ${fiatCurrency}`);
-
-                return {
-                    fiatCurrency: fiatCurrency.toUpperCase(),
-                    usdRate: rate, // 1 USD = rate ARS
-                    timestamp: new Date().toISOString(),
-                };
+                console.warn(`⚠️ Primary API returned ${response.status}. Trying fallback methods...`);
             }
         }
+    } catch (error: any) {
+        console.warn(`⚠️ Error fetching from primary endpoint: ${error.message}. Trying fallback...`);
+    }
 
-        // Fallback: Try simple/price endpoint with USD coin
-        // Note: CoinGecko doesn't have USD as a coin, so we'll use a different approach
-        // Try using a stablecoin (like USDC) price in the fiat currency
-        console.log(`⚠️ Exchange rates endpoint didn't have ${fiatCode}, trying fallback...`);
+    // Fallback: Try simple/price endpoint with USD coin
+    try {
+        console.log(`⚠️ Trying fallback endpoint for ${fiatCode}...`);
         const fallbackUrl = `${baseUrl}/api/v3/simple/price?ids=usd-coin&vs_currencies=${fiatCode}`;
         const fallbackResponse = await fetch(fallbackUrl, {
             method: "GET",
@@ -1002,36 +1002,45 @@ export async function fetchFiatExchangeRate(fiatCurrency: string): Promise<FiatE
                     `✅ Fetched exchange rate (fallback via USDC): 1 USD ≈ ${rate} ${fiatCurrency}`
                 );
 
+                // Store ARS rate if this is ARS
+                if (fiatCode === "ars") {
+                    await storeARSExchangeRate(rate);
+                }
+
                 return {
                     fiatCurrency: fiatCurrency.toUpperCase(),
                     usdRate: rate,
                     timestamp: new Date().toISOString(),
                 };
             }
+        } else if (fallbackResponse.status === 429) {
+            console.warn(`⚠️ Fallback endpoint also rate limited. Using estimated rate...`);
         }
-
-        // Last resort: Use a hardcoded estimate for ARS (this should be replaced with real API)
-        if (fiatCode === "ars") {
-            // Current ARS rate is approximately 1000-1200 ARS per USD (as of 2024)
-            // Using 1100 as a reasonable estimate
-            const estimatedRate = 1100;
-            console.warn(
-                `⚠️ Using estimated ARS rate (${estimatedRate} ARS = 1 USD). Consider using a real exchange rate API.`
-            );
-            return {
-                fiatCurrency: "ARS",
-                usdRate: estimatedRate,
-                timestamp: new Date().toISOString(),
-            };
-        }
-
-        throw new Error(
-            `Exchange rate not found for ${fiatCurrency}. Please check CoinGecko API documentation.`
-        );
     } catch (error: any) {
-        console.error(`Error fetching fiat exchange rate for ${fiatCurrency}:`, error);
-        throw new Error(
-            `Failed to fetch exchange rate for ${fiatCurrency}: ${error.message || "Unknown error"}`
-        );
+        console.warn(`⚠️ Fallback endpoint failed: ${error.message}. Using estimated rate...`);
     }
+
+    // Last resort: Use a hardcoded estimate for ARS (this should be replaced with real API)
+    if (fiatCode === "ars") {
+        // Current ARS rate is approximately 1000-1200 ARS per USD (as of 2024)
+        // Using 1100 as a reasonable estimate
+        const estimatedRate = 1100;
+        console.warn(
+            `⚠️ Using estimated ARS rate (${estimatedRate} ARS = 1 USD) due to API rate limiting. Consider using a real exchange rate API.`
+        );
+        
+        // Store estimated rate as fallback
+        await storeARSExchangeRate(estimatedRate);
+        
+        return {
+            fiatCurrency: "ARS",
+            usdRate: estimatedRate,
+            timestamp: new Date().toISOString(),
+        };
+    }
+
+    // If all else fails, throw an error
+    throw new Error(
+        `Failed to fetch exchange rate for ${fiatCurrency}. All API endpoints failed or rate limited.`
+    );
 }
