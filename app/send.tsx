@@ -15,10 +15,10 @@ import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 
-import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
-import { fetchFeeInfo } from "@/utils/feeApi";
+import { convertCurrency } from "@/utils/currencyApi";
 
 // Complete auth session on web
 if (Platform.OS === "web") {
@@ -39,14 +39,11 @@ export default function SendScreen() {
     const [toCurrency, setToCurrency] = useState("ARS");
     const [fromAddress, setFromAddress] = useState("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1");
     const [toAddress, setToAddress] = useState("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063");
-    const exchangeRate = 1050;
-    const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
-
-    // Fee state
-    const [minimizedFee, setMinimizedFee] = useState<number>(2.0);
-    const [feesSaved, setFeesSaved] = useState<number>(8.5);
-    const [feesLoading, setFeesLoading] = useState<boolean>(false);
-    const [feesError, setFeesError] = useState<string | null>(null);
+    
+    // Currency conversion state
+    const [convertedAmount, setConvertedAmount] = useState<number>(42000); // Default: 40 USDC * 1050
+    const [conversionLoading, setConversionLoading] = useState<boolean>(false);
+    const [conversionError, setConversionError] = useState<string | null>(null);
 
     // PayPal OAuth configuration
     // makeRedirectUri automatically handles:
@@ -190,38 +187,36 @@ export default function SendScreen() {
         }
     }, [response, payPalConnecting, handlePayPalCallback]);
 
-    // Fetch fees when amount or currency changes
+    // Fetch currency conversion when amount or currencies change
     useEffect(() => {
         const amountNum = parseFloat(amount);
         if (isNaN(amountNum) || amountNum <= 0) {
-            // Reset to default values if amount is invalid
-            setMinimizedFee(2.0);
-            setFeesSaved(8.5);
-            setFeesError(null);
+            // Reset to default if amount is invalid
+            setConvertedAmount(0);
+            setConversionError(null);
             return;
         }
 
-        const fetchFees = async () => {
-            setFeesLoading(true);
-            setFeesError(null);
+        const fetchConversion = async () => {
+            setConversionLoading(true);
+            setConversionError(null);
             try {
-                // Use the converted amount (in destination currency) for fee calculation
-                const feeInfo = await fetchFeeInfo(convertedAmount, toCurrency);
-                setMinimizedFee(feeInfo.minimizedFee);
-                setFeesSaved(feeInfo.feesSaved);
+                // Call API with correct direction: from_ccy = fromCurrency, to_ccy = toCurrency
+                const result = await convertCurrency(fromCurrency, toCurrency, amountNum);
+                setConvertedAmount(result.converted_amount);
             } catch (error: any) {
-                console.error("Failed to fetch fees:", error);
-                setFeesError(error.message || "Failed to fetch fees");
-                // Keep previous values on error
+                console.error("Failed to convert currency:", error);
+                setConversionError(error.message || "Failed to convert currency");
+                // Keep previous value on error
             } finally {
-                setFeesLoading(false);
+                setConversionLoading(false);
             }
         };
 
         // Debounce the API call to avoid too many requests
-        const timeoutId = setTimeout(fetchFees, 500);
+        const timeoutId = setTimeout(fetchConversion, 500);
         return () => clearTimeout(timeoutId);
-    }, [amount, toCurrency, convertedAmount]);
+    }, [amount, fromCurrency, toCurrency]);
 
     const handlePayPalLogin = async () => {
         try {
@@ -267,8 +262,8 @@ export default function SendScreen() {
             return addr;
         };
 
-        // Use the minimized fee as the transaction fee
-        const transactionFee = minimizedFee;
+        const transactionFee = 2.0;
+        const feesSaved = 8.5;
         const finalTotal = convertedAmount + transactionFee;
 
         const toAddressDisplay = sendToPayPal
@@ -448,12 +443,22 @@ export default function SendScreen() {
                                     placeholderTextColor={colors.inputPlaceholder}
                                 />
                                 <Text style={[styles.equals, { color: colors.textSecondary }]}>=</Text>
-                                <Text style={[styles.convertedValue, { color: colors.text }]}>
-                                    {convertedAmount.toLocaleString("en-US", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}
-                                </Text>
+                                {conversionLoading ? (
+                                    <Text style={[styles.convertedValue, { color: colors.textSecondary }]}>
+                                        Loading...
+                                    </Text>
+                                ) : conversionError ? (
+                                    <Text style={[styles.convertedValue, { color: colors.error }]}>
+                                        Error
+                                    </Text>
+                                ) : (
+                                    <Text style={[styles.convertedValue, { color: colors.text }]}>
+                                        {convertedAmount.toLocaleString("en-US", {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </Text>
+                                )}
                                 <TextInput
                                     value={toCurrency}
                                     onChangeText={setToCurrency}
@@ -468,27 +473,15 @@ export default function SendScreen() {
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Total Fees Saved:</Text>
-                                {feesLoading ? (
-                                    <Text style={[styles.feeValue, { color: colors.text }]}>Loading...</Text>
-                                ) : feesError ? (
-                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
-                                ) : (
-                                    <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
-                                        {feesSaved.toFixed(2)} {toCurrency}
-                                    </Text>
-                                )}
+                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
+                                    8.50 {toCurrency}
+                                </Text>
                             </View>
                             <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
-                                {feesLoading ? (
-                                    <Text style={[styles.feeValue, { color: colors.text }]}>Loading...</Text>
-                                ) : feesError ? (
-                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
-                                ) : (
-                                    <Text style={[styles.feeValue, { color: colors.text }]}>
-                                        {minimizedFee.toFixed(2)} {toCurrency}
-                                    </Text>
-                                )}
+                                <Text style={[styles.feeValue, { color: colors.text }]}>
+                                    2.00 {toCurrency}
+                                </Text>
                             </View>
                             <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed:</Text>

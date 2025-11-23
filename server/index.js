@@ -30,6 +30,52 @@ app.get("/health", (req, res) => {
     res.json({ status: "ok", service: "Claude API Proxy" });
 });
 
+// Currency conversion proxy endpoint
+app.post("/api/convert_currency", async (req, res) => {
+    const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+
+    try {
+        const { from_ccy, to_ccy, amount } = req.body;
+
+        // Validate required fields
+        if (!from_ccy || !to_ccy || amount === undefined) {
+            return res.status(400).json({
+                error: "Missing required fields: from_ccy, to_ccy, and amount are required",
+            });
+        }
+
+        console.log(`Proxying currency conversion: ${amount} ${from_ccy} -> ${to_ccy}`);
+
+        const response = await fetch(`${BACKEND_URL}/convert_currency`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                from_ccy,
+                to_ccy,
+                amount,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: { message: "Unknown error" } }));
+            console.error("❌ Currency conversion API error:", errorData);
+            return res.status(response.status).json(errorData);
+        }
+
+        const data = await response.json();
+        console.log("✅ Currency conversion response received");
+        res.json(data);
+    } catch (error) {
+        console.error("❌ Proxy error:", error);
+        res.status(500).json({
+            error: "Proxy server error",
+            message: error.message,
+        });
+    }
+});
+
 // Claude API proxy endpoint
 app.post("/api/claude", async (req, res) => {
     // Try multiple env var names for flexibility
@@ -108,8 +154,12 @@ app.listen(PORT, () => {
         process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ||
         process.env.CLAUDE_API_KEY;
 
-    console.log(`🚀 Claude API Proxy Server running on http://localhost:${PORT}`);
-    console.log(`📡 Endpoint: http://localhost:${PORT}/api/claude`);
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+    
+    console.log(`🚀 Proxy Server running on http://localhost:${PORT}`);
+    console.log(`📡 Claude API Endpoint: http://localhost:${PORT}/api/claude`);
+    console.log(`📡 Currency Conversion Endpoint: http://localhost:${PORT}/api/convert_currency`);
+    console.log(`🔗 Backend URL: ${backendUrl}`);
     console.log(`🔑 API Key: ${apiKey ? "✅ Found" : "❌ Not found (check .env in project root)"}`);
 
     if (!apiKey) {
