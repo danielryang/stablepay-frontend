@@ -18,7 +18,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
-import { convertCurrency } from "@/utils/currencyApi";
+import { evaluatePath, PathEvaluationResponse } from "@/utils/pathApi";
 
 // Complete auth session on web
 if (Platform.OS === "web") {
@@ -40,10 +40,16 @@ export default function SendScreen() {
     const [fromAddress, setFromAddress] = useState("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1");
     const [toAddress, setToAddress] = useState("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063");
     
-    // Currency conversion state
-    const [convertedAmount, setConvertedAmount] = useState<number>(42000); // Default: 40 USDC * 1050
+    // Path evaluation state
+    const [pathData, setPathData] = useState<PathEvaluationResponse | null>(null);
     const [conversionLoading, setConversionLoading] = useState<boolean>(false);
     const [conversionError, setConversionError] = useState<string | null>(null);
+    
+    // Derived values from path data
+    const convertedAmount = pathData?.final_amount_ars || 0;
+    const transactionFeeARS = pathData?.total_fee_ars || 0;
+    const hops = pathData?.hops || [];
+    const path = pathData?.path || [];
 
     // PayPal OAuth configuration
     // makeRedirectUri automatically handles:
@@ -187,26 +193,26 @@ export default function SendScreen() {
         }
     }, [response, payPalConnecting, handlePayPalCallback]);
 
-    // Fetch currency conversion when amount or currencies change
+    // Evaluate path when amount or currencies change
     useEffect(() => {
         const amountNum = parseFloat(amount);
         if (isNaN(amountNum) || amountNum <= 0) {
             // Reset to default if amount is invalid
-            setConvertedAmount(0);
+            setPathData(null);
             setConversionError(null);
             return;
         }
 
-        const fetchConversion = async () => {
+        const evaluateConversionPath = async () => {
             setConversionLoading(true);
             setConversionError(null);
             try {
-                // Call API with correct direction: from_ccy = fromCurrency, to_ccy = toCurrency
-                const result = await convertCurrency(fromCurrency, toCurrency, amountNum);
-                setConvertedAmount(result.converted_amount);
+                // Call API with correct direction: from_currency = fromCurrency, to_currency = toCurrency
+                const result = await evaluatePath(fromCurrency, toCurrency, amountNum);
+                setPathData(result);
             } catch (error: any) {
-                console.error("Failed to convert currency:", error);
-                setConversionError(error.message || "Failed to convert currency");
+                console.error("Failed to evaluate path:", error);
+                setConversionError(error.message || "Failed to evaluate conversion path");
                 // Keep previous value on error
             } finally {
                 setConversionLoading(false);
@@ -214,7 +220,7 @@ export default function SendScreen() {
         };
 
         // Debounce the API call to avoid too many requests
-        const timeoutId = setTimeout(fetchConversion, 500);
+        const timeoutId = setTimeout(evaluateConversionPath, 500);
         return () => clearTimeout(timeoutId);
     }, [amount, fromCurrency, toCurrency]);
 
@@ -262,9 +268,8 @@ export default function SendScreen() {
             return addr;
         };
 
-        const transactionFee = 2.0;
-        const feesSaved = 8.5;
-        const finalTotal = convertedAmount + transactionFee;
+        // Use path data for fees (always in ARS)
+        const finalTotal = convertedAmount + transactionFeeARS;
 
         const toAddressDisplay = sendToPayPal
             ? `PayPal: ${payPalEmail}`
@@ -283,10 +288,11 @@ export default function SendScreen() {
             toToken: toCurrency,
             type: "sent",
             status: "Confirmed",
-            transactionFee: `${transactionFee} ${toCurrency}`,
-            speed: "2s",
-            feesSaved: `${feesSaved} ${toCurrency}`,
-            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${toCurrency}`,
+            transactionFee: `${transactionFeeARS.toFixed(2)} ARS`, // Always in ARS
+            feesSaved: "0 ARS", // Can be calculated if needed
+            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS`,
+            path: path, // Add path array
+            hops: hops, // Add hops array
         });
 
         // Navigate to home immediately
@@ -470,22 +476,38 @@ export default function SendScreen() {
 
                         <View style={styles.divider} />
 
+                        {/* Path/Hops Display */}
+                        {path.length > 0 && (
+                            <>
+                                <View style={styles.pathSection}>
+                                    <Text style={[styles.pathLabel, { color: colors.textSecondary }]}>Conversion Path:</Text>
+                                    <View style={styles.pathContainer}>
+                                        {path.map((currency, index) => (
+                                            <View key={index} style={styles.pathItem}>
+                                                <Text style={[styles.pathCurrency, { color: colors.text }]}>{currency}</Text>
+                                                {index < path.length - 1 && (
+                                                    <Text style={[styles.pathArrow, { color: colors.textSecondary }]}>→</Text>
+                                                )}
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
+                                <View style={styles.divider} />
+                            </>
+                        )}
+
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Total Fees Saved:</Text>
-                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
-                                    8.50 {toCurrency}
-                                </Text>
-                            </View>
-                            <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
-                                <Text style={[styles.feeValue, { color: colors.text }]}>
-                                    2.00 {toCurrency}
-                                </Text>
-                            </View>
-                            <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed:</Text>
-                                <Text style={[styles.feeValue, { color: colors.text }]}>2s</Text>
+                                {conversionLoading ? (
+                                    <Text style={[styles.feeValue, { color: colors.textSecondary }]}>Loading...</Text>
+                                ) : conversionError ? (
+                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
+                                ) : (
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>
+                                        {transactionFeeARS.toFixed(2)} ARS
+                                    </Text>
+                                )}
                             </View>
                         </View>
                     </View>
@@ -788,5 +810,31 @@ const styles = StyleSheet.create({
     connectedStatus: {
         fontSize: 13,
         fontWeight: "500",
+    },
+    pathSection: {
+        gap: 12,
+    },
+    pathLabel: {
+        fontSize: 15,
+        fontWeight: "500",
+    },
+    pathContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    pathItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    pathCurrency: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    pathArrow: {
+        fontSize: 15,
+        marginHorizontal: 4,
     },
 });

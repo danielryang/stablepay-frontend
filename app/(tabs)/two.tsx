@@ -2,9 +2,9 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
+import { useColorScheme } from "@/components/useColorScheme";
 import { WalletHeader } from "@/components/WalletHeader";
 import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
 import { useTransactions } from "@/contexts/TransactionContext";
 
 export default function ActivityScreen() {
@@ -122,16 +122,32 @@ export default function ActivityScreen() {
 
                                     <View style={styles.divider} />
 
+                                    {/* Path Display */}
+                                    {tx.path && tx.path.length > 0 && (
+                                        <>
+                                            <View style={styles.pathSection}>
+                                                <Text style={[styles.pathLabel, { color: colors.textSecondary }]}>Conversion Path:</Text>
+                                                <View style={styles.pathContainer}>
+                                                    {tx.path.map((currency, index) => (
+                                                        <View key={index} style={styles.pathItem}>
+                                                            <Text style={[styles.pathCurrency, { color: colors.text }]}>{currency}</Text>
+                                                            {index < tx.path!.length - 1 && (
+                                                                <Text style={[styles.pathArrow, { color: colors.textSecondary }]}>→</Text>
+                                                            )}
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                            </View>
+                                            <View style={styles.divider} />
+                                        </>
+                                    )}
+
                                     <View style={styles.detailsSection}>
                                         <View style={styles.detailRow}>
                                             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
                                             <Text style={[styles.detailValue, { color: colors.text }]}>
                                                 {tx.transactionFee}
                                             </Text>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Speed:</Text>
-                                            <Text style={[styles.detailValue, { color: colors.text }]}>{tx.speed}</Text>
                                         </View>
                                         {tx.signature && (
                                             <View style={styles.detailRow}>
@@ -328,5 +344,31 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontFamily: "monospace",
         maxWidth: 150,
+    },
+    pathSection: {
+        gap: 8,
+        marginVertical: 8,
+    },
+    pathLabel: {
+        fontSize: 12,
+        marginBottom: 4,
+    },
+    pathContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 6,
+    },
+    pathItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    pathCurrency: {
+        fontSize: 12,
+        fontWeight: "600",
+    },
+    pathArrow: {
+        fontSize: 12,
     },
 });

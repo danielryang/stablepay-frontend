@@ -11,6 +11,18 @@ import { getRecentTransactions } from "@/utils/wallet";
 
 import { useWallet } from "./WalletContext";
 
+export interface TransactionHop {
+    from_ccy: string;
+    to_ccy: string;
+    fee_percent: number;
+    fee_local: number;
+    fee_ars: number;
+    amount_before: number;
+    amount_after_fee: number;
+    amount_next: number;
+    exchange: string;
+}
+
 export interface Transaction {
     id: string;
     date: string;
@@ -23,10 +35,11 @@ export interface Transaction {
     type: "sent" | "received" | "converted" | "bought";
     status: string;
     transactionFee: string;
-    speed: string;
     feesSaved: string;
     finalTotal: string;
     signature?: string;
+    path?: string[]; // Conversion path (e.g., ["USDC", "SOL", "ARS"])
+    hops?: TransactionHop[]; // Detailed hop information
 }
 
 interface TransactionContextType {
@@ -72,7 +85,6 @@ function TransactionProviderInner({ children }: { children: ReactNode }) {
                 type: tx.type === "sent" ? "sent" : tx.type === "received" ? "received" : "sent",
                 status: tx.status,
                 transactionFee: `${tx.fee} SOL`,
-                speed: "~1s",
                 feesSaved: "0",
                 finalTotal: tx.amount + " USDC",
                 signature: tx.signature,

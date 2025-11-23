@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Alert,
     Platform,
@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
+import { evaluatePath, PathEvaluationResponse } from "@/utils/pathApi";
 
 export default function ConvertScreen() {
     const router = useRouter();
@@ -24,8 +25,44 @@ export default function ConvertScreen() {
     const [amount, setAmount] = useState("40");
     const [fromCurrency, setFromCurrency] = useState("USDC");
     const [toCurrency, setToCurrency] = useState("ARS");
-    const exchangeRate = 1050;
-    const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
+    
+    // Path evaluation state
+    const [pathData, setPathData] = useState<PathEvaluationResponse | null>(null);
+    const [conversionLoading, setConversionLoading] = useState<boolean>(false);
+    const [conversionError, setConversionError] = useState<string | null>(null);
+    
+    // Derived values from path data
+    const convertedAmount = pathData?.final_amount_ars || 0;
+    const transactionFeeARS = pathData?.total_fee_ars || 0;
+    const hops = pathData?.hops || [];
+    const path = pathData?.path || [];
+
+    // Evaluate path when amount or currencies change
+    useEffect(() => {
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            setPathData(null);
+            setConversionError(null);
+            return;
+        }
+
+        const evaluateConversionPath = async () => {
+            setConversionLoading(true);
+            setConversionError(null);
+            try {
+                const result = await evaluatePath(fromCurrency, toCurrency, amountNum);
+                setPathData(result);
+            } catch (error: any) {
+                console.error("Failed to evaluate path:", error);
+                setConversionError(error.message || "Failed to evaluate conversion path");
+            } finally {
+                setConversionLoading(false);
+            }
+        };
+
+        const timeoutId = setTimeout(evaluateConversionPath, 500);
+        return () => clearTimeout(timeoutId);
+    }, [amount, fromCurrency, toCurrency]);
 
     const handleConvert = () => {
         const now = new Date();
@@ -37,9 +74,7 @@ export default function ConvertScreen() {
             hour12: true,
         });
 
-        const transactionFee = 2.0;
-        const feesSaved = 8.5;
-        const finalTotal = convertedAmount + transactionFee;
+        const finalTotal = convertedAmount + transactionFeeARS;
 
         addTransaction({
             date: dateString,
@@ -54,10 +89,12 @@ export default function ConvertScreen() {
             toToken: toCurrency,
             type: "converted",
             status: "Confirmed",
-            transactionFee: `${transactionFee} ${toCurrency}`,
+            transactionFee: `${transactionFeeARS.toFixed(2)} ARS`, // Always in ARS
             speed: "2s",
-            feesSaved: `${feesSaved} ${toCurrency}`,
-            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${toCurrency}`,
+            feesSaved: "0 ARS",
+            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS`,
+            path: path,
+            hops: hops,
         });
 
         // Navigate to home immediately
@@ -112,12 +149,22 @@ export default function ConvertScreen() {
                                 <Text style={[styles.equals, { color: colors.textSecondary }]}>
                                     =
                                 </Text>
-                                <Text style={[styles.convertedValue, { color: colors.text }]}>
-                                    {convertedAmount.toLocaleString("en-US", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}
-                                </Text>
+                                {conversionLoading ? (
+                                    <Text style={[styles.convertedValue, { color: colors.textSecondary }]}>
+                                        Loading...
+                                    </Text>
+                                ) : conversionError ? (
+                                    <Text style={[styles.convertedValue, { color: colors.error }]}>
+                                        Error
+                                    </Text>
+                                ) : (
+                                    <Text style={[styles.convertedValue, { color: colors.text }]}>
+                                        {convertedAmount.toLocaleString("en-US", {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </Text>
+                                )}
                                 <TextInput
                                     value={toCurrency}
                                     onChangeText={setToCurrency}
@@ -129,22 +176,40 @@ export default function ConvertScreen() {
 
                         <View style={styles.divider} />
 
+                        {/* Path/Hops Display */}
+                        {path.length > 0 && (
+                            <>
+                                <View style={styles.pathSection}>
+                                    <Text style={[styles.pathLabel, { color: colors.textSecondary }]}>Conversion Path:</Text>
+                                    <View style={styles.pathContainer}>
+                                        {path.map((currency, index) => (
+                                            <View key={index} style={styles.pathItem}>
+                                                <Text style={[styles.pathCurrency, { color: colors.text }]}>{currency}</Text>
+                                                {index < path.length - 1 && (
+                                                    <Text style={[styles.pathArrow, { color: colors.textSecondary }]}>→</Text>
+                                                )}
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
+                                <View style={styles.divider} />
+                            </>
+                        )}
+
                         <View style={styles.feesSection}>
-                            <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
-                                    Total Fees Saved:
-                                </Text>
-                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
-                                    8.50 {toCurrency}
-                                </Text>
-                            </View>
                             <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
                                     Transaction Fee:
                                 </Text>
-                                <Text style={[styles.feeValue, { color: colors.text }]}>
-                                    2.00 {toCurrency}
-                                </Text>
+                                {conversionLoading ? (
+                                    <Text style={[styles.feeValue, { color: colors.textSecondary }]}>Loading...</Text>
+                                ) : conversionError ? (
+                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
+                                ) : (
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>
+                                        {transactionFeeARS.toFixed(2)} ARS
+                                    </Text>
+                                )}
                             </View>
                             <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>
@@ -336,5 +401,35 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: "600",
         letterSpacing: 0.2,
+    },
+    pathSection: {
+        gap: 12,
+    },
+    pathLabel: {
+        fontSize: 15,
+        fontWeight: "500",
+    },
+    pathContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    pathItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    pathCurrency: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    pathArrow: {
+        fontSize: 15,
+        marginHorizontal: 4,
+    },
+    feeValueError: {
+        fontSize: 14,
+        fontWeight: "500",
     },
 });

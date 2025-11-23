@@ -30,18 +30,80 @@ app.get("/health", (req, res) => {
     res.json({ status: "ok", service: "Claude API Proxy" });
 });
 
+// Path evaluation proxy endpoint
+app.post("/api/evaluate_path", async (req, res) => {
+    const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+
+    try {
+        let { from_currency, to_currency, amount } = req.body;
+
+        // Validate required fields
+        if (!from_currency || !to_currency || amount === undefined) {
+            return res.status(400).json({
+                error: "Missing required fields: from_currency, to_currency, and amount are required",
+            });
+        }
+
+        // Replace USDC with USDE for backend compatibility
+        if (from_currency === "USDC") {
+            from_currency = "USDE";
+        }
+        if (to_currency === "USDC") {
+            to_currency = "USDE";
+        }
+
+        console.log(`Proxying path evaluation: ${amount} ${from_currency} -> ${to_currency}`);
+
+        const response = await fetch(`${BACKEND_URL}/evaluate_path`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                from_currency,
+                to_currency,
+                amount,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: { message: "Unknown error" } }));
+            console.error("❌ Path evaluation API error:", errorData);
+            return res.status(response.status).json(errorData);
+        }
+
+        const data = await response.json();
+        console.log("✅ Path evaluation response received");
+        res.json(data);
+    } catch (error) {
+        console.error("❌ Proxy error:", error);
+        res.status(500).json({
+            error: "Proxy server error",
+            message: error.message,
+        });
+    }
+});
+
 // Currency conversion proxy endpoint
 app.post("/api/convert_currency", async (req, res) => {
     const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
     try {
-        const { from_ccy, to_ccy, amount } = req.body;
+        let { from_ccy, to_ccy, amount } = req.body;
 
         // Validate required fields
         if (!from_ccy || !to_ccy || amount === undefined) {
             return res.status(400).json({
                 error: "Missing required fields: from_ccy, to_ccy, and amount are required",
             });
+        }
+
+        // Replace USDC with USDE for backend compatibility
+        if (from_ccy === "USDC") {
+            from_ccy = "USDE";
+        }
+        if (to_ccy === "USDC") {
+            to_ccy = "USDE";
         }
 
         console.log(`Proxying currency conversion: ${amount} ${from_ccy} -> ${to_ccy}`);
@@ -159,6 +221,7 @@ app.listen(PORT, () => {
     console.log(`🚀 Proxy Server running on http://localhost:${PORT}`);
     console.log(`📡 Claude API Endpoint: http://localhost:${PORT}/api/claude`);
     console.log(`📡 Currency Conversion Endpoint: http://localhost:${PORT}/api/convert_currency`);
+    console.log(`📡 Path Evaluation Endpoint: http://localhost:${PORT}/api/evaluate_path`);
     console.log(`🔗 Backend URL: ${backendUrl}`);
     console.log(`🔑 API Key: ${apiKey ? "✅ Found" : "❌ Not found (check .env in project root)"}`);
 
