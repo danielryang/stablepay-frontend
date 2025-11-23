@@ -104,15 +104,14 @@ export default function CreateWalletScreen() {
     // Step 1: Show mnemonic
     if (step === "mnemonic") {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-                <ScrollView style={styles.scrollView}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.content}>
                         <View
                             style={[
                                 styles.header,
                                 {
                                     backgroundColor: colors.background,
-                                    borderBottomColor: colors.border,
                                 },
                             ]}
                         >
@@ -129,7 +128,6 @@ export default function CreateWalletScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -170,7 +168,6 @@ export default function CreateWalletScreen() {
                                     styles.copyButton,
                                     {
                                         backgroundColor: colors.buttonSecondary,
-                                        borderColor: colors.border,
                                     },
                                 ]}
                                 onPress={handleCopyMnemonic}
@@ -213,15 +210,14 @@ export default function CreateWalletScreen() {
     // Step 2: Warning
     if (step === "warning") {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-                <ScrollView style={styles.scrollView}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.content}>
                         <View
                             style={[
                                 styles.header,
                                 {
                                     backgroundColor: colors.background,
-                                    borderBottomColor: colors.border,
                                 },
                             ]}
                         >
@@ -241,7 +237,6 @@ export default function CreateWalletScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -250,7 +245,6 @@ export default function CreateWalletScreen() {
                                     styles.warningBox,
                                     {
                                         backgroundColor: colors.warningLight,
-                                        borderColor: colors.warning,
                                     },
                                 ]}
                             >
@@ -293,15 +287,14 @@ export default function CreateWalletScreen() {
     // Step 3: Confirm mnemonic
     if (step === "confirm") {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-                <ScrollView style={styles.scrollView}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.content}>
                         <View
                             style={[
                                 styles.header,
                                 {
                                     backgroundColor: colors.background,
-                                    borderBottomColor: colors.border,
                                 },
                             ]}
                         >
@@ -318,7 +311,6 @@ export default function CreateWalletScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -374,7 +366,7 @@ export default function CreateWalletScreen() {
 
     // Step 4: Set password
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             {isCreating && (
                 <View
                     style={[
@@ -400,7 +392,7 @@ export default function CreateWalletScreen() {
                 <View
                     style={[
                         styles.header,
-                        { backgroundColor: colors.background, borderBottomColor: colors.border },
+                        { backgroundColor: colors.background },
                     ]}
                 >
                     <Pressable
@@ -416,7 +408,7 @@ export default function CreateWalletScreen() {
                 <View
                     style={[
                         styles.card,
-                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        { backgroundColor: colors.cardBackground },
                     ]}
                 >
                     <Text style={[styles.cardTitle, { color: colors.text }]}>
@@ -438,7 +430,6 @@ export default function CreateWalletScreen() {
                                 styles.input,
                                 {
                                     backgroundColor: colors.inputBackground,
-                                    borderColor: colors.inputBorder,
                                     color: colors.inputText,
                                 },
                             ]}
@@ -457,7 +448,6 @@ export default function CreateWalletScreen() {
                                 styles.input,
                                 {
                                     backgroundColor: colors.inputBackground,
-                                    borderColor: colors.inputBorder,
                                     color: colors.inputText,
                                 },
                             ]}
@@ -503,147 +493,148 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 24,
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        marginBottom: 28,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     backButton: {
-        marginRight: 12,
+        marginRight: 14,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 16,
+        padding: 28,
+        borderRadius: 20,
+        gap: 20,
     },
     cardTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     cardSubtitle: {
-        fontSize: 14,
-        marginBottom: 8,
-        lineHeight: 20,
+        fontSize: 15,
+        marginBottom: 12,
+        lineHeight: 22,
     },
     inputGroup: {
-        gap: 8,
+        gap: 10,
     },
     label: {
-        fontSize: 14,
-        fontWeight: "500",
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-    },
-    button: {
-        borderRadius: 8,
-        padding: 16,
-        alignItems: "center",
-        marginTop: 8,
-    },
-    buttonText: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: "600",
     },
-    copyButton: {
-        borderRadius: 8,
-        padding: 12,
+    input: {
+        borderRadius: 14,
+        padding: 16,
+        fontSize: 16,
+    },
+    button: {
+        borderRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         alignItems: "center",
-        borderWidth: 1,
+        marginTop: 12,
+    },
+    buttonText: {
+        fontSize: 17,
+        fontWeight: "600",
+        letterSpacing: 0.2,
+    },
+    copyButton: {
+        borderRadius: 14,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        alignItems: "center",
     },
     copyButtonContent: {
         flexDirection: "row",
         alignItems: "center",
     },
     copyButtonText: {
-        fontSize: 14,
-        fontWeight: "500",
+        fontSize: 15,
+        fontWeight: "600",
     },
     warningBox: {
-        borderRadius: 12,
-        padding: 20,
-        borderWidth: 2,
-        gap: 12,
+        borderRadius: 18,
+        padding: 24,
+        gap: 14,
     },
     warningIcon: {
         fontSize: 32,
         textAlign: "center",
     },
     warningTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
         textAlign: "center",
+        letterSpacing: -0.3,
     },
     warningText: {
-        fontSize: 14,
-        lineHeight: 20,
+        fontSize: 15,
+        lineHeight: 22,
     },
     mnemonicGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 8,
-        marginBottom: 16,
+        gap: 10,
+        marginBottom: 20,
     },
     mnemonicWord: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: 12,
+        padding: 14,
         minWidth: "30%",
-        gap: 8,
+        gap: 10,
     },
     mnemonicIndex: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: "600",
     },
     mnemonicText: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: "600",
     },
     confirmGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 8,
-        marginBottom: 16,
+        gap: 10,
+        marginBottom: 20,
     },
     confirmWord: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        padding: 8,
+        borderRadius: 12,
+        padding: 10,
         minWidth: "30%",
-        gap: 8,
+        gap: 10,
     },
     confirmIndex: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: "600",
     },
     confirmInput: {
         flex: 1,
-        fontSize: 14,
-        padding: 4,
+        fontSize: 15,
+        padding: 6,
     },
     loadingContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        gap: 10,
     },
     fullScreenLoader: {
         position: "absolute",
@@ -654,13 +645,13 @@ const styles = StyleSheet.create({
         zIndex: 1000,
         justifyContent: "center",
         alignItems: "center",
-        gap: 16,
+        gap: 18,
     },
     loaderText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "600",
     },
     loaderSubtext: {
-        fontSize: 14,
+        fontSize: 15,
     },
 });

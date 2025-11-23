@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
+import { WalletHeader } from "@/components/WalletHeader";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
@@ -22,58 +23,18 @@ export default function HomeScreen() {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme];
 
-    const formatAddress = (address: string | null) => {
-        if (!address) return "Not available";
-        return `${address.slice(0, 4)}...${address.slice(-4)}`;
-    };
-
     const formatBalance = (bal: number | null) => {
         if (bal === null) return "0.00";
         return bal.toFixed(4);
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-            <View
-                style={[
-                    styles.header,
-                    { backgroundColor: colors.background, borderBottomColor: colors.border },
-                ]}
-            >
-                <View style={styles.headerLeft}>
-                    <Image
-                        source={require("@/assets/images/logo.png")}
-                        style={styles.headerLogo}
-                        resizeMode="contain"
-                    />
-                    <View>
-                        <Text style={[styles.headerTitle, { color: colors.text }]}>
-                            Solana Wallet
-                        </Text>
-                        {publicKeyString && (
-                            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                                {formatAddress(publicKeyString)}
-                            </Text>
-                        )}
-                    </View>
-                </View>
-                <Pressable onPress={() => router.push("/settings")}>
-                    <FontAwesome
-                        name="cog"
-                        size={24}
-                        color={colors.text}
-                    />
-                </Pressable>
-            </View>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <WalletHeader />
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.mainContent}>
-                    <View
-                        style={[
-                            styles.balanceCard,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
-                        ]}
-                    >
+                    <View style={[styles.balanceCard, { backgroundColor: colors.cardBackground }]}>
                         <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>
                             USDC Balance
                         </Text>
@@ -81,7 +42,7 @@ export default function HomeScreen() {
                             <ActivityIndicator
                                 size="small"
                                 color={colors.primary}
-                                style={{ marginTop: 8 }}
+                                style={{ marginTop: 12 }}
                             />
                         ) : (
                             <Text style={[styles.balanceAmount, { color: colors.text }]}>
@@ -114,11 +75,7 @@ export default function HomeScreen() {
                             onPress={() => router.push("/convert")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <FontAwesome
-                                    name="exchange"
-                                    size={18}
-                                    color={colors.textInverse}
-                                />
+                                <FontAwesome name="exchange" size={18} color={colors.textInverse} />
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Convert
@@ -170,7 +127,6 @@ export default function HomeScreen() {
                                 styles.tokenCard,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -226,7 +182,6 @@ export default function HomeScreen() {
                                 styles.tokenCard,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -274,33 +229,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    header: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-    },
-    headerLeft: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-    headerLogo: {
-        width: 32,
-        height: 32,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    headerSubtitle: {
-        fontSize: 12,
-        marginTop: 2,
-        fontFamily: "monospace",
-    },
     refreshButtonContent: {
         flexDirection: "row",
         alignItems: "center",
@@ -309,48 +237,48 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     mainContent: {
-        padding: 16,
-        gap: 24,
+        padding: 20,
+        gap: 28,
     },
     balanceCard: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
+        padding: 28,
+        borderRadius: 20,
     },
     balanceLabel: {
-        fontSize: 14,
-        marginBottom: 8,
+        fontSize: 15,
+        marginBottom: 12,
+        fontWeight: "500",
     },
     balanceAmount: {
-        fontSize: 48,
+        fontSize: 52,
         fontWeight: "bold",
+        letterSpacing: -1,
     },
     refreshButton: {
-        marginTop: 8,
-        padding: 8,
+        marginTop: 12,
+        padding: 10,
         alignSelf: "flex-start",
     },
     refreshText: {
-        fontSize: 12,
-        fontWeight: "500",
+        fontSize: 13,
+        fontWeight: "600",
     },
     actionsGrid: {
         flexDirection: "row",
-        gap: 12,
-        marginTop: 24,
+        gap: 14,
     },
     actionButton: {
         flex: 1,
         alignItems: "center",
-        gap: 8,
-        padding: 16,
-        borderRadius: 12,
+        gap: 10,
+        padding: 20,
+        borderRadius: 18,
     },
     actionIcon: {
         borderRadius: 999,
-        padding: 12,
-        width: 48,
-        height: 48,
+        padding: 14,
+        width: 52,
+        height: 52,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -359,25 +287,24 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     actionLabel: {
-        fontSize: 12,
-        fontWeight: "500",
+        fontSize: 13,
+        fontWeight: "600",
     },
     tokensSection: {
         gap: 16,
-        marginTop: 24,
     },
     fiatSection: {
         gap: 16,
-        marginTop: 24,
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: "600",
+        fontSize: 20,
+        fontWeight: "700",
+        letterSpacing: -0.3,
+        marginBottom: 4,
     },
     tokenCard: {
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
+        padding: 18,
+        borderRadius: 18,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -385,37 +312,37 @@ const styles = StyleSheet.create({
     tokenInfo: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        gap: 14,
     },
     tokenIconContainer: {
-        width: 40,
-        height: 40,
+        width: 44,
+        height: 44,
         borderRadius: 999,
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
     },
     tokenIconImage: {
-        width: 40,
-        height: 40,
+        width: 44,
+        height: 44,
     },
     tokenIconText: {
         fontSize: 14,
         fontWeight: "bold",
     },
     tokenName: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
     },
     tokenSubtext: {
         fontSize: 14,
-        marginTop: 2,
+        marginTop: 3,
     },
     tokenBalance: {
         alignItems: "flex-end",
     },
     tokenAmount: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
     },
     fiatLabel: {

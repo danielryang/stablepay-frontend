@@ -9,8 +9,11 @@ import {
     View,
 } from "react-native";
 
+import { useRouter } from "expo-router";
+
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
+import { WalletHeader } from "@/components/WalletHeader";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
@@ -49,6 +52,7 @@ const getFiatBalances = (): FiatBalance[] => {
 };
 
 export default function OptimizerScreen() {
+    const router = useRouter();
     const { settings } = useOptimizerSettings();
     const { transactions } = useTransactions();
     const colorScheme = useColorScheme();
@@ -315,7 +319,8 @@ export default function OptimizerScreen() {
 
     if (loading) {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <WalletHeader />
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={colors.primary} />
                     <Text style={[styles.loadingText, { color: colors.text }]}>
@@ -331,7 +336,8 @@ export default function OptimizerScreen() {
 
     if (aiLoading) {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <WalletHeader />
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={colors.primary} />
                     <Text style={[styles.loadingText, { color: colors.text }]}>
@@ -347,8 +353,9 @@ export default function OptimizerScreen() {
 
     if (error) {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-                <ScrollView style={styles.scrollView}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <WalletHeader />
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.errorContainer}>
                         <View style={styles.errorTitleRow}>
                             <FontAwesome
@@ -389,20 +396,22 @@ export default function OptimizerScreen() {
     const timingInsights = results?.recommendations.find(r => r.type === "timing_insight");
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-            <ScrollView style={styles.scrollView}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <WalletHeader />
+
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     {/* Header */}
                     <View
                         style={[
                             styles.headerCard,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                            { backgroundColor: colors.cardBackground },
                         ]}
                     >
-                        <Text style={[styles.headerTitle, { color: colors.text }]}>
+                        <Text style={[styles.cardTitle, { color: colors.text }]}>
                             Allocation Optimizer
                         </Text>
-                        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                             Real data from {dataSource || "CoinGecko API"} • Analyzes timing,
                             stablecoins, and network efficiency
                         </Text>
@@ -1879,8 +1888,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        padding: 16,
-        gap: 16,
+        padding: 20,
+        gap: 20,
     },
     loadingContainer: {
         flex: 1,
@@ -1925,17 +1934,18 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     headerCard: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 12,
+        padding: 28,
+        borderRadius: 20,
+        gap: 16,
     },
-    headerTitle: {
+    cardTitle: {
         fontSize: 28,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
-    headerSubtitle: {
-        fontSize: 14,
+    cardSubtitle: {
+        fontSize: 15,
+        lineHeight: 22,
     },
     generateButton: {
         marginTop: 8,

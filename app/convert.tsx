@@ -70,11 +70,11 @@ export default function ConvertScreen() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    { backgroundColor: colors.background },
                 ]}
             >
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
@@ -83,12 +83,12 @@ export default function ConvertScreen() {
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Convert</Text>
             </View>
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     <View
                         style={[
                             styles.card,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                            { backgroundColor: colors.cardBackground },
                         ]}
                     >
                         <View style={styles.amountSection}>
@@ -127,7 +127,7 @@ export default function ConvertScreen() {
                             </View>
                         </View>
 
-                        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                        <View style={styles.divider} />
 
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
@@ -161,12 +161,11 @@ export default function ConvertScreen() {
                             style={[
                                 styles.cancelButton,
                                 {
-                                    backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
+                                    backgroundColor: colors.buttonSecondary,
                                 },
                             ]}
                         >
-                            <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                            <Text style={[styles.cancelButtonText, { color: colors.buttonSecondaryText }]}>
                                 Cancel
                             </Text>
                         </Pressable>
@@ -200,32 +199,31 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "flex-end",
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     backButton: {
-        marginRight: 8,
+        marginRight: 10,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     scrollView: {
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 24,
+        padding: 28,
+        borderRadius: 20,
+        gap: 28,
     },
     amountSection: {
         alignItems: "center",
@@ -291,6 +289,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
+        backgroundColor: "transparent",
     },
     feesSection: {
         gap: 12,
@@ -317,24 +316,25 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         flex: 1,
-        height: 48,
-        borderWidth: 1,
-        borderRadius: 8,
+        height: 56,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
     },
     cancelButtonText: {
-        fontSize: 16,
+        fontSize: 17,
+        fontWeight: "600",
     },
     convertButton: {
         flex: 1,
-        height: 48,
-        borderRadius: 8,
+        height: 56,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
     },
     convertButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
+        fontSize: 17,
+        fontWeight: "600",
+        letterSpacing: 0.2,
     },
 });

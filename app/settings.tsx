@@ -70,11 +70,11 @@ export default function SettingsScreen() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    { backgroundColor: colors.background },
                 ]}
             >
                 <View style={styles.headerLeft}>
@@ -90,7 +90,7 @@ export default function SettingsScreen() {
                 </View>
             </View>
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     <View style={styles.section}>
                         <View
@@ -98,7 +98,6 @@ export default function SettingsScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -125,7 +124,7 @@ export default function SettingsScreen() {
                                 />
                             </View>
 
-                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                            <View style={styles.divider} />
 
                             <Pressable style={styles.settingItem}>
                                 <FontAwesome name="shield" size={22} color={colors.textSecondary} />
@@ -144,7 +143,7 @@ export default function SettingsScreen() {
                                 </View>
                             </Pressable>
 
-                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                            <View style={styles.divider} />
 
                             <Pressable style={styles.settingItem}>
                                 <FontAwesome name="globe" size={22} color={colors.textSecondary} />
@@ -172,7 +171,6 @@ export default function SettingsScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -192,7 +190,7 @@ export default function SettingsScreen() {
                                 </View>
                             </View>
 
-                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                            <View style={styles.divider} />
 
                             <View style={styles.settingItem}>
                                 <FontAwesome name="usd" size={22} color={colors.textSecondary} />
@@ -232,7 +230,7 @@ export default function SettingsScreen() {
                                 </View>
                             </View>
 
-                            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                            <View style={styles.divider} />
 
                             <View style={styles.settingItem}>
                                 <FontAwesome
@@ -289,7 +287,6 @@ export default function SettingsScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -337,7 +334,6 @@ export default function SettingsScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -379,50 +375,49 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "flex-end",
         justifyContent: "space-between",
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     headerLeft: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        gap: 14,
     },
     headerLogo: {
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
     },
     backButton: {
         marginRight: 0,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     scrollView: {
         flex: 1,
     },
     content: {
-        padding: 16,
-        gap: 16,
+        padding: 20,
+        gap: 20,
     },
     section: {
         gap: 0,
     },
     card: {
-        borderRadius: 12,
-        borderWidth: 1,
+        borderRadius: 18,
         overflow: "hidden",
     },
     settingItem: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
-        padding: 16,
+        gap: 14,
+        padding: 18,
     },
     settingIcon: {
         fontSize: 18,
@@ -455,7 +450,8 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        marginLeft: 16,
+        marginLeft: 18,
+        backgroundColor: "transparent",
     },
     destructiveIcon: {
         fontSize: 18,
@@ -482,9 +478,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
         minWidth: 80,
     },
     inputPrefix: {

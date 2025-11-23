@@ -92,16 +92,14 @@ export default function LoginScreen() {
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    <View style={styles.logo}>
-                        <Image
-                            source={require("@/assets/images/logo.png")}
-                            style={styles.logoImage}
-                            resizeMode="contain"
-                        />
-                    </View>
+                    <Image
+                        source={require("@/assets/images/logo.png")}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
                     <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                         Unlock your wallet
@@ -111,7 +109,7 @@ export default function LoginScreen() {
                 <View
                     style={[
                         styles.card,
-                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        { backgroundColor: colors.cardBackground },
                     ]}
                 >
                     <View style={styles.inputGroup}>
@@ -125,7 +123,6 @@ export default function LoginScreen() {
                                 styles.input,
                                 {
                                     backgroundColor: colors.inputBackground,
-                                    borderColor: colors.inputBorder,
                                     color: colors.inputText,
                                 },
                             ]}
@@ -179,16 +176,16 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
+        padding: 24,
     },
     content: {
         width: "100%",
         maxWidth: 400,
-        gap: 32,
+        gap: 40,
     },
     logoContainer: {
         alignItems: "center",
-        gap: 8,
+        gap: 16,
     },
     logo: {
         width: 80,
@@ -197,61 +194,66 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     logoImage: {
-        width: 80,
-        height: 80,
+        width: 100,
+        height: 100,
     },
     title: {
-        fontSize: 30,
+        fontSize: 32,
         fontWeight: "bold",
+        letterSpacing: -0.5,
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: "400",
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 16,
+        padding: 28,
+        borderRadius: 20,
+        gap: 20,
     },
     inputGroup: {
-        gap: 8,
+        gap: 10,
     },
     label: {
-        fontSize: 14,
-        fontWeight: "500",
+        fontSize: 15,
+        fontWeight: "600",
     },
     input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
+        borderRadius: 14,
+        padding: 16,
+        fontSize: 16,
     },
     loginButton: {
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         alignItems: "center",
-        minHeight: 48,
+        minHeight: 56,
         justifyContent: "center",
+        marginTop: 8,
     },
     loginButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
+        fontSize: 17,
+        fontWeight: "600",
+        letterSpacing: 0.2,
     },
     switchAccountButton: {
-        marginTop: 12,
-        padding: 12,
+        marginTop: 8,
+        padding: 14,
         alignItems: "center",
         justifyContent: "center",
     },
     switchAccountText: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: "500",
     },
     footer: {
         alignItems: "center",
     },
     footerText: {
-        fontSize: 14,
+        fontSize: 13,
+        textAlign: "center",
+        fontWeight: "400",
     },
     signUpLink: {
         // Color handled inline with theme

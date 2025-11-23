@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
+import { WalletHeader } from "@/components/WalletHeader";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useTransactions } from "@/contexts/TransactionContext";
@@ -10,11 +11,14 @@ export default function ActivityScreen() {
     const { transactions, isLoading, refreshTransactions } = useTransactions();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme];
+
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-            <ScrollView style={styles.scrollView}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <WalletHeader />
+
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
-                    <View style={styles.header}>
+                    <View style={styles.sectionHeader}>
                         <View>
                             <Text style={[styles.title, { color: colors.text }]}>
                                 Recent Transactions
@@ -57,7 +61,6 @@ export default function ActivityScreen() {
                                         styles.transactionCard,
                                         {
                                             backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
                                         },
                                     ]}
                                 >
@@ -103,7 +106,7 @@ export default function ActivityScreen() {
                                         </View>
                                     </View>
 
-                                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                                    <View style={styles.divider} />
 
                                     <View style={styles.addressRow}>
                                         <View style={styles.addressColumn}>
@@ -117,7 +120,7 @@ export default function ActivityScreen() {
                                         </View>
                                     </View>
 
-                                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                                    <View style={styles.divider} />
 
                                     <View style={styles.detailsSection}>
                                         <View style={styles.detailRow}>
@@ -162,21 +165,22 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
-    header: {
+    sectionHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "flex-start",
-        marginBottom: 16,
+        marginBottom: 20,
     },
     title: {
-        fontSize: 18,
-        fontWeight: "600",
+        fontSize: 20,
+        fontWeight: "700",
+        letterSpacing: -0.3,
         marginBottom: 4,
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 15,
     },
     refreshButton: {
         padding: 8,
@@ -211,9 +215,8 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     transactionCard: {
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
+        padding: 18,
+        borderRadius: 18,
     },
     transactionHeader: {
         flexDirection: "row",

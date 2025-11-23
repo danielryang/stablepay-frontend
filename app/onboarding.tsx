@@ -2,8 +2,8 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useRouter } from "expo-router";
 
-import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -11,76 +11,45 @@ export default function OnboardingScreen() {
     const colors = Colors[colorScheme];
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    <View style={styles.logo}>
-                        <Image
-                            source={require("@/assets/images/logo.png")}
-                            style={styles.logoImage}
-                            resizeMode="contain"
-                        />
-                    </View>
+                    <Image
+                        source={require("@/assets/images/logo.png")}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
                     <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                        Welcome to your Solana wallet
+                        Your Solana wallet
                     </Text>
                 </View>
 
-                <View
-                    style={[
-                        styles.card,
-                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
-                    ]}
-                >
-                    <Text style={[styles.cardTitle, { color: colors.text }]}>Get Started</Text>
-                    <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-                        Create a new wallet or restore an existing one
-                    </Text>
-
-                    <View style={styles.buttonGroup}>
-                        <Pressable
-                            style={[
-                                styles.primaryButton,
-                                { backgroundColor: colors.buttonPrimary },
-                            ]}
-                            onPress={() => router.push("/create-wallet")}
+                <View style={styles.buttonContainer}>
+                    <Pressable
+                        style={[styles.primaryButton, { backgroundColor: colors.buttonPrimary }]}
+                        onPress={() => router.push("/create-wallet")}
+                    >
+                        <Text
+                            style={[styles.primaryButtonText, { color: colors.buttonPrimaryText }]}
                         >
-                            <Text
-                                style={[
-                                    styles.primaryButtonText,
-                                    { color: colors.buttonPrimaryText },
-                                ]}
-                            >
-                                Create New Wallet
-                            </Text>
-                        </Pressable>
+                            Create New Wallet
+                        </Text>
+                    </Pressable>
 
-                        <Pressable
-                            style={[
-                                styles.secondaryButton,
-                                {
-                                    backgroundColor: colors.buttonSecondary,
-                                    borderColor: colors.border,
-                                },
-                            ]}
-                            onPress={() => router.push("/restore-wallet")}
-                        >
-                            <Text
-                                style={[
-                                    styles.secondaryButtonText,
-                                    { color: colors.buttonSecondaryText },
-                                ]}
-                            >
-                                Restore Wallet
-                            </Text>
-                        </Pressable>
-                    </View>
+                    <Pressable
+                        style={styles.restoreLink}
+                        onPress={() => router.push("/restore-wallet")}
+                    >
+                        <Text style={[styles.restoreLinkText, { color: colors.text }]}>
+                            Restore Wallet
+                        </Text>
+                    </Pressable>
                 </View>
 
                 <View style={styles.footer}>
                     <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-                        Your wallet is stored securely on your device
+                        Secured and encrypted on your device
                     </Text>
                 </View>
             </View>
@@ -93,76 +62,66 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
+        padding: 24,
     },
     content: {
         width: "100%",
         maxWidth: 400,
-        gap: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 48,
     },
     logoContainer: {
         alignItems: "center",
-        gap: 8,
-    },
-    logo: {
-        width: 80,
-        height: 80,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    logoImage: {
-        width: 80,
-        height: 80,
-    },
-    title: {
-        fontSize: 30,
-        fontWeight: "bold",
-    },
-    subtitle: {
-        fontSize: 14,
-    },
-    card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
         gap: 16,
     },
-    cardTitle: {
-        fontSize: 20,
+    logoImage: {
+        width: 100,
+        height: 100,
+    },
+    title: {
+        fontSize: 32,
         fontWeight: "bold",
+        letterSpacing: -0.5,
     },
-    cardSubtitle: {
-        fontSize: 14,
-        marginBottom: 8,
+    subtitle: {
+        fontSize: 16,
+        fontWeight: "400",
     },
-    buttonGroup: {
-        gap: 12,
-        marginTop: 8,
+    buttonContainer: {
+        width: "100%",
+        gap: 20,
+        alignItems: "center",
     },
     primaryButton: {
-        borderRadius: 8,
-        padding: 16,
+        width: "100%",
+        borderRadius: 16,
+        paddingVertical: 18,
+        paddingHorizontal: 24,
         alignItems: "center",
+        justifyContent: "center",
+        minHeight: 56,
     },
     primaryButtonText: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
+        letterSpacing: 0.2,
     },
-    secondaryButton: {
-        borderRadius: 8,
-        padding: 16,
-        alignItems: "center",
-        borderWidth: 1,
+    restoreLink: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
     },
-    secondaryButtonText: {
+    restoreLinkText: {
         fontSize: 16,
-        fontWeight: "600",
+        fontWeight: "500",
     },
     footer: {
         alignItems: "center",
+        marginTop: 8,
     },
     footerText: {
-        fontSize: 12,
+        fontSize: 13,
         textAlign: "center",
+        fontWeight: "400",
     },
 });

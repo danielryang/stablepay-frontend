@@ -57,7 +57,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 backgroundColor: colors.tabBarBackground,
                 borderTopWidth: 1,
                 borderTopColor: colors.tabBarBorder,
-                height: 60,
+                height: 88,
+                paddingBottom: 20,
             }}
         >
             <Animated.View
@@ -117,7 +118,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                             flex: 1,
                             alignItems: "center",
                             justifyContent: "center",
-                            paddingVertical: 8,
+                            paddingTop: 8,
+                            paddingBottom: 0,
                         }}
                     >
                         <TabBarIcon

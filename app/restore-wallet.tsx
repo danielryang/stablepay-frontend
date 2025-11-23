@@ -82,15 +82,14 @@ export default function RestoreWalletScreen() {
 
     if (step === "mnemonic") {
         return (
-            <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
-                <ScrollView style={styles.scrollView}>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.content}>
                         <View
                             style={[
                                 styles.header,
                                 {
                                     backgroundColor: colors.background,
-                                    borderBottomColor: colors.border,
                                 },
                             ]}
                         >
@@ -107,7 +106,6 @@ export default function RestoreWalletScreen() {
                                 styles.card,
                                 {
                                     backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
                                 },
                             ]}
                         >
@@ -129,7 +127,6 @@ export default function RestoreWalletScreen() {
                                         styles.mnemonicInput,
                                         {
                                             backgroundColor: colors.inputBackground,
-                                            borderColor: colors.inputBorder,
                                             color: colors.inputText,
                                         },
                                     ]}
@@ -157,7 +154,7 @@ export default function RestoreWalletScreen() {
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             {isRestoring && (
                 <View
                     style={[
@@ -183,7 +180,7 @@ export default function RestoreWalletScreen() {
                 <View
                     style={[
                         styles.header,
-                        { backgroundColor: colors.background, borderBottomColor: colors.border },
+                        { backgroundColor: colors.background },
                     ]}
                 >
                     <Pressable
@@ -199,7 +196,7 @@ export default function RestoreWalletScreen() {
                 <View
                     style={[
                         styles.card,
-                        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                        { backgroundColor: colors.cardBackground },
                     ]}
                 >
                     <Text style={[styles.cardTitle, { color: colors.text }]}>Set a Password</Text>
@@ -219,7 +216,6 @@ export default function RestoreWalletScreen() {
                                 styles.input,
                                 {
                                     backgroundColor: colors.inputBackground,
-                                    borderColor: colors.inputBorder,
                                     color: colors.inputText,
                                 },
                             ]}
@@ -238,7 +234,6 @@ export default function RestoreWalletScreen() {
                                 styles.input,
                                 {
                                     backgroundColor: colors.inputBackground,
-                                    borderColor: colors.inputBorder,
                                     color: colors.inputText,
                                 },
                             ]}
@@ -284,75 +279,76 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 24,
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        marginBottom: 28,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     backButton: {
-        marginRight: 12,
+        marginRight: 14,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 16,
+        padding: 28,
+        borderRadius: 20,
+        gap: 20,
     },
     cardTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     cardSubtitle: {
-        fontSize: 14,
-        marginBottom: 8,
+        fontSize: 15,
+        marginBottom: 12,
+        lineHeight: 22,
     },
     inputGroup: {
-        gap: 8,
+        gap: 10,
     },
     label: {
-        fontSize: 14,
-        fontWeight: "500",
+        fontSize: 15,
+        fontWeight: "600",
     },
     input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
+        borderRadius: 14,
+        padding: 16,
+        fontSize: 16,
     },
     mnemonicInput: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-        minHeight: 120,
+        borderRadius: 14,
+        padding: 16,
+        fontSize: 16,
+        minHeight: 140,
     },
     button: {
-        borderRadius: 8,
-        padding: 16,
+        borderRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         alignItems: "center",
-        marginTop: 8,
+        marginTop: 12,
     },
     buttonText: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
+        letterSpacing: 0.2,
     },
     loadingContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        gap: 10,
     },
     fullScreenLoader: {
         position: "absolute",
@@ -363,13 +359,13 @@ const styles = StyleSheet.create({
         zIndex: 1000,
         justifyContent: "center",
         alignItems: "center",
-        gap: 16,
+        gap: 18,
     },
     loaderText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "600",
     },
     loaderSubtext: {
-        fontSize: 14,
+        fontSize: 15,
     },
 });

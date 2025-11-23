@@ -308,32 +308,32 @@ export default function SendScreen() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    { backgroundColor: colors.background },
                 ]}
             >
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
                     <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                 </Pressable>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Sending Page</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Send</Text>
             </View>
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     <View
                         style={[
                             styles.card,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                            { backgroundColor: colors.cardBackground },
                         ]}
                     >
                         <View style={styles.switchSection}>
                             <View style={styles.switchRow}>
                                 <View style={styles.switchLabelContainer}>
-                                    <Text style={styles.switchLabel}>Send to Address</Text>
-                                    <Text style={styles.switchSubtext}>Crypto wallet address</Text>
+                                    <Text style={[styles.switchLabel, { color: colors.text }]}>Send to Address</Text>
+                                    <Text style={[styles.switchSubtext, { color: colors.textSecondary }]}>Crypto wallet address</Text>
                                 </View>
                                 <Switch
                                     value={sendToPayPal}
@@ -342,8 +342,8 @@ export default function SendScreen() {
                                     thumbColor={colors.textInverse}
                                 />
                                 <View style={styles.switchLabelContainer}>
-                                    <Text style={styles.switchLabel}>Send to PayPal</Text>
-                                    <Text style={styles.switchSubtext}>Fiat payment</Text>
+                                    <Text style={[styles.switchLabel, { color: colors.text }]}>Send to PayPal</Text>
+                                    <Text style={[styles.switchSubtext, { color: colors.textSecondary }]}>Fiat payment</Text>
                                 </View>
                             </View>
                         </View>
@@ -352,32 +352,32 @@ export default function SendScreen() {
 
                         <View style={styles.addressSection}>
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>From Wallet Address</Text>
+                                <Text style={[styles.label, { color: colors.text }]}>From Wallet Address</Text>
                                 <TextInput
                                     value={fromAddress}
                                     onChangeText={setFromAddress}
-                                    style={styles.input}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
                             </View>
                             {!sendToPayPal ? (
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.label}>To Wallet Address</Text>
+                                    <Text style={[styles.label, { color: colors.text }]}>To Wallet Address</Text>
                                     <TextInput
                                         value={toAddress}
                                         onChangeText={setToAddress}
-                                        style={styles.input}
-                                        placeholderTextColor="#737A82"
+                                        style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                                        placeholderTextColor={colors.inputPlaceholder}
                                     />
                                 </View>
                             ) : (
                                 <View style={styles.paypalSection}>
                                     {payPalConnecting ? (
                                         <View style={styles.connectingSection}>
-                                            <Text style={styles.connectingTitle}>
+                                            <Text style={[styles.connectingTitle, { color: colors.text }]}>
                                                 Connecting to PayPal...
                                             </Text>
-                                            <Text style={styles.connectingSubtext}>
+                                            <Text style={[styles.connectingSubtext, { color: colors.textSecondary }]}>
                                                 Please complete the login in your browser, then
                                                 return to this app.
                                             </Text>
@@ -387,39 +387,39 @@ export default function SendScreen() {
                                         </View>
                                     ) : !payPalConnected ? (
                                         <>
-                                            <Text style={styles.paypalTitle}>
+                                            <Text style={[styles.paypalTitle, { color: colors.text }]}>
                                                 Connect PayPal Account
                                             </Text>
-                                            <Text style={styles.paypalDescription}>
+                                            <Text style={[styles.paypalDescription, { color: colors.textSecondary }]}>
                                                 You'll be redirected to PayPal to securely log in
                                                 and authorize the connection.
                                             </Text>
                                             <Pressable
                                                 onPress={handlePayPalLogin}
-                                                style={styles.connectButton}
+                                                style={[styles.connectButton, { backgroundColor: colors.buttonPrimary }]}
                                             >
-                                                <Text style={styles.connectButtonText}>
+                                                <Text style={[styles.connectButtonText, { color: colors.buttonPrimaryText }]}>
                                                     🔵 Connect with PayPal
                                                 </Text>
                                             </Pressable>
                                         </>
                                     ) : (
-                                        <View style={styles.connectedSection}>
+                                        <View style={[styles.connectedSection, { backgroundColor: colors.backgroundTertiary }]}>
                                             <View style={styles.connectedHeader}>
-                                                <Text style={styles.connectedTitle}>
+                                                <Text style={[styles.connectedTitle, { color: colors.text }]}>
                                                     PayPal Connected
                                                 </Text>
                                                 <Pressable onPress={handlePayPalDisconnect}>
-                                                    <Text style={styles.disconnectText}>
+                                                    <Text style={[styles.disconnectText, { color: colors.primary }]}>
                                                         Disconnect
                                                     </Text>
                                                 </Pressable>
                                             </View>
                                             <View style={styles.connectedInfo}>
-                                                <Text style={styles.connectedEmail}>
+                                                <Text style={[styles.connectedEmail, { color: colors.text }]}>
                                                     {payPalEmail}
                                                 </Text>
-                                                <Text style={styles.connectedStatus}>
+                                                <Text style={[styles.connectedStatus, { color: colors.success }]}>
                                                     ✓ Verified Account
                                                 </Text>
                                             </View>
@@ -432,23 +432,23 @@ export default function SendScreen() {
                         <View style={styles.divider} />
 
                         <View style={styles.amountSection}>
-                            <Text style={styles.amountLabel}>Amount</Text>
+                            <Text style={[styles.amountLabel, { color: colors.textSecondary }]}>Amount</Text>
                             <View style={styles.conversionContainer}>
                                 <TextInput
                                     value={amount}
                                     onChangeText={setAmount}
                                     keyboardType="numeric"
-                                    style={styles.amountInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.amountInput, { color: colors.text }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
                                 <TextInput
                                     value={fromCurrency}
                                     onChangeText={setFromCurrency}
-                                    style={styles.currencyInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
-                                <Text style={styles.equals}>=</Text>
-                                <Text style={styles.convertedValue}>
+                                <Text style={[styles.equals, { color: colors.textSecondary }]}>=</Text>
+                                <Text style={[styles.convertedValue, { color: colors.text }]}>
                                     {convertedAmount.toLocaleString("en-US", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
@@ -457,8 +457,8 @@ export default function SendScreen() {
                                 <TextInput
                                     value={toCurrency}
                                     onChangeText={setToCurrency}
-                                    style={styles.currencyInput}
-                                    placeholderTextColor="#737A82"
+                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
+                                    placeholderTextColor={colors.inputPlaceholder}
                                 />
                             </View>
                         </View>
@@ -467,32 +467,32 @@ export default function SendScreen() {
 
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Total Fees Saved:</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Total Fees Saved:</Text>
                                 {feesLoading ? (
-                                    <Text style={styles.feeValue}>Loading...</Text>
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>Loading...</Text>
                                 ) : feesError ? (
-                                    <Text style={styles.feeValueError}>Error</Text>
+                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
                                 ) : (
-                                    <Text style={styles.feeValueSuccess}>
+                                    <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
                                         {feesSaved.toFixed(2)} {toCurrency}
                                     </Text>
                                 )}
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Transaction Fee:</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
                                 {feesLoading ? (
-                                    <Text style={styles.feeValue}>Loading...</Text>
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>Loading...</Text>
                                 ) : feesError ? (
-                                    <Text style={styles.feeValueError}>Error</Text>
+                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
                                 ) : (
-                                    <Text style={styles.feeValue}>
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>
                                         {minimizedFee.toFixed(2)} {toCurrency}
                                     </Text>
                                 )}
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={styles.feeLabel}>Speed:</Text>
-                                <Text style={styles.feeValue}>2s</Text>
+                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed:</Text>
+                                <Text style={[styles.feeValue, { color: colors.text }]}>2s</Text>
                             </View>
                         </View>
                     </View>
@@ -503,12 +503,11 @@ export default function SendScreen() {
                             style={[
                                 styles.cancelButton,
                                 {
-                                    backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
+                                    backgroundColor: colors.buttonSecondary,
                                 },
                             ]}
                         >
-                            <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                            <Text style={[styles.cancelButtonText, { color: colors.buttonSecondaryText }]}>
                                 Cancel
                             </Text>
                         </Pressable>
@@ -539,53 +538,53 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "flex-end",
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     backButton: {
-        marginRight: 8,
+        marginRight: 10,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     scrollView: {
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 24,
+        padding: 28,
+        borderRadius: 20,
+        gap: 28,
     },
     addressSection: {
         gap: 16,
     },
     inputGroup: {
-        gap: 8,
+        gap: 10,
     },
     label: {
-        fontSize: 12,
+        fontSize: 15,
+        fontWeight: "600",
     },
     input: {
-        borderWidth: 1,
-        borderRadius: 12,
+        borderRadius: 14,
         padding: 16,
-        fontSize: 12,
+        fontSize: 15,
     },
     inputRight: {
         textAlign: "right",
     },
     divider: {
         height: 1,
+        backgroundColor: "transparent",
     },
     amountSection: {
         alignItems: "center",
@@ -605,7 +604,6 @@ const styles = StyleSheet.create({
     amountInput: {
         fontSize: 28,
         fontWeight: "bold",
-        color: "#29343D",
         textAlign: "center",
         paddingHorizontal: 0,
         ...(Platform.OS === "web"
@@ -620,7 +618,6 @@ const styles = StyleSheet.create({
     },
     currencyInput: {
         fontSize: 18,
-        color: "#737A82",
         textAlign: "center",
         ...(Platform.OS === "web"
             ? {
@@ -635,7 +632,6 @@ const styles = StyleSheet.create({
     convertedValue: {
         fontSize: 28,
         fontWeight: "bold",
-        color: "#29343D",
         ...(Platform.OS === "web"
             ? {
                   marginLeft: 2,
@@ -645,7 +641,6 @@ const styles = StyleSheet.create({
     },
     equals: {
         fontSize: 18,
-        color: "#737A82",
         ...(Platform.OS === "web"
             ? {
                   marginLeft: 2,
@@ -661,23 +656,20 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     feeLabel: {
-        fontSize: 14,
-        color: "#737A82",
+        fontSize: 15,
+        fontWeight: "500",
     },
     feeValue: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: "#29343D",
+        fontSize: 15,
+        fontWeight: "600",
     },
     feeValueSuccess: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: "#22C55E",
+        fontSize: 15,
+        fontWeight: "600",
     },
     feeValueError: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: "#EF4444",
+        fontSize: 15,
+        fontWeight: "600",
     },
     buttonContainer: {
         flexDirection: "row",
@@ -686,25 +678,26 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         flex: 1,
-        height: 48,
-        borderWidth: 1,
-        borderRadius: 8,
+        height: 56,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
     },
     cancelButtonText: {
-        fontSize: 16,
+        fontSize: 17,
+        fontWeight: "600",
     },
     sendButton: {
         flex: 1,
-        height: 48,
-        borderRadius: 8,
+        height: 56,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
     },
     sendButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
+        fontSize: 17,
+        fontWeight: "600",
+        letterSpacing: 0.2,
     },
     sendButtonDisabled: {
         opacity: 0.6,
@@ -775,10 +768,9 @@ const styles = StyleSheet.create({
         fontSize: 32,
     },
     connectedSection: {
-        padding: 16,
-        backgroundColor: "#EFF1F3",
-        borderRadius: 8,
-        gap: 12,
+        padding: 18,
+        borderRadius: 14,
+        gap: 14,
     },
     connectedHeader: {
         flexDirection: "row",
@@ -786,25 +778,22 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     connectedTitle: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
-        color: "#29343D",
     },
     disconnectText: {
-        fontSize: 14,
-        color: "#0891D1",
-        fontWeight: "500",
+        fontSize: 15,
+        fontWeight: "600",
     },
     connectedInfo: {
-        gap: 4,
+        gap: 6,
     },
     connectedEmail: {
-        fontSize: 14,
-        color: "#29343D",
-        fontWeight: "500",
+        fontSize: 15,
+        fontWeight: "600",
     },
     connectedStatus: {
-        fontSize: 12,
-        color: "#22C55E",
+        fontSize: 13,
+        fontWeight: "500",
     },
 });

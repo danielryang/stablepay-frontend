@@ -40,11 +40,11 @@ export default function ReceiveScreen() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View
                 style={[
                     styles.header,
-                    { backgroundColor: colors.background, borderBottomColor: colors.border },
+                    { backgroundColor: colors.background },
                 ]}
             >
                 <Pressable onPress={() => router.back()} style={styles.backButton}>
@@ -53,12 +53,12 @@ export default function ReceiveScreen() {
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Receive</Text>
             </View>
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     <View
                         style={[
                             styles.card,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                            { backgroundColor: colors.cardBackground },
                         ]}
                     >
                         <View style={styles.titleSection}>
@@ -76,7 +76,6 @@ export default function ReceiveScreen() {
                                     styles.qrOuter,
                                     {
                                         backgroundColor: colors.backgroundTertiary,
-                                        borderColor: colors.border,
                                     },
                                 ]}
                             >
@@ -141,17 +140,16 @@ export default function ReceiveScreen() {
                                     style={[
                                         styles.actionButton,
                                         {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
+                                            backgroundColor: colors.buttonSecondary,
                                         },
                                     ]}
                                 >
                                     <FontAwesome
                                         name="clipboard"
                                         size={18}
-                                        color={colors.text}
+                                        color={colors.buttonSecondaryText}
                                     />
-                                    <Text style={[styles.actionText, { color: colors.text }]}>
+                                    <Text style={[styles.actionText, { color: colors.buttonSecondaryText }]}>
                                         Copy
                                     </Text>
                                 </Pressable>
@@ -160,17 +158,16 @@ export default function ReceiveScreen() {
                                     style={[
                                         styles.actionButton,
                                         {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
+                                            backgroundColor: colors.buttonSecondary,
                                         },
                                     ]}
                                 >
                                     <FontAwesome
                                         name="share"
                                         size={18}
-                                        color={colors.text}
+                                        color={colors.buttonSecondaryText}
                                     />
-                                    <Text style={[styles.actionText, { color: colors.text }]}>
+                                    <Text style={[styles.actionText, { color: colors.buttonSecondaryText }]}>
                                         Share
                                     </Text>
                                 </Pressable>
@@ -181,7 +178,7 @@ export default function ReceiveScreen() {
                     <View
                         style={[
                             styles.notesCard,
-                            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                            { backgroundColor: colors.cardBackground },
                         ]}
                     >
                         <Text style={[styles.notesTitle, { color: colors.text }]}>
@@ -212,32 +209,31 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "flex-end",
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
     },
     backButton: {
-        marginRight: 8,
+        marginRight: 10,
     },
     backText: {
-        fontSize: 24,
+        fontSize: 26,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "bold",
+        letterSpacing: -0.3,
     },
     scrollView: {
         flex: 1,
     },
     content: {
-        padding: 16,
+        padding: 20,
     },
     card: {
-        padding: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 24,
+        padding: 28,
+        borderRadius: 20,
+        gap: 28,
     },
     titleSection: {
         alignItems: "center",
@@ -257,10 +253,9 @@ const styles = StyleSheet.create({
     qrOuter: {
         width: 256,
         height: 256,
-        borderRadius: 16,
+        borderRadius: 20,
         alignItems: "center",
         justifyContent: "center",
-        borderWidth: 2,
     },
     qrInner: {
         width: 192,
@@ -302,10 +297,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
-        padding: 12,
-        borderWidth: 1,
-        borderRadius: 8,
+        gap: 10,
+        padding: 16,
+        borderRadius: 14,
     },
     actionIcon: {
         fontSize: 14,
@@ -314,11 +308,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     notesCard: {
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        gap: 8,
-        marginTop: 24,
+        padding: 20,
+        borderRadius: 18,
+        gap: 12,
+        marginTop: 28,
     },
     notesTitle: {
         fontSize: 16,
