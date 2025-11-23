@@ -32,10 +32,11 @@ export default function RestoreWalletScreen() {
     useEffect(() => {
         if (keypair && isRestoring) {
             // Wallet was successfully restored, navigate to home
-            // Use a small delay to ensure state is fully updated
+            // Use a delay to show loading screen before navigation
             const timer = setTimeout(() => {
+                setIsRestoring(false);
                 router.replace("/(tabs)");
-            }, 200);
+            }, 1500); // Show loading screen for 1.5 seconds
             return () => clearTimeout(timer);
         }
     }, [keypair, isRestoring, router]);
@@ -70,14 +71,19 @@ export default function RestoreWalletScreen() {
 
         // Set loading state immediately - this triggers a re-render
         setIsRestoring(true);
-        try {
-            await restoreWallet(mnemonic.trim(), password);
-            // Navigation will happen automatically via useEffect when keypair is set
-        } catch (error: any) {
-            setIsRestoring(false);
-            console.error("Restore wallet error:", error);
-            Alert.alert("Error", error.message || "Failed to restore wallet");
-        }
+
+        // Yield to React to allow it to render the loading state before heavy computation
+        // Use a small delay to ensure React processes the state update and renders first
+        setTimeout(async () => {
+            try {
+                await restoreWallet(mnemonic.trim(), password);
+                // Navigation will happen automatically via useEffect when keypair is set
+            } catch (error: any) {
+                setIsRestoring(false);
+                console.error("Restore wallet error:", error);
+                Alert.alert("Error", error.message || "Failed to restore wallet");
+            }
+        }, 50); // Small delay to ensure UI renders loading state
     };
 
     if (step === "mnemonic") {
@@ -162,7 +168,7 @@ export default function RestoreWalletScreen() {
                         {
                             backgroundColor:
                                 colorScheme === "dark"
-                                    ? "rgba(15, 23, 42, 0.95)"
+                                    ? "rgba(18, 18, 18, 0.95)"
                                     : "rgba(255, 255, 255, 0.95)",
                         },
                     ]}
@@ -284,7 +290,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 28,
+        marginBottom: 16,
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 16,

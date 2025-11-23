@@ -402,38 +402,35 @@ export default function OptimizerScreen() {
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     {/* Header */}
-                    <View
-                        style={[
-                            styles.headerCard,
-                            { backgroundColor: colors.cardBackground },
-                        ]}
-                    >
-                        <Text style={[styles.cardTitle, { color: colors.text }]}>
-                            Allocation Optimizer
-                        </Text>
-                        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-                            Real data from {dataSource || "CoinGecko API"} • Analyzes timing,
-                            stablecoins, and network efficiency
-                        </Text>
-                        {!results && (
-                            <Pressable
-                                style={[
-                                    styles.generateButton,
-                                    { backgroundColor: colors.buttonPrimary },
-                                ]}
-                                onPress={generateReport}
-                            >
-                                <Text
-                                    style={[
-                                        styles.generateButtonText,
-                                        { color: colors.buttonPrimaryText },
-                                    ]}
-                                >
-                                    Generate Report
-                                </Text>
-                            </Pressable>
-                        )}
+                    <View style={styles.sectionHeader}>
+                        <View>
+                            <Text style={[styles.cardTitle, { color: colors.text }]}>
+                                Allocation Optimizer
+                            </Text>
+                            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                                Real data from {dataSource || "CoinGecko API"} • Analyzes timing,
+                                stablecoins, and network efficiency
+                            </Text>
+                        </View>
                     </View>
+                    {!results && (
+                        <Pressable
+                            style={[
+                                styles.generateButton,
+                                { backgroundColor: colors.buttonPrimary },
+                            ]}
+                            onPress={generateReport}
+                        >
+                            <Text
+                                style={[
+                                    styles.generateButtonText,
+                                    { color: colors.buttonPrimaryText },
+                                ]}
+                            >
+                                Generate Report
+                            </Text>
+                        </Pressable>
+                    )}
 
                     {results && (
                         <>
@@ -444,7 +441,7 @@ export default function OptimizerScreen() {
                                         styles.corsWarningCard,
                                         {
                                             backgroundColor: colors.warningLight,
-                                            borderColor: colors.warning,
+                                            marginTop: -16,
                                         },
                                     ]}
                                 >
@@ -455,10 +452,7 @@ export default function OptimizerScreen() {
                                         AI Features Limited in Browser
                                     </Text>
                                     <Text style={[styles.corsWarningText, { color: colors.text }]}>
-                                        Anthropic API doesn't support browser CORS. AI explanations
-                                        work on native devices (iOS/Android) or require a backend
-                                        proxy. Algorithmic recommendations are fully functional
-                                        below.
+                                        AI features work on native devices (iOS/Android). Algorithmic recommendations are fully functional below.
                                     </Text>
                                 </View>
                             )}
@@ -470,7 +464,6 @@ export default function OptimizerScreen() {
                                         styles.aiSummaryCard,
                                         {
                                             backgroundColor: colors.infoLight,
-                                            borderColor: colors.info,
                                         },
                                     ]}
                                 >
@@ -550,7 +543,6 @@ export default function OptimizerScreen() {
                                         styles.sentimentCard,
                                         {
                                             backgroundColor: colors.warningLight,
-                                            borderColor: colors.warning,
                                         },
                                     ]}
                                 >
@@ -603,7 +595,6 @@ export default function OptimizerScreen() {
                                         <View
                                             style={[
                                                 styles.sentimentIndicators,
-                                                { borderTopColor: colors.warning },
                                             ]}
                                         >
                                             <Text
@@ -645,15 +636,7 @@ export default function OptimizerScreen() {
 
                             {/* Fiat to Stablecoin Distribution Recommendations */}
                             {fiatRecs.length > 0 && (
-                                <View
-                                    style={[
-                                        styles.sectionCard,
-                                        {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
-                                        },
-                                    ]}
-                                >
+                                <View style={{ gap: 12 }}>
                                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Fiat to Stablecoin Distribution
                                     </Text>
@@ -724,14 +707,7 @@ export default function OptimizerScreen() {
                                                 {rec.distribution &&
                                                     rec.distribution.length > 0 && (
                                                         <View
-                                                            style={[
-                                                                styles.distributionContainer,
-                                                                {
-                                                                    backgroundColor:
-                                                                        colors.cardBackgroundSecondary,
-                                                                    borderColor: colors.border,
-                                                                },
-                                                            ]}
+                                                            style={styles.distributionContainer}
                                                         >
                                                             <Text
                                                                 style={[
@@ -747,10 +723,6 @@ export default function OptimizerScreen() {
                                                                         key={distIdx}
                                                                         style={[
                                                                             styles.distributionItem,
-                                                                            {
-                                                                                borderBottomColor:
-                                                                                    colors.border,
-                                                                            },
                                                                         ]}
                                                                     >
                                                                         <View
@@ -815,18 +787,38 @@ export default function OptimizerScreen() {
 
                                                 <View style={styles.statsGrid}>
                                                     <View style={styles.statItem}>
-                                                        <Text style={styles.statLabel}>
+                                                        <Text
+                                                            style={[
+                                                                styles.statLabel,
+                                                                { color: colors.textSecondary },
+                                                            ]}
+                                                        >
                                                             Total Conversion Fee
                                                         </Text>
-                                                        <Text style={styles.statValue}>
+                                                        <Text
+                                                            style={[
+                                                                styles.statValue,
+                                                                { color: colors.text },
+                                                            ]}
+                                                        >
                                                             {rec.totalConversionFee}
                                                         </Text>
                                                     </View>
                                                     <View style={styles.statItem}>
-                                                        <Text style={styles.statLabel}>
+                                                        <Text
+                                                            style={[
+                                                                styles.statLabel,
+                                                                { color: colors.textSecondary },
+                                                            ]}
+                                                        >
                                                             6-Month Savings
                                                         </Text>
-                                                        <Text style={styles.statValue}>
+                                                        <Text
+                                                            style={[
+                                                                styles.statValue,
+                                                                { color: colors.text },
+                                                            ]}
+                                                        >
                                                             ${rec.estimatedSavings6Months}
                                                         </Text>
                                                     </View>
@@ -840,7 +832,6 @@ export default function OptimizerScreen() {
                                                             {
                                                                 backgroundColor:
                                                                     colors.cardBackgroundSecondary,
-                                                                borderLeftColor: colors.primary,
                                                             },
                                                         ]}
                                                     >
@@ -870,15 +861,7 @@ export default function OptimizerScreen() {
 
                             {/* Stablecoin Recommendations */}
                             {stablecoinRecs.length > 0 && (
-                                <View
-                                    style={[
-                                        styles.sectionCard,
-                                        {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
-                                        },
-                                    ]}
-                                >
+                                <View style={{ gap: 12 }}>
                                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Stablecoin Optimization
                                     </Text>
@@ -1015,7 +998,6 @@ export default function OptimizerScreen() {
                                                             {
                                                                 backgroundColor:
                                                                     colors.cardBackgroundSecondary,
-                                                                borderLeftColor: colors.primary,
                                                             },
                                                         ]}
                                                     >
@@ -1068,7 +1050,6 @@ export default function OptimizerScreen() {
                                                             {
                                                                 backgroundColor:
                                                                     colors.successLight,
-                                                                borderColor: colors.success,
                                                             },
                                                         ]}
                                                         onPress={() =>
@@ -1093,7 +1074,6 @@ export default function OptimizerScreen() {
                                                             styles.feedbackButton,
                                                             {
                                                                 backgroundColor: colors.errorLight,
-                                                                borderColor: colors.error,
                                                             },
                                                         ]}
                                                         onPress={() =>
@@ -1122,15 +1102,7 @@ export default function OptimizerScreen() {
 
                             {/* Conversion Timing Recommendations */}
                             {conversionRecs.length > 0 && (
-                                <View
-                                    style={[
-                                        styles.sectionCard,
-                                        {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
-                                        },
-                                    ]}
-                                >
+                                <View style={{ gap: 12 }}>
                                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Optimal Conversion Timing
                                     </Text>
@@ -1140,7 +1112,6 @@ export default function OptimizerScreen() {
                                             style={[
                                                 styles.timingCard,
                                                 {
-                                                    borderLeftColor: colors.success,
                                                     backgroundColor: colors.successLight,
                                                 },
                                             ]}
@@ -1263,22 +1234,17 @@ export default function OptimizerScreen() {
                             )}
 
                             {/* Current Holdings Analysis */}
-                            <View
-                                style={[
-                                    styles.sectionCard,
-                                    {
-                                        backgroundColor: colors.cardBackground,
-                                        borderColor: colors.border,
-                                    },
-                                ]}
-                            >
+                            <View style={{ gap: 12 }}>
                                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                     Current Holdings Analysis
                                 </Text>
                                 {results.analysis.map((item, idx) => (
                                     <View
                                         key={idx}
-                                        style={[styles.holdingCard, { borderColor: colors.border }]}
+                                        style={[
+                                            styles.holdingCard,
+                                            { backgroundColor: colors.cardBackground },
+                                        ]}
                                     >
                                         <View style={styles.holdingHeader}>
                                             <View style={styles.holdingHeaderLeft}>
@@ -1345,7 +1311,6 @@ export default function OptimizerScreen() {
                                                     styles.switchWarning,
                                                     {
                                                         backgroundColor: colors.warningLight,
-                                                        borderColor: colors.warning,
                                                     },
                                                 ]}
                                             >
@@ -1457,15 +1422,7 @@ export default function OptimizerScreen() {
 
                             {/* Bridge Recommendations */}
                             {bridgeRecs.length > 0 && (
-                                <View
-                                    style={[
-                                        styles.sectionCard,
-                                        {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
-                                        },
-                                    ]}
-                                >
+                                <View style={{ gap: 12 }}>
                                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Bridge Recommendations
                                     </Text>
@@ -1475,7 +1432,6 @@ export default function OptimizerScreen() {
                                             style={[
                                                 styles.bridgeCard,
                                                 {
-                                                    borderLeftColor: colors.primary,
                                                     backgroundColor: colors.primaryLight,
                                                 },
                                             ]}
@@ -1611,15 +1567,7 @@ export default function OptimizerScreen() {
 
                             {/* Timing Insights */}
                             {timingInsights && (
-                                <View
-                                    style={[
-                                        styles.sectionCard,
-                                        {
-                                            backgroundColor: colors.cardBackground,
-                                            borderColor: colors.border,
-                                        },
-                                    ]}
-                                >
+                                <View style={{ gap: 12 }}>
                                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                         Market Timing Insights
                                     </Text>
@@ -1628,7 +1576,7 @@ export default function OptimizerScreen() {
                                             key={idx}
                                             style={[
                                                 styles.insightCard,
-                                                { borderColor: colors.border },
+                                                { backgroundColor: colors.cardBackground },
                                             ]}
                                         >
                                             <Text
@@ -1726,15 +1674,14 @@ export default function OptimizerScreen() {
                                                 {insight.weekendVsWeekday}
                                             </Text>
                                             {insight.volatilityWarning && (
-                                                <View
-                                                    style={[
-                                                        styles.volatilityWarning,
-                                                        {
-                                                            backgroundColor: colors.warningLight,
-                                                            borderColor: colors.warning,
-                                                        },
-                                                    ]}
-                                                >
+                                            <View
+                                                style={[
+                                                    styles.volatilityWarning,
+                                                    {
+                                                        backgroundColor: colors.warningLight,
+                                                    },
+                                                ]}
+                                            >
                                                     <View style={styles.volatilityWarningRow}>
                                                         <FontAwesome
                                                             name="exclamation-triangle"
@@ -1803,7 +1750,6 @@ export default function OptimizerScreen() {
                                     styles.qaSection,
                                     {
                                         backgroundColor: colors.cardBackground,
-                                        borderColor: colors.border,
                                     },
                                 ]}
                             >
@@ -1818,7 +1764,6 @@ export default function OptimizerScreen() {
                                         styles.qaInput,
                                         {
                                             backgroundColor: colors.inputBackground,
-                                            borderColor: colors.inputBorder,
                                             color: colors.inputText,
                                         },
                                     ]}
@@ -1852,7 +1797,6 @@ export default function OptimizerScreen() {
                                             styles.qaAnswer,
                                             {
                                                 backgroundColor: colors.primaryLight,
-                                                borderLeftColor: colors.primary,
                                             },
                                         ]}
                                     >
@@ -1889,7 +1833,7 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
-        gap: 20,
+        gap: 28,
     },
     loadingContainer: {
         flex: 1,
@@ -1933,22 +1877,29 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
     },
+    sectionHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: 20,
+    },
     headerCard: {
         padding: 28,
         borderRadius: 20,
         gap: 16,
     },
     cardTitle: {
-        fontSize: 28,
-        fontWeight: "bold",
+        fontSize: 26,
+        fontWeight: "700",
         letterSpacing: -0.3,
+        marginBottom: 4,
     },
     cardSubtitle: {
         fontSize: 15,
         lineHeight: 22,
     },
     generateButton: {
-        marginTop: 8,
+        marginTop: 0,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: "center",
@@ -1957,16 +1908,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
     },
-    sectionCard: {
-        borderRadius: 12,
-        borderWidth: 1,
-        padding: 16,
-        gap: 12,
-    },
     sectionTitle: {
         fontSize: 20,
         fontWeight: "600",
-        marginBottom: 4,
+        marginBottom: 8,
     },
     recommendationCard: {
         borderRadius: 8,
@@ -2019,7 +1964,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     timingCard: {
-        borderLeftWidth: 4,
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -2078,7 +2022,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     holdingCard: {
-        borderWidth: 1,
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -2127,7 +2070,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     switchWarning: {
-        borderWidth: 1,
         borderRadius: 8,
         padding: 12,
     },
@@ -2160,7 +2102,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     bridgeCard: {
-        borderLeftWidth: 4,
         borderRadius: 8,
         padding: 16,
         gap: 12,
@@ -2196,7 +2137,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     insightCard: {
-        borderWidth: 1,
         borderRadius: 8,
         padding: 16,
         gap: 8,
@@ -2226,7 +2166,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     volatilityWarning: {
-        borderWidth: 1,
         borderRadius: 6,
         padding: 8,
         marginTop: 8,
@@ -2265,7 +2204,6 @@ const styles = StyleSheet.create({
     aiSummaryCard: {
         borderRadius: 12,
         padding: 20,
-        borderWidth: 1,
         marginBottom: 16,
     },
     aiSummaryTitle: {
@@ -2294,7 +2232,6 @@ const styles = StyleSheet.create({
     sentimentCard: {
         borderRadius: 12,
         padding: 16,
-        borderWidth: 1,
         marginBottom: 16,
     },
     sentimentTitle: {
@@ -2323,7 +2260,6 @@ const styles = StyleSheet.create({
     sentimentIndicators: {
         marginTop: 12,
         paddingTop: 12,
-        borderTopWidth: 1,
     },
     sentimentIndicatorText: {
         fontSize: 12,
@@ -2333,7 +2269,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         marginTop: 12,
-        borderLeftWidth: 3,
     },
     aiExplanationLabel: {
         fontSize: 12,
@@ -2365,10 +2300,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     feedbackButtonPositive: {
-        borderWidth: 1,
     },
     feedbackButtonNegative: {
-        borderWidth: 1,
     },
     feedbackButtonText: {
         fontSize: 12,
@@ -2377,7 +2310,6 @@ const styles = StyleSheet.create({
     qaSection: {
         borderRadius: 12,
         padding: 16,
-        borderWidth: 1,
         marginTop: 16,
     },
     qaTitle: {
@@ -2386,7 +2318,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     qaInput: {
-        borderWidth: 1,
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
@@ -2407,7 +2338,6 @@ const styles = StyleSheet.create({
         marginTop: 16,
         padding: 12,
         borderRadius: 8,
-        borderLeftWidth: 3,
     },
     qaAnswerLabel: {
         fontSize: 12,
@@ -2420,9 +2350,6 @@ const styles = StyleSheet.create({
     },
     distributionContainer: {
         marginTop: 12,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
     },
     distributionTitle: {
         fontSize: 14,
@@ -2432,7 +2359,6 @@ const styles = StyleSheet.create({
     distributionItem: {
         marginBottom: 12,
         paddingBottom: 12,
-        borderBottomWidth: 1,
     },
     distributionHeader: {
         flexDirection: "row",
@@ -2459,8 +2385,7 @@ const styles = StyleSheet.create({
     corsWarningCard: {
         borderRadius: 12,
         padding: 16,
-        borderWidth: 1,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     corsWarningTitle: {
         fontSize: 16,

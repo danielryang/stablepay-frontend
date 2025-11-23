@@ -20,12 +20,7 @@ export function WalletHeader() {
     };
 
     return (
-        <View
-            style={[
-                styles.header,
-                { backgroundColor: colors.background },
-            ]}
-        >
+        <View style={[styles.header, { backgroundColor: colors.background }]}>
             <View style={styles.headerLeft}>
                 <Image
                     source={require("@/assets/images/logo.png")}
@@ -33,23 +28,14 @@ export function WalletHeader() {
                     resizeMode="contain"
                 />
                 <View style={styles.headerTextContainer}>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>
-                        Solana Wallet
-                    </Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Your Wallet</Text>
                     <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
                         {publicKeyString ? formatAddress(publicKeyString) : " "}
                     </Text>
                 </View>
             </View>
-            <Pressable 
-                onPress={() => router.push("/settings")} 
-                style={styles.settingsButton}
-            >
-                <FontAwesome
-                    name="cog"
-                    size={24}
-                    color={colors.text}
-                />
+            <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
+                <FontAwesome name="cog" size={24} color={colors.text} />
             </Pressable>
         </View>
     );
@@ -81,10 +67,10 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     headerTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "bold",
         letterSpacing: -0.3,
-        lineHeight: 26,
+        lineHeight: 24,
     },
     headerSubtitle: {
         fontSize: 13,
@@ -100,4 +86,3 @@ const styles = StyleSheet.create({
         marginRight: 0,
     },
 });
-

@@ -106,12 +106,7 @@ export default function LoginScreen() {
                     </Text>
                 </View>
 
-                <View
-                    style={[
-                        styles.card,
-                        { backgroundColor: colors.cardBackground },
-                    ]}
-                >
+                <View style={styles.formContainer}>
                     <View style={styles.inputGroup}>
                         <Text style={[styles.label, { color: colors.text }]}>Password</Text>
                         <TextInput
@@ -181,7 +176,9 @@ const styles = StyleSheet.create({
     content: {
         width: "100%",
         maxWidth: 400,
-        gap: 40,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 48,
     },
     logoContainer: {
         alignItems: "center",
@@ -206,9 +203,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "400",
     },
-    card: {
-        padding: 28,
-        borderRadius: 20,
+    formContainer: {
+        width: "100%",
         gap: 20,
     },
     inputGroup: {

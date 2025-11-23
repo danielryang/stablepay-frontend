@@ -24,7 +24,7 @@ export default function CreateWalletScreen() {
     const { generateMnemonic, createWallet } = useWallet();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme];
-    const [step, setStep] = useState<"mnemonic" | "warning" | "confirm" | "password">("mnemonic");
+    const [step, setStep] = useState<"mnemonic" | "confirm" | "password">("mnemonic");
     const [mnemonic, setMnemonic] = useState<string[]>([]);
     const [confirmedWords, setConfirmedWords] = useState<string[]>([]);
     const [password, setPassword] = useState("");
@@ -51,10 +51,6 @@ export default function CreateWalletScreen() {
     };
 
     const handleContinueFromMnemonic = () => {
-        setStep("warning");
-    };
-
-    const handleContinueFromWarning = () => {
         setStep("confirm");
         setConfirmedWords(Array(mnemonic.length).fill(""));
     };
@@ -168,6 +164,7 @@ export default function CreateWalletScreen() {
                                     styles.copyButton,
                                     {
                                         backgroundColor: colors.buttonSecondary,
+                                        marginTop: -4,
                                     },
                                 ]}
                                 onPress={handleCopyMnemonic}
@@ -191,7 +188,10 @@ export default function CreateWalletScreen() {
                             </Pressable>
 
                             <Pressable
-                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                style={[
+                                    styles.button,
+                                    { backgroundColor: colors.buttonPrimary, marginTop: 0 },
+                                ]}
                                 onPress={handleContinueFromMnemonic}
                             >
                                 <Text
@@ -207,84 +207,7 @@ export default function CreateWalletScreen() {
         );
     }
 
-    // Step 2: Warning
-    if (step === "warning") {
-        return (
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                    <View style={styles.content}>
-                        <View
-                            style={[
-                                styles.header,
-                                {
-                                    backgroundColor: colors.background,
-                                },
-                            ]}
-                        >
-                            <Pressable
-                                onPress={() => setStep("mnemonic")}
-                                style={styles.backButton}
-                            >
-                                <Text style={[styles.backText, { color: colors.text }]}>←</Text>
-                            </Pressable>
-                            <Text style={[styles.headerTitle, { color: colors.text }]}>
-                                Important Warning
-                            </Text>
-                        </View>
-
-                        <View
-                            style={[
-                                styles.card,
-                                {
-                                    backgroundColor: colors.cardBackground,
-                                },
-                            ]}
-                        >
-                            <View
-                                style={[
-                                    styles.warningBox,
-                                    {
-                                        backgroundColor: colors.warningLight,
-                                    },
-                                ]}
-                            >
-                                <FontAwesome
-                                    name="exclamation-triangle"
-                                    size={32}
-                                    color={colors.warning}
-                                />
-                                <Text style={[styles.warningTitle, { color: colors.warning }]}>
-                                    This is Your Only Way to Recover Your Wallet
-                                </Text>
-                                <Text style={[styles.warningText, { color: colors.text }]}>
-                                    If you lose your recovery phrase, you will permanently lose
-                                    access to your wallet and all funds.
-                                </Text>
-                                <Text style={[styles.warningText, { color: colors.text }]}>
-                                    • Store it in a secure location{"\n"}• Never share it with
-                                    anyone{"\n"}• Never store it digitally (screenshots, cloud
-                                    storage, etc.){"\n"}• Write it down on paper and keep it safe
-                                </Text>
-                            </View>
-
-                            <Pressable
-                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
-                                onPress={handleContinueFromWarning}
-                            >
-                                <Text
-                                    style={[styles.buttonText, { color: colors.buttonPrimaryText }]}
-                                >
-                                    I Understand, Continue
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </ScrollView>
-            </View>
-        );
-    }
-
-    // Step 3: Confirm mnemonic
+    // Step 2: Confirm mnemonic
     if (step === "confirm") {
         return (
             <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -298,7 +221,7 @@ export default function CreateWalletScreen() {
                                 },
                             ]}
                         >
-                            <Pressable onPress={() => setStep("warning")} style={styles.backButton}>
+                            <Pressable onPress={() => setStep("mnemonic")} style={styles.backButton}>
                                 <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                             </Pressable>
                             <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -364,7 +287,7 @@ export default function CreateWalletScreen() {
         );
     }
 
-    // Step 4: Set password
+    // Step 3: Set password
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {isCreating && (
@@ -374,7 +297,7 @@ export default function CreateWalletScreen() {
                         {
                             backgroundColor:
                                 colorScheme === "dark"
-                                    ? "rgba(15, 23, 42, 0.95)"
+                                    ? "rgba(18, 18, 18, 0.95)"
                                     : "rgba(255, 255, 255, 0.95)",
                         },
                     ]}
@@ -498,7 +421,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 28,
+        marginBottom: 16,
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 16,
@@ -555,7 +478,7 @@ const styles = StyleSheet.create({
     },
     copyButton: {
         borderRadius: 14,
-        paddingVertical: 14,
+        paddingVertical: 16,
         paddingHorizontal: 20,
         alignItems: "center",
     },
@@ -590,14 +513,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 10,
-        marginBottom: 20,
+        marginBottom: 12,
     },
     mnemonicWord: {
         flexDirection: "row",
         alignItems: "center",
         borderRadius: 12,
         padding: 14,
-        minWidth: "30%",
+        minWidth: "48%",
         gap: 10,
     },
     mnemonicIndex: {

@@ -31,6 +31,7 @@ export default function HomeScreen() {
     const [isLoadingRate, setIsLoadingRate] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const rotateAnim = useRef(new Animated.Value(0)).current;
+    const rotationAnimRef = useRef<Animated.CompositeAnimation | null>(null);
 
     // Load ARS exchange rate and balance on mount
     useEffect(() => {
@@ -101,15 +102,21 @@ export default function HomeScreen() {
 
         setIsRefreshing(true);
 
-        // Start rotation animation
+        // Stop any existing animation
+        if (rotationAnimRef.current) {
+            rotationAnimRef.current.stop();
+        }
+
+        // Reset and start smooth rotation animation
         rotateAnim.setValue(0);
-        Animated.loop(
+        rotationAnimRef.current = Animated.loop(
             Animated.timing(rotateAnim, {
                 toValue: 1,
-                duration: 1000,
+                duration: 800,
                 useNativeDriver: true,
             })
-        ).start();
+        );
+        rotationAnimRef.current.start();
 
         try {
             // Refresh balance
@@ -123,20 +130,24 @@ export default function HomeScreen() {
                 console.warn("Failed to refresh ARS rate:", error);
             }
         } finally {
-            // Stop animation after a short delay
-            setTimeout(() => {
-                Animated.timing(rotateAnim, {
-                    toValue: 0,
-                    duration: 200,
-                    useNativeDriver: true,
-                }).start(() => {
-                    setIsRefreshing(false);
-                });
-            }, 500);
+            // Stop the loop animation smoothly
+            if (rotationAnimRef.current) {
+                rotationAnimRef.current.stop();
+            }
+
+            // Animate to final position with spring effect
+            Animated.spring(rotateAnim, {
+                toValue: 0,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }).start(() => {
+                setIsRefreshing(false);
+            });
         }
     };
 
-    // Interpolate rotation value
+    // Interpolate rotation value with easing
     const rotation = rotateAnim.interpolate({
         inputRange: [0, 1],
         outputRange: ["0deg", "360deg"],
@@ -166,7 +177,10 @@ export default function HomeScreen() {
                         {publicKeyString && (
                             <Pressable
                                 onPress={handleRefresh}
-                                style={styles.refreshButton}
+                                style={({ pressed }) => [
+                                    styles.refreshButton,
+                                    pressed && { opacity: 0.7 },
+                                ]}
                                 disabled={isRefreshing}
                             >
                                 <View style={styles.refreshButtonContent}>
@@ -196,13 +210,11 @@ export default function HomeScreen() {
                                 styles.actionButton,
                                 { backgroundColor: colors.cardBackground },
                             ]}
-                            onPress={() => router.push("/convert")}
+                            onPress={() => router.push("/receive")}
                         >
-                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <FontAwesome name="exchange" size={18} color={colors.textInverse} />
-                            </View>
+                            <FontAwesome name="qrcode" size={26} color={colors.primary} />
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
-                                Convert
+                                Receive
                             </Text>
                         </Pressable>
 
@@ -213,13 +225,7 @@ export default function HomeScreen() {
                             ]}
                             onPress={() => router.push("/send")}
                         >
-                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <FontAwesome
-                                    name="paper-plane"
-                                    size={18}
-                                    color={colors.textInverse}
-                                />
-                            </View>
+                            <FontAwesome name="paper-plane" size={22} color={colors.primary} />
                             <Text style={[styles.actionLabel, { color: colors.text }]}>Send</Text>
                         </Pressable>
 
@@ -228,17 +234,11 @@ export default function HomeScreen() {
                                 styles.actionButton,
                                 { backgroundColor: colors.cardBackground },
                             ]}
-                            onPress={() => router.push("/receive")}
+                            onPress={() => router.push("/convert")}
                         >
-                            <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <FontAwesome
-                                    name="arrow-down"
-                                    size={18}
-                                    color={colors.textInverse}
-                                />
-                            </View>
+                            <FontAwesome name="exchange" size={22} color={colors.primary} />
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
-                                Receive
+                                Convert
                             </Text>
                         </Pressable>
                     </View>
@@ -371,15 +371,16 @@ const styles = StyleSheet.create({
     },
     mainContent: {
         padding: 20,
-        gap: 28,
+        gap: 20,
     },
     balanceCard: {
-        padding: 28,
+        paddingVertical: 24,
+        paddingHorizontal: 28,
         borderRadius: 20,
     },
     balanceLabel: {
         fontSize: 15,
-        marginBottom: 12,
+        marginBottom: 8,
         fontWeight: "500",
     },
     balanceAmount: {
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
         letterSpacing: -1,
     },
     refreshButton: {
-        marginTop: 12,
+        marginTop: 6,
         padding: 10,
         alignSelf: "flex-start",
     },
@@ -399,6 +400,7 @@ const styles = StyleSheet.create({
     actionsGrid: {
         flexDirection: "row",
         gap: 14,
+        marginTop: -4,
     },
     actionButton: {
         flex: 1,
@@ -406,14 +408,6 @@ const styles = StyleSheet.create({
         gap: 10,
         padding: 20,
         borderRadius: 18,
-    },
-    actionIcon: {
-        borderRadius: 999,
-        padding: 14,
-        width: 52,
-        height: 52,
-        alignItems: "center",
-        justifyContent: "center",
     },
     actionIconText: {
         fontSize: 18,
@@ -425,9 +419,11 @@ const styles = StyleSheet.create({
     },
     tokensSection: {
         gap: 16,
+        marginBottom: -4,
     },
     fiatSection: {
         gap: 16,
+        marginBottom: -4,
     },
     sectionTitle: {
         fontSize: 20,
