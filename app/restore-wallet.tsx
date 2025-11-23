@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -17,12 +17,24 @@ import { validateMnemonic } from "@/utils/wallet";
 
 export default function RestoreWalletScreen() {
     const router = useRouter();
-    const { restoreWallet } = useWallet();
+    const { restoreWallet, keypair } = useWallet();
     const [step, setStep] = useState<"mnemonic" | "password">("mnemonic");
     const [mnemonic, setMnemonic] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isRestoring, setIsRestoring] = useState(false);
+
+    // Navigate to home when wallet is successfully restored
+    useEffect(() => {
+        if (keypair && isRestoring) {
+            // Wallet was successfully restored, navigate to home
+            // Use a small delay to ensure state is fully updated
+            const timer = setTimeout(() => {
+                router.replace("/(tabs)");
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [keypair, isRestoring, router]);
 
     const handleMnemonicSubmit = () => {
         const trimmedMnemonic = mnemonic.trim();
@@ -55,18 +67,14 @@ export default function RestoreWalletScreen() {
         // Set loading state immediately - this triggers a re-render
         setIsRestoring(true);
 
-        // Yield to React to allow it to render the loading state before heavy computation
-        // Use a small delay to ensure React processes the state update and renders first
-        setTimeout(async () => {
-            try {
-                await restoreWallet(mnemonic.trim(), password);
-                // Navigate immediately without showing alert to speed up flow
-                router.replace("/(tabs)");
-            } catch (error: any) {
-                setIsRestoring(false);
-                Alert.alert("Error", error.message || "Failed to restore wallet");
-            }
-        }, 50); // Small delay to ensure UI renders loading state
+        try {
+            await restoreWallet(mnemonic.trim(), password);
+            // Navigation will happen automatically via useEffect when keypair is set
+        } catch (error: any) {
+            setIsRestoring(false);
+            console.error("Restore wallet error:", error);
+            Alert.alert("Error", error.message || "Failed to restore wallet");
+        }
     };
 
     if (step === "mnemonic") {

@@ -18,6 +18,8 @@ export default function HomeScreen() {
         return bal.toFixed(4);
     };
 
+
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -96,7 +98,7 @@ export default function HomeScreen() {
                                 </View>
                                 <View>
                                     <Text style={styles.tokenName}>USDC</Text>
-                                    <Text style={styles.tokenSubtext}>USD Coin</Text>
+                                    <Text style={styles.tokenSubtext}>USD Coin • Ethereum</Text>
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
@@ -112,6 +114,38 @@ export default function HomeScreen() {
                                         </Text>
                                     </>
                                 )}
+                            </View>
+                        </View>
+
+                        <View style={styles.tokenCard}>
+                            <View style={styles.tokenInfo}>
+                                <View style={[styles.tokenIconContainer, { backgroundColor: '#DCFCE7' }]}>
+                                    <Text style={[styles.tokenIconText, { color: '#22C55E' }]}>T</Text>
+                                </View>
+                                <View>
+                                    <Text style={styles.tokenName}>USDT</Text>
+                                    <Text style={styles.tokenSubtext}>Tether • Polygon</Text>
+                                </View>
+                            </View>
+                            <View style={styles.tokenBalance}>
+                                <Text style={styles.tokenAmount}>$700</Text>
+                                <Text style={styles.tokenSubtext}>700 USDT</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.tokenCard}>
+                            <View style={styles.tokenInfo}>
+                                <View style={[styles.tokenIconContainer, { backgroundColor: '#FEF3C7' }]}>
+                                    <Text style={[styles.tokenIconText, { color: '#D97706' }]}>₱</Text>
+                                </View>
+                                <View>
+                                    <Text style={styles.tokenName}>ARS</Text>
+                                    <Text style={styles.tokenSubtext}>Argentine Peso</Text>
+                                </View>
+                            </View>
+                            <View style={styles.tokenBalance}>
+                                <Text style={styles.tokenAmount}>₱50,000</Text>
+                                <Text style={styles.tokenSubtext}>50,000 ARS</Text>
                             </View>
                         </View>
                     </View>

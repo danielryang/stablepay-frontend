@@ -1,6 +1,7 @@
 // Ensure polyfills are loaded before crypto imports
 import { hmac } from "@noble/hashes/hmac";
 import { sha512 } from "@noble/hashes/sha2";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as bip39 from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
@@ -17,6 +18,8 @@ import { Buffer } from "buffer";
 import CryptoJS from "crypto-js";
 import * as nacl from "tweetnacl";
 
+import { Platform } from "react-native";
+
 import * as SecureStore from "expo-secure-store";
 
 import "../polyfills";
@@ -26,6 +29,34 @@ const SOLANA_DERIVATION_PATH = "m/44'/501'/0'/0'";
 const WALLET_STORAGE_KEY = "encrypted_wallet";
 const WALLET_SECRET_KEY = "encrypted_secret_key";
 const WALLET_PASSWORD_KEY = "wallet_password_hash";
+
+// Platform detection
+const isWeb = Platform.OS === "web";
+
+// Storage wrapper that uses SecureStore on native and AsyncStorage on web
+const storage = {
+    async setItem(key: string, value: string): Promise<void> {
+        if (isWeb) {
+            await AsyncStorage.setItem(key, value);
+        } else {
+            await SecureStore.setItemAsync(key, value);
+        }
+    },
+    async getItem(key: string): Promise<string | null> {
+        if (isWeb) {
+            return await AsyncStorage.getItem(key);
+        } else {
+            return await SecureStore.getItemAsync(key);
+        }
+    },
+    async deleteItem(key: string): Promise<void> {
+        if (isWeb) {
+            await AsyncStorage.removeItem(key);
+        } else {
+            await SecureStore.deleteItemAsync(key);
+        }
+    },
+};
 
 // Connection to Solana devnet
 export const SOLANA_RPC_URL = "https://api.devnet.solana.com";
@@ -188,9 +219,9 @@ export async function storeEncryptedWallet(
 
         // Store all encrypted data in parallel
         await Promise.all([
-            SecureStore.setItemAsync(WALLET_SECRET_KEY, encryptedSecretKey),
-            SecureStore.setItemAsync(WALLET_STORAGE_KEY, encryptedMnemonic),
-            SecureStore.setItemAsync(WALLET_PASSWORD_KEY, passwordHash),
+            storage.setItem(WALLET_SECRET_KEY, encryptedSecretKey),
+            storage.setItem(WALLET_STORAGE_KEY, encryptedMnemonic),
+            storage.setItem(WALLET_PASSWORD_KEY, passwordHash),
         ]);
     } catch (error) {
         throw new Error(`Failed to store wallet: ${error}`);
@@ -204,11 +235,11 @@ export async function storeEncryptedWallet(
 export async function loadEncryptedWallet(password: string): Promise<Keypair> {
     try {
         // Try to load encrypted secret key first (preferred method)
-        const encryptedSecretKey = await SecureStore.getItemAsync(WALLET_SECRET_KEY);
+        const encryptedSecretKey = await storage.getItem(WALLET_SECRET_KEY);
 
         if (encryptedSecretKey) {
             // Verify password
-            const storedPasswordHash = await SecureStore.getItemAsync(WALLET_PASSWORD_KEY);
+            const storedPasswordHash = await storage.getItem(WALLET_PASSWORD_KEY);
             const passwordHash = CryptoJS.SHA256(password).toString();
 
             if (storedPasswordHash !== passwordHash) {
@@ -224,14 +255,14 @@ export async function loadEncryptedWallet(password: string): Promise<Keypair> {
         }
 
         // Fallback: if no encrypted secret key, try to load from mnemonic (legacy support)
-        const encryptedMnemonic = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
+        const encryptedMnemonic = await storage.getItem(WALLET_STORAGE_KEY);
 
         if (!encryptedMnemonic) {
             throw new Error("No wallet found");
         }
 
         // Verify password
-        const storedPasswordHash = await SecureStore.getItemAsync(WALLET_PASSWORD_KEY);
+        const storedPasswordHash = await storage.getItem(WALLET_PASSWORD_KEY);
         const passwordHash = CryptoJS.SHA256(password).toString();
 
         if (storedPasswordHash !== passwordHash) {
@@ -255,8 +286,8 @@ export async function loadEncryptedWallet(password: string): Promise<Keypair> {
 export async function walletExists(): Promise<boolean> {
     try {
         // Check for encrypted secret key (preferred) or encrypted mnemonic (legacy)
-        const encryptedSecretKey = await SecureStore.getItemAsync(WALLET_SECRET_KEY);
-        const encryptedWallet = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
+        const encryptedSecretKey = await storage.getItem(WALLET_SECRET_KEY);
+        const encryptedWallet = await storage.getItem(WALLET_STORAGE_KEY);
         return encryptedSecretKey !== null || encryptedWallet !== null;
     } catch {
         return false;
@@ -268,9 +299,9 @@ export async function walletExists(): Promise<boolean> {
  */
 export async function clearWallet(): Promise<void> {
     try {
-        await SecureStore.deleteItemAsync(WALLET_STORAGE_KEY);
-        await SecureStore.deleteItemAsync(WALLET_SECRET_KEY);
-        await SecureStore.deleteItemAsync(WALLET_PASSWORD_KEY);
+        await storage.deleteItem(WALLET_STORAGE_KEY);
+        await storage.deleteItem(WALLET_SECRET_KEY);
+        await storage.deleteItem(WALLET_PASSWORD_KEY);
     } catch (error) {
         throw new Error(`Failed to clear wallet: ${error}`);
     }

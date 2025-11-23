@@ -6,4 +6,14 @@
     * {
         @apply border-border;
     }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    @supports (font-variation-settings: normal) {
+        body {
+            font-family: 'Inter var', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    }
 }
