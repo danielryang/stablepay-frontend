@@ -58,34 +58,6 @@ const storage = {
     },
 };
 
-// Platform detection
-const isWeb = Platform.OS === 'web';
-
-// Storage wrapper that uses SecureStore on native and AsyncStorage on web
-const storage = {
-    async setItem(key: string, value: string): Promise<void> {
-        if (isWeb) {
-            await AsyncStorage.setItem(key, value);
-        } else {
-            await SecureStore.setItemAsync(key, value);
-        }
-    },
-    async getItem(key: string): Promise<string | null> {
-        if (isWeb) {
-            return await AsyncStorage.getItem(key);
-        } else {
-            return await SecureStore.getItemAsync(key);
-        }
-    },
-    async deleteItem(key: string): Promise<void> {
-        if (isWeb) {
-            await AsyncStorage.removeItem(key);
-        } else {
-            await SecureStore.deleteItemAsync(key);
-        }
-    }
-};
-
 // Connection to Solana devnet
 export const SOLANA_RPC_URL = "https://api.devnet.solana.com";
 export const connection = new Connection(SOLANA_RPC_URL, "confirmed");

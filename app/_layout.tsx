@@ -27,7 +27,6 @@ import { OptimizerSettingsProvider } from "@/contexts/OptimizerSettingsContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
 import { WalletProvider } from "@/contexts/WalletContext";
 
-import "../global.css";
 import "../polyfills";
 
 export {

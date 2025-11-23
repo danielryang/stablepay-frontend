@@ -1,14 +1,25 @@
-import { Platform } from "react-native";
-import { Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
 
 export default function ModalScreen() {
     return (
-        <View className="flex-1 items-center justify-center">
-            <Text className="text-xl font-bold">Modal</Text>
+        <View style={styles.container}>
+            <Text style={styles.text}>Modal</Text>
             {/* Use a light status bar on iOS to account for the black space above the modal */}
             <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+});
