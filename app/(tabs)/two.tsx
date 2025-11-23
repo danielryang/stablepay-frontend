@@ -21,7 +21,7 @@ export default function ActivityScreen() {
                     <View style={styles.sectionHeader}>
                         <View>
                             <Text style={[styles.title, { color: colors.text }]}>
-                                Recent Transactions
+                                Recent Activity
                             </Text>
                             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                                 Your Solana transaction history
@@ -44,7 +44,7 @@ export default function ActivityScreen() {
                             </Text>
                         </View>
                     ) : transactions.length === 0 ? (
-                        <View style={styles.emptyContainer}>
+                        <View style={[styles.emptyContainer, { backgroundColor: colors.cardBackground }]}>
                             <Text style={[styles.emptyText, { color: colors.text }]}>
                                 No transactions yet
                             </Text>
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     title: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "700",
         letterSpacing: -0.3,
         marginBottom: 4,
@@ -200,7 +200,10 @@ const styles = StyleSheet.create({
     emptyContainer: {
         alignItems: "center",
         justifyContent: "center",
-        padding: 40,
+        paddingTop: 32,
+        paddingBottom: 40,
+        paddingHorizontal: 40,
+        borderRadius: 18,
     },
     emptyText: {
         fontSize: 16,

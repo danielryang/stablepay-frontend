@@ -157,7 +157,7 @@ export default function SettingsScreen() {
                                             { color: colors.textSecondary },
                                         ]}
                                     >
-                                        English (US)
+                                        Argentina
                                     </Text>
                                 </View>
                             </Pressable>
@@ -229,7 +229,7 @@ export default function SettingsScreen() {
                                             { color: colors.textSecondary },
                                         ]}
                                     >
-                                        Minimum spending threshold (default: $800)
+                                        Minimum spending threshold
                                     </Text>
                                 </View>
                                 <View
@@ -273,7 +273,7 @@ export default function SettingsScreen() {
                                             { color: colors.textSecondary },
                                         ]}
                                     >
-                                        % of balance spent monthly (default: 15%)
+                                        % of balance spent monthly
                                     </Text>
                                 </View>
                                 <View
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     },
     sectionHeader: {
         padding: 16,
-        paddingBottom: 12,
+        paddingBottom: 8,
     },
     sectionHeaderText: {
         fontSize: 16,

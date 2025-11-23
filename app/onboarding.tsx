@@ -21,7 +21,7 @@ export default function OnboardingScreen() {
                     />
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
                     <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                        Your Solana wallet
+                        Manage your stablecoin assets
                     </Text>
                 </View>
 

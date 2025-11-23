@@ -14,11 +14,13 @@ import {
 import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
-import { convertCurrency } from "@/utils/currencyApi";
+import { getStoredARSExchangeRate } from "@/utils/arsExchangeRate";
+import { fetchFiatExchangeRate } from "@/utils/realDataFetcher";
 
 // Complete auth session on web
 if (Platform.OS === "web") {
@@ -33,6 +35,7 @@ export default function SendScreen() {
     const [sendToPayPal, setSendToPayPal] = useState(false);
     const [payPalConnected, setPayPalConnected] = useState(false);
     const [payPalEmail, setPayPalEmail] = useState("");
+    const [payPalUsername, setPayPalUsername] = useState("");
     const [payPalConnecting, setPayPalConnecting] = useState(false);
     const [amount, setAmount] = useState("40");
     const [fromCurrency, setFromCurrency] = useState("USDC");
@@ -201,9 +204,44 @@ export default function SendScreen() {
             setConversionLoading(true);
             setConversionError(null);
             try {
-                // Call API with correct direction: from_ccy = fromCurrency, to_ccy = toCurrency
-                const result = await convertCurrency(fromCurrency, toCurrency, amountNum);
-                setConvertedAmount(result.converted_amount);
+                // Handle conversions locally using stored ARS exchange rate
+                if (fromCurrency === "USDC" && toCurrency === "ARS") {
+                    // USDC is pegged to USD, so use ARS rate
+                    let arsRate = await getStoredARSExchangeRate();
+                    if (arsRate === null) {
+                        // Try to fetch fresh rate if not available
+                        try {
+                            const exchangeRate = await fetchFiatExchangeRate("ARS");
+                            arsRate = exchangeRate.usdRate;
+                        } catch (error) {
+                            console.warn("Failed to fetch ARS rate, using fallback:", error);
+                            arsRate = 1100; // Fallback rate
+                        }
+                    }
+                    setConvertedAmount(amountNum * arsRate);
+                } else if (fromCurrency === "ARS" && toCurrency === "USDC") {
+                    // Convert ARS to USDC (which is pegged to USD)
+                    let arsRate = await getStoredARSExchangeRate();
+                    if (arsRate === null) {
+                        // Try to fetch fresh rate if not available
+                        try {
+                            const exchangeRate = await fetchFiatExchangeRate("ARS");
+                            arsRate = exchangeRate.usdRate;
+                        } catch (error) {
+                            console.warn("Failed to fetch ARS rate, using fallback:", error);
+                            arsRate = 1100; // Fallback rate
+                        }
+                    }
+                    setConvertedAmount(amountNum / arsRate);
+                } else if (fromCurrency === toCurrency) {
+                    // Same currency, no conversion needed
+                    setConvertedAmount(amountNum);
+                } else {
+                    // For other currency pairs, try to use ARS as intermediary
+                    // USDC -> ARS -> other currency (if needed)
+                    // For now, if currencies are the same or unsupported, use 1:1
+                    setConvertedAmount(amountNum);
+                }
             } catch (error: any) {
                 console.error("Failed to convert currency:", error);
                 setConversionError(error.message || "Failed to convert currency");
@@ -213,8 +251,8 @@ export default function SendScreen() {
             }
         };
 
-        // Debounce the API call to avoid too many requests
-        const timeoutId = setTimeout(fetchConversion, 500);
+        // Debounce the conversion to avoid too many calculations
+        const timeoutId = setTimeout(fetchConversion, 300);
         return () => clearTimeout(timeoutId);
     }, [amount, fromCurrency, toCurrency]);
 
@@ -241,8 +279,8 @@ export default function SendScreen() {
     };
 
     const handleSend = () => {
-        if (sendToPayPal && !payPalConnected) {
-            Alert.alert("Error", "Please connect your PayPal account first");
+        if (sendToPayPal && !payPalUsername.trim()) {
+            Alert.alert("Error", "Please enter a PayPal username");
             return;
         }
 
@@ -267,7 +305,7 @@ export default function SendScreen() {
         const finalTotal = convertedAmount + transactionFee;
 
         const toAddressDisplay = sendToPayPal
-            ? `PayPal: ${payPalEmail}`
+            ? `PayPal: ${payPalUsername}`
             : shortenAddress(toAddress);
 
         addTransaction({
@@ -294,7 +332,7 @@ export default function SendScreen() {
 
         // Show success alert after navigation
         const successMessage = sendToPayPal
-            ? `Payment sent to PayPal (${payPalEmail}) successfully!`
+            ? `Payment sent to PayPal (${payPalUsername}) successfully!`
             : "Transaction sent successfully!";
 
         setTimeout(() => {
@@ -324,167 +362,159 @@ export default function SendScreen() {
                             { backgroundColor: colors.cardBackground },
                         ]}
                     >
-                        <View style={styles.switchSection}>
-                            <View style={styles.switchRow}>
-                                <View style={styles.switchLabelContainer}>
-                                    <Text style={[styles.switchLabel, { color: colors.text }]}>Send to Address</Text>
-                                    <Text style={[styles.switchSubtext, { color: colors.textSecondary }]}>Crypto wallet address</Text>
-                                </View>
-                                <Switch
-                                    value={sendToPayPal}
-                                    onValueChange={setSendToPayPal}
-                                    trackColor={{ false: colors.border, true: colors.primary }}
-                                    thumbColor={colors.textInverse}
-                                />
-                                <View style={styles.switchLabelContainer}>
-                                    <Text style={[styles.switchLabel, { color: colors.text }]}>Send to PayPal</Text>
-                                    <Text style={[styles.switchSubtext, { color: colors.textSecondary }]}>Fiat payment</Text>
-                                </View>
-                            </View>
+                        {/* Tab System */}
+                        <View style={styles.tabContainer}>
+                            <Pressable
+                                style={[
+                                    styles.tab,
+                                    !sendToPayPal && { backgroundColor: colors.primary, borderColor: colors.primary },
+                                    sendToPayPal && { backgroundColor: colors.cardBackgroundSecondary, borderColor: colors.border },
+                                ]}
+                                onPress={() => setSendToPayPal(false)}
+                            >
+                                <FontAwesome name="wallet" size={16} color={!sendToPayPal ? colors.textInverse : colors.textSecondary} />
+                                <Text style={[styles.tabText, { color: !sendToPayPal ? colors.textInverse : colors.textSecondary }]}>
+                                    Address
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                style={[
+                                    styles.tab,
+                                    sendToPayPal && { backgroundColor: colors.primary, borderColor: colors.primary },
+                                    !sendToPayPal && { backgroundColor: colors.cardBackgroundSecondary, borderColor: colors.border },
+                                ]}
+                                onPress={() => setSendToPayPal(true)}
+                            >
+                                <FontAwesome name="paypal" size={16} color={sendToPayPal ? colors.textInverse : colors.textSecondary} />
+                                <Text style={[styles.tabText, { color: sendToPayPal ? colors.textInverse : colors.textSecondary }]}>
+                                    PayPal
+                                </Text>
+                            </Pressable>
                         </View>
-
-                        <View style={styles.divider} />
 
                         <View style={styles.addressSection}>
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, { color: colors.text }]}>From Wallet Address</Text>
-                                <TextInput
-                                    value={fromAddress}
-                                    onChangeText={setFromAddress}
-                                    style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
-                                    placeholderTextColor={colors.inputPlaceholder}
-                                />
-                            </View>
-                            {!sendToPayPal ? (
-                                <View style={styles.inputGroup}>
-                                    <Text style={[styles.label, { color: colors.text }]}>To Wallet Address</Text>
+                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
                                     <TextInput
-                                        value={toAddress}
-                                        onChangeText={setToAddress}
-                                        style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                                        value={fromAddress}
+                                        onChangeText={setFromAddress}
+                                        style={[styles.input, { color: colors.text }]}
                                         placeholderTextColor={colors.inputPlaceholder}
                                     />
                                 </View>
-                            ) : (
-                                <View style={styles.paypalSection}>
-                                    {payPalConnecting ? (
-                                        <View style={styles.connectingSection}>
-                                            <Text style={[styles.connectingTitle, { color: colors.text }]}>
-                                                Connecting to PayPal...
-                                            </Text>
-                                            <Text style={[styles.connectingSubtext, { color: colors.textSecondary }]}>
-                                                Please complete the login in your browser, then
-                                                return to this app.
-                                            </Text>
-                                            <View style={styles.loadingIndicator}>
-                                                <Text style={styles.loadingText}>⏳</Text>
-                                            </View>
-                                        </View>
-                                    ) : !payPalConnected ? (
-                                        <>
-                                            <Text style={[styles.paypalTitle, { color: colors.text }]}>
-                                                Connect PayPal Account
-                                            </Text>
-                                            <Text style={[styles.paypalDescription, { color: colors.textSecondary }]}>
-                                                You'll be redirected to PayPal to securely log in
-                                                and authorize the connection.
-                                            </Text>
-                                            <Pressable
-                                                onPress={handlePayPalLogin}
-                                                style={[styles.connectButton, { backgroundColor: colors.buttonPrimary }]}
-                                            >
-                                                <Text style={[styles.connectButtonText, { color: colors.buttonPrimaryText }]}>
-                                                    🔵 Connect with PayPal
-                                                </Text>
-                                            </Pressable>
-                                        </>
+                            </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, { color: colors.text }]}>
+                                    {sendToPayPal ? "PayPal Username" : "To Wallet Address"}
+                                </Text>
+                                <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground }]}>
+                                    {sendToPayPal ? (
+                                        <TextInput
+                                            value={payPalUsername}
+                                            onChangeText={setPayPalUsername}
+                                            style={[styles.input, { color: colors.text }]}
+                                            placeholder="Enter PayPal username"
+                                            placeholderTextColor={colors.inputPlaceholder}
+                                        />
                                     ) : (
-                                        <View style={[styles.connectedSection, { backgroundColor: colors.backgroundTertiary }]}>
-                                            <View style={styles.connectedHeader}>
-                                                <Text style={[styles.connectedTitle, { color: colors.text }]}>
-                                                    PayPal Connected
-                                                </Text>
-                                                <Pressable onPress={handlePayPalDisconnect}>
-                                                    <Text style={[styles.disconnectText, { color: colors.primary }]}>
-                                                        Disconnect
-                                                    </Text>
-                                                </Pressable>
-                                            </View>
-                                            <View style={styles.connectedInfo}>
-                                                <Text style={[styles.connectedEmail, { color: colors.text }]}>
-                                                    {payPalEmail}
-                                                </Text>
-                                                <Text style={[styles.connectedStatus, { color: colors.success }]}>
-                                                    ✓ Verified Account
-                                                </Text>
-                                            </View>
-                                        </View>
+                                        <TextInput
+                                            value={toAddress}
+                                            onChangeText={setToAddress}
+                                            style={[styles.input, { color: colors.text }]}
+                                            placeholderTextColor={colors.inputPlaceholder}
+                                        />
                                     )}
                                 </View>
-                            )}
+                            </View>
                         </View>
 
                         <View style={styles.divider} />
 
                         <View style={styles.amountSection}>
                             <Text style={[styles.amountLabel, { color: colors.textSecondary }]}>Amount</Text>
-                            <View style={styles.conversionContainer}>
-                                <TextInput
-                                    value={amount}
-                                    onChangeText={setAmount}
-                                    keyboardType="numeric"
-                                    style={[styles.amountInput, { color: colors.text }]}
-                                    placeholderTextColor={colors.inputPlaceholder}
-                                />
-                                <TextInput
-                                    value={fromCurrency}
-                                    onChangeText={setFromCurrency}
-                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
-                                    placeholderTextColor={colors.inputPlaceholder}
-                                />
-                                <Text style={[styles.equals, { color: colors.textSecondary }]}>=</Text>
-                                {conversionLoading ? (
-                                    <Text style={[styles.convertedValue, { color: colors.textSecondary }]}>
-                                        Loading...
-                                    </Text>
-                                ) : conversionError ? (
-                                    <Text style={[styles.convertedValue, { color: colors.error }]}>
-                                        Error
-                                    </Text>
-                                ) : (
-                                    <Text style={[styles.convertedValue, { color: colors.text }]}>
-                                        {convertedAmount.toLocaleString("en-US", {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
-                                    </Text>
-                                )}
-                                <TextInput
-                                    value={toCurrency}
-                                    onChangeText={setToCurrency}
-                                    style={[styles.currencyInput, { color: colors.textSecondary }]}
-                                    placeholderTextColor={colors.inputPlaceholder}
-                                />
+                            <View style={[styles.conversionCard, { backgroundColor: colors.backgroundTertiary }]}>
+                                <View style={styles.conversionRow}>
+                                    <View style={styles.currencyGroup}>
+                                        <TextInput
+                                            value={amount}
+                                            onChangeText={setAmount}
+                                            keyboardType="numeric"
+                                            style={[styles.amountInput, { color: colors.text }]}
+                                            placeholderTextColor={colors.inputPlaceholder}
+                                        />
+                                        <View style={[styles.currencyBadge, { backgroundColor: colors.primaryLight }]}>
+                                            <TextInput
+                                                value={fromCurrency}
+                                                onChangeText={setFromCurrency}
+                                                style={[styles.currencyInput, { color: colors.primary }]}
+                                                placeholderTextColor={colors.inputPlaceholder}
+                                            />
+                                        </View>
+                                    </View>
+                                    
+                                    <View style={styles.arrowContainer}>
+                                        <FontAwesome name="arrow-right" size={16} color={colors.primary} />
+                                    </View>
+                                    
+                                    <View style={styles.currencyGroup}>
+                                        {conversionLoading ? (
+                                            <Text style={[styles.convertedValue, { color: colors.textSecondary }]}>
+                                                Loading...
+                                            </Text>
+                                        ) : conversionError ? (
+                                            <Text style={[styles.convertedValue, { color: colors.error }]}>
+                                                Error
+                                            </Text>
+                                        ) : (
+                                            <Text style={[styles.convertedValue, { color: colors.text }]}>
+                                                {convertedAmount.toLocaleString("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                            </Text>
+                                        )}
+                                        <View style={[styles.currencyBadge, { backgroundColor: colors.primaryLight }]}>
+                                            <TextInput
+                                                value={toCurrency}
+                                                onChangeText={setToCurrency}
+                                                style={[styles.currencyInput, { color: colors.primary }]}
+                                                placeholderTextColor={colors.inputPlaceholder}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
                             </View>
                         </View>
 
                         <View style={styles.divider} />
 
                         <View style={styles.feesSection}>
-                            <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Total Fees Saved:</Text>
-                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
-                                    8.50 {toCurrency}
-                                </Text>
+                            <View style={[styles.feeCard, { backgroundColor: colors.successLight }]}>
+                                <View style={styles.feeRow}>
+                                    <View style={styles.feeLabelContainer}>
+                                        <FontAwesome name="check-circle" size={14} color={colors.success} />
+                                        <Text style={[styles.feeLabel, { color: colors.text }]}>Total Fees Saved</Text>
+                                    </View>
+                                    <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
+                                        8.50 {toCurrency}
+                                    </Text>
+                                </View>
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
+                                <View style={styles.feeLabelContainer}>
+                                    <FontAwesome name="tag" size={12} color={colors.textSecondary} />
+                                    <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee</Text>
+                                </View>
                                 <Text style={[styles.feeValue, { color: colors.text }]}>
                                     2.00 {toCurrency}
                                 </Text>
                             </View>
                             <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed:</Text>
+                                <View style={styles.feeLabelContainer}>
+                                    <FontAwesome name="bolt" size={12} color={colors.textSecondary} />
+                                    <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed</Text>
+                                </View>
                                 <Text style={[styles.feeValue, { color: colors.text }]}>2s</Text>
                             </View>
                         </View>
@@ -509,9 +539,7 @@ export default function SendScreen() {
                             style={[
                                 styles.sendButton,
                                 { backgroundColor: colors.buttonPrimary },
-                                sendToPayPal && !payPalConnected && styles.sendButtonDisabled,
                             ]}
-                            disabled={sendToPayPal && !payPalConnected}
                         >
                             <Text style={[styles.sendButtonText, { color: colors.buttonPrimaryText }]}>
                                 Send
@@ -553,12 +581,32 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     card: {
-        padding: 28,
+        padding: 20,
         borderRadius: 20,
-        gap: 28,
+        gap: 16,
+    },
+    tabContainer: {
+        flexDirection: "row",
+        gap: 8,
+        marginBottom: 4,
+    },
+    tab: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: "600",
     },
     addressSection: {
-        gap: 16,
+        gap: 14,
     },
     inputGroup: {
         gap: 10,
@@ -567,10 +615,14 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: "600",
     },
-    input: {
+    inputContainer: {
         borderRadius: 14,
-        padding: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 4,
+    },
+    input: {
         fontSize: 15,
+        paddingVertical: 12,
     },
     inputRight: {
         textAlign: "right",
@@ -584,72 +636,89 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     amountLabel: {
-        fontSize: 14,
+        fontSize: 13,
+        fontWeight: "500",
     },
-    conversionContainer: {
+    conversionCard: {
+        width: "100%",
+        padding: 18,
+        borderRadius: 16,
+    },
+    conversionRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        ...(Platform.OS === "web" ? {} : { gap: 2 }),
-        flexWrap: "wrap",
-        paddingHorizontal: 8,
+        justifyContent: "space-between",
+        gap: 12,
+    },
+    currencyGroup: {
+        flex: 1,
+        alignItems: "center",
+        gap: 8,
     },
     amountInput: {
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: "bold",
         textAlign: "center",
         paddingHorizontal: 0,
+        minWidth: 70,
         ...(Platform.OS === "web"
             ? {
-                  marginRight: 2,
                   padding: 0,
                   borderWidth: 0,
                   outline: "none",
-                  width: "auto",
               }
             : {}),
     },
+    currencyBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
+        minWidth: 60,
+    },
     currencyInput: {
-        fontSize: 18,
+        fontSize: 13,
+        fontWeight: "600",
         textAlign: "center",
         ...(Platform.OS === "web"
             ? {
-                  marginRight: 2,
                   padding: 0,
                   borderWidth: 0,
                   outline: "none",
-                  width: "auto",
               }
             : {}),
     },
     convertedValue: {
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: "bold",
-        ...(Platform.OS === "web"
-            ? {
-                  marginLeft: 2,
-                  marginRight: 2,
-              }
-            : {}),
+        textAlign: "center",
+        minWidth: 90,
+    },
+    arrowContainer: {
+        padding: 6,
     },
     equals: {
         fontSize: 18,
-        ...(Platform.OS === "web"
-            ? {
-                  marginLeft: 2,
-                  marginRight: 2,
-              }
-            : {}),
     },
     feesSection: {
-        gap: 12,
+        gap: 10,
+    },
+    feeCard: {
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 2,
     },
     feeRow: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
+    },
+    feeLabelContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
     feeLabel: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: "500",
     },
     feeValue: {
@@ -694,99 +763,5 @@ const styles = StyleSheet.create({
     },
     sendButtonDisabled: {
         opacity: 0.6,
-    },
-    switchSection: {
-        marginBottom: 8,
-    },
-    switchRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-    },
-    switchLabelContainer: {
-        flex: 1,
-        alignItems: "center",
-    },
-    switchLabel: {
-        fontSize: 14,
-        fontWeight: "500",
-        marginBottom: 2,
-    },
-    switchSubtext: {
-        fontSize: 12,
-    },
-    paypalSection: {
-        gap: 16,
-    },
-    paypalTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    paypalDescription: {
-        fontSize: 14,
-        marginBottom: 16,
-        lineHeight: 20,
-    },
-    connectButton: {
-        borderRadius: 8,
-        padding: 16,
-        alignItems: "center",
-        marginTop: 8,
-    },
-    connectButtonText: {
-        fontSize: 16,
-        fontWeight: "500",
-    },
-    connectingSection: {
-        padding: 24,
-        alignItems: "center",
-        gap: 12,
-    },
-    connectingTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-    },
-    connectingSubtext: {
-        fontSize: 14,
-        color: "#737A82",
-        textAlign: "center",
-        lineHeight: 20,
-    },
-    loadingIndicator: {
-        marginTop: 16,
-    },
-    loadingText: {
-        fontSize: 32,
-    },
-    connectedSection: {
-        padding: 18,
-        borderRadius: 14,
-        gap: 14,
-    },
-    connectedHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    connectedTitle: {
-        fontSize: 17,
-        fontWeight: "600",
-    },
-    disconnectText: {
-        fontSize: 15,
-        fontWeight: "600",
-    },
-    connectedInfo: {
-        gap: 6,
-    },
-    connectedEmail: {
-        fontSize: 15,
-        fontWeight: "600",
-    },
-    connectedStatus: {
-        fontSize: 13,
-        fontWeight: "500",
     },
 });

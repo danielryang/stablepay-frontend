@@ -29,6 +29,7 @@ import {
 } from "@react-navigation/native";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { OptimizerSettingsProvider } from "@/contexts/OptimizerSettingsContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
@@ -88,6 +89,7 @@ function RootLayoutNav() {
 
 function RootLayoutNavInner() {
     const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? "light"];
 
     return (
         <WalletProvider>
@@ -100,7 +102,7 @@ function RootLayoutNavInner() {
                             style={{
                                 flex: 1,
                                 paddingTop: 30,
-                                backgroundColor: colorScheme === "dark" ? "#0F172A" : "#FFFFFF",
+                                backgroundColor: colors.background,
                             }}
                         >
                             <Stack>

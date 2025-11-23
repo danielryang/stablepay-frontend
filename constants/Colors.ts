@@ -1,20 +1,20 @@
 // Comprehensive color constants for light and dark themes
-const tintColorLight = "#0891D1";
-const tintColorDark = "#60A5FA";
+const tintColorLight = "#15803D";
+const tintColorDark = "#16A34A";
 
 export const Colors = {
     light: {
         // Primary colors
         tint: tintColorLight,
-        primary: "#0891D1",
-        primaryDark: "#075985",
-        primaryLight: "#E0F2FE",
+        primary: "#15803D",
+        primaryDark: "#166534",
+        primaryLight: "#DCFCE7",
 
         // Background colors
         background: "#FFFFFF",
         backgroundSecondary: "#FAFAFA",
         backgroundTertiary: "#F3F4F6",
-        cardBackground: "#F9FAFB",
+        cardBackground: "#F7F8FA",
         cardBackgroundSecondary: "#F3F4F6",
 
         // Text colors
@@ -35,11 +35,11 @@ export const Colors = {
         errorLight: "#FEE2E2",
         warning: "#F59E0B",
         warningLight: "#FEF3C7",
-        info: "#0891D1",
-        infoLight: "#E0F2FE",
+        info: "#15803D",
+        infoLight: "#DCFCE7",
 
         // Interactive colors
-        buttonPrimary: "#0891D1",
+        buttonPrimary: "#15803D",
         buttonPrimaryText: "#FFFFFF",
         buttonSecondary: "#EFF1F3",
         buttonSecondaryText: "#29343D",
@@ -55,33 +55,33 @@ export const Colors = {
         // Tab bar
         tabBarBackground: "#FFFFFF",
         tabBarBorder: "#E5E7EB",
-        tabBarActive: tintColorLight,
+        tabBarActive: "#15803D",
         tabBarInactive: "#999999",
     },
     dark: {
         // Primary colors
         tint: tintColorDark,
-        primary: "#60A5FA",
-        primaryDark: "#3B82F6",
-        primaryLight: "#1E3A8A",
+        primary: "#16A34A",
+        primaryDark: "#15803D",
+        primaryLight: "#14532D",
 
         // Background colors
-        background: "#0F172A",
-        backgroundSecondary: "#1E293B",
-        backgroundTertiary: "#334155",
-        cardBackground: "#1E293B",
-        cardBackgroundSecondary: "#334155",
+        background: "#121212",
+        backgroundSecondary: "#1E1E1E",
+        backgroundTertiary: "#2A2A2A",
+        cardBackground: "#1E1E1E",
+        cardBackgroundSecondary: "#2A2A2A",
 
         // Text colors
-        text: "#F1F5F9",
-        textSecondary: "#94A3B8",
-        textTertiary: "#64748B",
-        textInverse: "#0F172A",
+        text: "#FFFFFF",
+        textSecondary: "#B3B3B3",
+        textTertiary: "#808080",
+        textInverse: "#121212",
 
         // Border colors
-        border: "#334155",
-        borderLight: "#475569",
-        borderDark: "#1E293B",
+        border: "#2A2A2A",
+        borderLight: "#353535",
+        borderDark: "#1E1E1E",
 
         // Status colors
         success: "#22C55E",
@@ -90,28 +90,28 @@ export const Colors = {
         errorLight: "#7F1D1D",
         warning: "#F59E0B",
         warningLight: "#78350F",
-        info: "#60A5FA",
-        infoLight: "#1E3A8A",
+        info: "#16A34A",
+        infoLight: "#14532D",
 
         // Interactive colors
-        buttonPrimary: "#60A5FA",
-        buttonPrimaryText: "#0F172A",
-        buttonSecondary: "#334155",
-        buttonSecondaryText: "#F1F5F9",
-        buttonDisabled: "#334155",
-        buttonDisabledText: "#64748B",
+        buttonPrimary: "#16A34A",
+        buttonPrimaryText: "#121212",
+        buttonSecondary: "#2A2A2A",
+        buttonSecondaryText: "#FFFFFF",
+        buttonDisabled: "#2A2A2A",
+        buttonDisabledText: "#666666",
 
         // Input colors
-        inputBackground: "#334155",
-        inputBorder: "#475569",
-        inputText: "#F1F5F9",
-        inputPlaceholder: "#94A3B8",
+        inputBackground: "#2A2A2A",
+        inputBorder: "#353535",
+        inputText: "#FFFFFF",
+        inputPlaceholder: "#B3B3B3",
 
         // Tab bar
-        tabBarBackground: "#1E293B",
-        tabBarBorder: "#334155",
-        tabBarActive: tintColorDark,
-        tabBarInactive: "#64748B",
+        tabBarBackground: "#1E1E1E",
+        tabBarBorder: "#2A2A2A",
+        tabBarActive: "#16A34A",
+        tabBarInactive: "#666666",
     },
 };
 
