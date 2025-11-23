@@ -5,21 +5,20 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
-    View,
+    View
 } from "react-native";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useTransactions } from "@/contexts/TransactionContext";
-import { convertCurrency } from "@/utils/currencyApi";
+import { evaluatePath, PathEvaluationResponse } from "@/utils/pathApi";
 
 // Complete auth session on web
 if (Platform.OS === "web") {
@@ -209,9 +208,9 @@ export default function SendScreen() {
             setConversionLoading(true);
             setConversionError(null);
             try {
-                // Call API with correct direction: from_ccy = fromCurrency, to_ccy = toCurrency
-                const result = await convertCurrency(fromCurrency, toCurrency, amountNum);
-                setConvertedAmount(result.converted_amount);
+                // Call API with correct direction: from_currency = fromCurrency, to_currency = toCurrency
+                const result = await evaluatePath(fromCurrency, toCurrency, amountNum);
+                setPathData(result);
             } catch (error: any) {
                 console.error("Failed to evaluate path:", error);
                 setConversionError(error.message || "Failed to evaluate conversion path");
@@ -222,7 +221,7 @@ export default function SendScreen() {
         };
 
         // Debounce the API call to avoid too many requests
-        const timeoutId = setTimeout(fetchConversion, 500);
+        const timeoutId = setTimeout(evaluateConversionPath, 500);
         return () => clearTimeout(timeoutId);
     }, [amount, fromCurrency, toCurrency]);
 
@@ -342,7 +341,7 @@ export default function SendScreen() {
                                 ]}
                                 onPress={() => setSendToPayPal(false)}
                             >
-                                <FontAwesome name="wallet" size={16} color={!sendToPayPal ? colors.textInverse : colors.textSecondary} />
+                                <FontAwesome name="credit-card" size={16} color={!sendToPayPal ? colors.textInverse : colors.textSecondary} />
                                 <Text style={[styles.tabText, { color: !sendToPayPal ? colors.textInverse : colors.textSecondary }]}>
                                     Address
                                 </Text>
@@ -836,5 +835,31 @@ const styles = StyleSheet.create({
     connectedStatus: {
         fontSize: 13,
         fontWeight: "500",
+    },
+    pathSection: {
+        gap: 12,
+    },
+    pathLabel: {
+        fontSize: 15,
+        fontWeight: "500",
+    },
+    pathContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    pathItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    pathCurrency: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    pathArrow: {
+        fontSize: 15,
+        marginHorizontal: 4,
     },
 });
