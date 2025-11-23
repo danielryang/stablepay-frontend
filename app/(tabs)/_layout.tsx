@@ -1,16 +1,17 @@
 import React, { useEffect } from "react";
-import { View, Pressable, Dimensions } from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { Dimensions, Pressable, View } from "react-native";
 import Animated, {
+    Easing,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
-    Easing,
 } from "react-native-reanimated";
 
 import { Link, Tabs } from "expo-router";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -102,7 +103,6 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                         accessibilityRole="button"
                         accessibilityState={isFocused ? { selected: true } : {}}
                         accessibilityLabel={options.tabBarAccessibilityLabel}
-                        testID={options.tabBarTestID}
                         onPress={onPress}
                         onLongPress={onLongPress}
                         style={{
@@ -128,7 +128,7 @@ export default function TabLayout() {
 
     return (
         <Tabs
-            tabBar={(props) => <CustomTabBar {...props} />}
+            tabBar={props => <CustomTabBar {...props} />}
             screenOptions={{
                 headerShown: useClientOnlyValue(false, true),
             }}
