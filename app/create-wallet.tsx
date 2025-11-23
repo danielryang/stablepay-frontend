@@ -164,6 +164,7 @@ export default function CreateWalletScreen() {
                                     styles.copyButton,
                                     {
                                         backgroundColor: colors.buttonSecondary,
+                                        marginTop: -4,
                                     },
                                 ]}
                                 onPress={handleCopyMnemonic}
@@ -187,7 +188,10 @@ export default function CreateWalletScreen() {
                             </Pressable>
 
                             <Pressable
-                                style={[styles.button, { backgroundColor: colors.buttonPrimary }]}
+                                style={[
+                                    styles.button,
+                                    { backgroundColor: colors.buttonPrimary, marginTop: 0 },
+                                ]}
                                 onPress={handleContinueFromMnemonic}
                             >
                                 <Text
@@ -293,7 +297,7 @@ export default function CreateWalletScreen() {
                         {
                             backgroundColor:
                                 colorScheme === "dark"
-                                    ? "rgba(15, 23, 42, 0.95)"
+                                    ? "rgba(18, 18, 18, 0.95)"
                                     : "rgba(255, 255, 255, 0.95)",
                         },
                     ]}
@@ -417,7 +421,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 28,
+        marginBottom: 16,
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 16,
@@ -474,7 +478,7 @@ const styles = StyleSheet.create({
     },
     copyButton: {
         borderRadius: 14,
-        paddingVertical: 14,
+        paddingVertical: 16,
         paddingHorizontal: 20,
         alignItems: "center",
     },
@@ -509,14 +513,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 10,
-        marginBottom: 20,
+        marginBottom: 12,
     },
     mnemonicWord: {
         flexDirection: "row",
         alignItems: "center",
         borderRadius: 12,
         padding: 14,
-        minWidth: "30%",
+        minWidth: "48%",
         gap: 10,
     },
     mnemonicIndex: {

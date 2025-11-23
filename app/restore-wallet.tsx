@@ -168,7 +168,7 @@ export default function RestoreWalletScreen() {
                         {
                             backgroundColor:
                                 colorScheme === "dark"
-                                    ? "rgba(15, 23, 42, 0.95)"
+                                    ? "rgba(18, 18, 18, 0.95)"
                                     : "rgba(255, 255, 255, 0.95)",
                         },
                     ]}
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 28,
+        marginBottom: 16,
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 16,

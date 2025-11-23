@@ -13,7 +13,7 @@ export const Colors = {
         // Background colors
         background: "#FFFFFF",
         backgroundSecondary: "#FAFAFA",
-        backgroundTertiary: "#F3F4F6",
+        backgroundTertiary: "#EDEFF2",
         cardBackground: "#F7F8FA",
         cardBackgroundSecondary: "#F3F4F6",
 
@@ -41,13 +41,13 @@ export const Colors = {
         // Interactive colors
         buttonPrimary: "#15803D",
         buttonPrimaryText: "#FFFFFF",
-        buttonSecondary: "#EFF1F3",
+        buttonSecondary: "#EDEFF2",
         buttonSecondaryText: "#29343D",
         buttonDisabled: "#E1E4E8",
         buttonDisabledText: "#9CA3AF",
 
         // Input colors
-        inputBackground: "#F3F4F6",
+        inputBackground: "#EDEFF2",
         inputBorder: "#E1E4E8",
         inputText: "#29343D",
         inputPlaceholder: "#737A82",

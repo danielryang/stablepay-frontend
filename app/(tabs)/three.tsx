@@ -1899,7 +1899,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     generateButton: {
-        marginTop: 4,
+        marginTop: 0,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: "center",
