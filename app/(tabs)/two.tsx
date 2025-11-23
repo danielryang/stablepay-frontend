@@ -1,53 +1,72 @@
 import { useTransactions } from "@/contexts/TransactionContext";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, ActivityIndicator, Pressable } from "react-native";
 
 export default function ActivityScreen() {
-    const { transactions } = useTransactions();
+    const { transactions, isLoading, refreshTransactions } = useTransactions();
     return (
         <View style={styles.container}>
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Account 1</Text>
-                    <Text style={styles.subtitle}>Transactions</Text>
+                    <View style={styles.header}>
+                        <View>
+                            <Text style={styles.title}>Recent Transactions</Text>
+                            <Text style={styles.subtitle}>Your Solana transaction history</Text>
+                        </View>
+                        <Pressable onPress={refreshTransactions} style={styles.refreshButton}>
+                            <Text style={styles.refreshText}>🔄</Text>
+                        </Pressable>
+                    </View>
 
-                    <View style={styles.transactionsList}>
-                        {transactions.map((tx) => (
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#0891D1" />
+                            <Text style={styles.loadingText}>Loading transactions...</Text>
+                        </View>
+                    ) : transactions.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>No transactions yet</Text>
+                            <Text style={styles.emptySubtext}>Your transaction history will appear here</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.transactionsList}>
+                            {transactions.map((tx) => (
                             <View key={tx.id} style={styles.transactionCard}>
                                 <View style={styles.transactionHeader}>
                                     <View style={styles.headerLeft}>
                                         <View style={styles.iconContainer}>
                                             <Text style={styles.icon}>
-                                                {tx.type === "converted" ? "⟳" : tx.type === "bought" ? "$" : "↗"}
+                                                {tx.type === "sent" ? "↗" : tx.type === "received" ? "↙" : "⟳"}
                                             </Text>
                                         </View>
                                         <View>
                                             <Text style={styles.date}>{tx.date}</Text>
-                                            <Text style={styles.status}>{tx.status}</Text>
+                                            <Text style={[styles.status, tx.status === 'Failed' && styles.statusFailed]}>
+                                                {tx.status}
+                                            </Text>
                                         </View>
                                     </View>
                                     <View style={styles.amounts}>
-                                        <Text style={styles.fromAmount}>
-                                            -{tx.fromAmount} {tx.fromToken}
-                                        </Text>
-                                        <Text style={styles.toAmount}>
-                                            +{tx.toAmount} {tx.toToken}
+                                        <Text style={[styles.fromAmount, tx.type === 'received' && styles.receivedAmount]}>
+                                            {tx.type === 'sent' ? '-' : '+'}{tx.fromAmount} {tx.fromToken}
                                         </Text>
                                     </View>
                                 </View>
 
-                                {tx.type !== "converted" && (
-                                    <>
-                                        <View style={styles.divider} />
+                                <View style={styles.divider} />
 
-                                        <View style={styles.addressRow}>
-                                            <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
-                                            <Text style={styles.arrow}>→</Text>
-                                            <Text style={styles.addressRight}>{tx.toAddress}</Text>
-                                        </View>
+                                <View style={styles.addressRow}>
+                                    <View style={styles.addressColumn}>
+                                        <Text style={styles.addressLabel}>From</Text>
+                                        <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
+                                    </View>
+                                    <Text style={styles.arrow}>→</Text>
+                                    <View style={styles.addressColumn}>
+                                        <Text style={styles.addressLabel}>To</Text>
+                                        <Text style={styles.addressRight}>{tx.toAddress}</Text>
+                                    </View>
+                                </View>
 
-                                        <View style={styles.divider} />
-                                    </>
-                                )}
+                                <View style={styles.divider} />
 
                                 <View style={styles.detailsSection}>
                                     <View style={styles.detailRow}>
@@ -58,18 +77,19 @@ export default function ActivityScreen() {
                                         <Text style={styles.detailLabel}>Speed:</Text>
                                         <Text style={styles.detailValue}>{tx.speed}</Text>
                                     </View>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Total Fees Saved:</Text>
-                                        <Text style={styles.detailValueSuccess}>{tx.feesSaved}</Text>
-                                    </View>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabelBold}>Final Total:</Text>
-                                        <Text style={styles.detailValueBold}>{tx.finalTotal}</Text>
-                                    </View>
+                                    {tx.signature && (
+                                        <View style={styles.detailRow}>
+                                            <Text style={styles.detailLabel}>Signature:</Text>
+                                            <Text style={styles.signatureText} numberOfLines={1} ellipsizeMode="middle">
+                                                {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                         ))}
                     </View>
+                    )}
                 </View>
             </ScrollView>
         </View>
@@ -87,16 +107,53 @@ const styles = StyleSheet.create({
     content: {
         padding: 16,
     },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
     title: {
         fontSize: 18,
         fontWeight: '600',
         color: '#29343D',
-        marginBottom: 8,
+        marginBottom: 4,
     },
     subtitle: {
         fontSize: 14,
         color: '#737A82',
-        marginBottom: 16,
+    },
+    refreshButton: {
+        padding: 8,
+    },
+    refreshText: {
+        fontSize: 20,
+    },
+    loadingContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 40,
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 14,
+        color: '#737A82',
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 40,
+    },
+    emptyText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#29343D',
+        marginBottom: 8,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: '#737A82',
+        textAlign: 'center',
     },
     transactionsList: {
         gap: 12,
@@ -144,6 +201,9 @@ const styles = StyleSheet.create({
         color: '#22C55E',
         marginTop: 2,
     },
+    statusFailed: {
+        color: '#EF4444',
+    },
     amounts: {
         alignItems: 'flex-end',
     },
@@ -152,10 +212,22 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#29343D',
     },
+    receivedAmount: {
+        color: '#22C55E',
+    },
     toAmount: {
         fontSize: 14,
         color: '#737A82',
         marginTop: 2,
+    },
+    addressColumn: {
+        flex: 1,
+    },
+    addressLabel: {
+        fontSize: 10,
+        color: '#737A82',
+        marginBottom: 4,
+        fontWeight: '500',
     },
     divider: {
         height: 1,
@@ -214,5 +286,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         color: '#29343D',
+    },
+    signatureText: {
+        fontSize: 10,
+        color: '#737A82',
+        fontFamily: 'monospace',
+        maxWidth: 150,
     },
 });

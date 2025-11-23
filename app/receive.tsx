@@ -1,12 +1,22 @@
 import { useRouter } from "expo-router";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { useWallet } from "@/contexts/WalletContext";
+import * as Clipboard from 'expo-clipboard';
+import QRCode from 'react-native-qrcode-svg';
 
 export default function ReceiveScreen() {
     const router = useRouter();
-    const walletAddress = "0x1234...5678";
+    const { publicKeyString } = useWallet();
 
-    const handleCopy = () => {
-        Alert.alert("Success", "Address copied to clipboard");
+    const handleCopy = async () => {
+        if (publicKeyString) {
+            try {
+                await Clipboard.setStringAsync(publicKeyString);
+                Alert.alert("Success", "Address copied to clipboard");
+            } catch (error) {
+                Alert.alert("Error", "Failed to copy address");
+            }
+        }
     };
 
     const handleShare = () => {
@@ -35,9 +45,26 @@ export default function ReceiveScreen() {
                         <View style={styles.qrContainer}>
                             <View style={styles.qrOuter}>
                                 <View style={styles.qrInner}>
-                                    <Text style={styles.qrPlaceholder}>
-                                        QR Code for Bitcoin Wallet
-                                    </Text>
+                                    {publicKeyString ? (
+                                        <QRCode
+                                            value={publicKeyString}
+                                            size={192}
+                                            color="#29343D"
+                                            backgroundColor="#FFFFFF"
+                                            logo={undefined}
+                                            logoSize={0}
+                                            logoMargin={0}
+                                            logoBackgroundColor="transparent"
+                                            quietZone={8}
+                                        />
+                                    ) : (
+                                        <View style={styles.qrLoadingContainer}>
+                                            <ActivityIndicator size="large" color="#0891D1" />
+                                            <Text style={styles.qrPlaceholder}>
+                                                Loading wallet address...
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                         </View>
@@ -45,9 +72,11 @@ export default function ReceiveScreen() {
                         <View style={styles.addressSection}>
                             <View style={styles.addressCard}>
                                 <Text style={styles.addressLabel}>
-                                    Your Wallet Address
+                                    Your Solana Wallet Address
                                 </Text>
-                                <Text style={styles.addressText}>{walletAddress}</Text>
+                                <Text style={styles.addressText} selectable>
+                                    {publicKeyString || "Not available"}
+                                </Text>
                             </View>
 
                             <View style={styles.buttonRow}>
@@ -170,6 +199,11 @@ const styles = StyleSheet.create({
         color: '#737A82',
         textAlign: 'center',
         paddingHorizontal: 16,
+        marginTop: 12,
+    },
+    qrLoadingContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     addressSection: {
         gap: 12,

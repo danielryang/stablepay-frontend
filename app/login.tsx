@@ -1,15 +1,52 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useState, useEffect } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from "react-native";
+import { useWallet } from "@/contexts/WalletContext";
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState("");
+    const { login, isInitialized, isLoading, hasWallet, keypair } = useWallet();
     const [password, setPassword] = useState("");
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-    const handleLogin = () => {
-        router.push("/(tabs)");
+    useEffect(() => {
+        if (isInitialized && !isLoading) {
+            // If wallet is already loaded, redirect to tabs
+            if (keypair) {
+                router.replace("/(tabs)");
+                return;
+            }
+            // If no wallet exists, redirect to onboarding
+            if (!hasWallet) {
+                router.replace("/onboarding");
+            }
+        }
+    }, [isInitialized, isLoading, hasWallet, keypair]);
+
+    const handleLogin = async () => {
+        if (!password) {
+            Alert.alert("Error", "Please enter your password");
+            return;
+        }
+
+        try {
+            setIsLoggingIn(true);
+            await login(password);
+            router.replace("/(tabs)");
+        } catch (error: any) {
+            Alert.alert("Error", error.message || "Invalid password. Please try again.");
+        } finally {
+            setIsLoggingIn(false);
+        }
     };
+
+    if (isLoading || !isInitialized) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="#0891D1" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -19,45 +56,39 @@ export default function LoginScreen() {
                         <Text style={styles.logoIcon}>💲</Text>
                     </View>
                     <Text style={styles.title}>StablePay</Text>
-                    <Text style={styles.subtitle}>Sign in to your account</Text>
+                    <Text style={styles.subtitle}>Unlock your wallet</Text>
                 </View>
 
                 <View style={styles.card}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput
-                            value={email}
-                            onChangeText={setEmail}
-                            placeholder="you@example.com"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            style={styles.input}
-                            placeholderTextColor="#737A82"
-                        />
-                    </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password</Text>
                         <TextInput
                             value={password}
                             onChangeText={setPassword}
-                            placeholder="••••••••"
+                            placeholder="Enter your wallet password"
                             secureTextEntry
                             style={styles.input}
                             placeholderTextColor="#737A82"
+                            onSubmitEditing={handleLogin}
+                            autoFocus
                         />
                     </View>
                     <Pressable
                         onPress={handleLogin}
-                        style={styles.loginButton}
+                        style={[styles.loginButton, isLoggingIn && styles.loginButtonDisabled]}
+                        disabled={isLoggingIn}
                     >
-                        <Text style={styles.loginButtonText}>Sign In</Text>
+                        {isLoggingIn ? (
+                            <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                            <Text style={styles.loginButtonText}>Unlock Wallet</Text>
+                        )}
                     </Pressable>
                 </View>
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>
-                        Don't have an account?{" "}
-                        <Text style={styles.signUpLink}>Sign up</Text>
+                        Your wallet is encrypted and stored securely on your device
                     </Text>
                 </View>
             </View>
@@ -133,6 +164,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         alignItems: 'center',
+        minHeight: 48,
+        justifyContent: 'center',
+    },
+    loginButtonDisabled: {
+        opacity: 0.5,
     },
     loginButtonText: {
         color: '#FFFFFF',

@@ -1,10 +1,42 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View, Alert } from "react-native";
+import { useWallet } from "@/contexts/WalletContext";
 
 export default function SettingsScreen() {
     const router = useRouter();
+    const { logout, publicKeyString } = useWallet();
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+    const handleLogout = () => {
+        Alert.alert(
+            "Sign Out",
+            "Are you sure you want to sign out? You'll need to enter your password to access your wallet again.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Sign Out",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await logout();
+                            router.replace("/login");
+                        } catch (error: any) {
+                            Alert.alert("Error", error.message || "Failed to sign out");
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const formatAddress = (address: string | null) => {
+        if (!address) return "Not available";
+        return `${address.slice(0, 8)}...${address.slice(-8)}`;
+    };
 
     return (
         <View style={styles.container}>
@@ -21,15 +53,15 @@ export default function SettingsScreen() {
                 <View style={styles.content}>
                     <View style={styles.section}>
                         <View style={styles.card}>
-                            <Pressable style={styles.settingItem}>
+                            <View style={styles.settingItem}>
                                 <Text style={styles.settingIcon}>👤</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Account</Text>
+                                    <Text style={styles.settingTitle}>Wallet Address</Text>
                                     <Text style={styles.settingSubtitle}>
-                                        Manage your account settings
+                                        {formatAddress(publicKeyString)}
                                     </Text>
                                 </View>
-                            </Pressable>
+                            </View>
 
                             <View style={styles.divider} />
 
@@ -94,12 +126,15 @@ export default function SettingsScreen() {
                     <View style={styles.section}>
                         <View style={styles.card}>
                             <Pressable
-                                onPress={() => router.push("/login")}
+                                onPress={handleLogout}
                                 style={styles.settingItem}
                             >
                                 <Text style={styles.destructiveIcon}>🚪</Text>
                                 <View style={styles.settingContent}>
                                     <Text style={styles.destructiveText}>Sign Out</Text>
+                                    <Text style={styles.settingSubtitle}>
+                                        Clear wallet from this device
+                                    </Text>
                                 </View>
                             </Pressable>
                         </View>
