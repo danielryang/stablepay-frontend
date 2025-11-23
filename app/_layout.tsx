@@ -1,3 +1,5 @@
+import "../polyfills";
+
 // IMPORTANT: Polyfills must be imported FIRST before any other imports
 import { useEffect } from "react";
 import { View } from "react-native";
@@ -26,8 +28,6 @@ import { useColorScheme } from "@/components/useColorScheme";
 import { OptimizerSettingsProvider } from "@/contexts/OptimizerSettingsContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
 import { WalletProvider } from "@/contexts/WalletContext";
-
-import "../polyfills";
 
 export {
     // Catch any errors thrown by the Layout component.

@@ -1,4 +1,6 @@
-// Ensure polyfills are loaded before crypto imports
+import "../polyfills";
+
+// IMPORTANT: Polyfills must be imported FIRST before any other imports
 import { hmac } from "@noble/hashes/hmac";
 import { sha512 } from "@noble/hashes/sha2";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -21,8 +23,6 @@ import * as nacl from "tweetnacl";
 import { Platform } from "react-native";
 
 import * as SecureStore from "expo-secure-store";
-
-import "../polyfills";
 
 // Solana derivation path: m/44'/501'/0'/0'
 const SOLANA_DERIVATION_PATH = "m/44'/501'/0'/0'";
