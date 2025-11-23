@@ -212,12 +212,10 @@ const styles = StyleSheet.create({
     },
     backText: {
         fontSize: 24,
-        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     scrollView: {
         flex: 1,
@@ -263,7 +261,6 @@ const styles = StyleSheet.create({
     },
     qrPlaceholder: {
         fontSize: 12,
-        color: "#737A82",
         textAlign: "center",
         paddingHorizontal: 16,
         marginTop: 12,

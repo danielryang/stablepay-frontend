@@ -250,6 +250,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     signUpLink: {
-        color: "#0891D1",
+        // Color handled inline with theme
     },
 });

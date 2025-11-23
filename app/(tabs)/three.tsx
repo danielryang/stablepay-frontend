@@ -2298,7 +2298,6 @@ const styles = StyleSheet.create({
     },
     aiInsightText: {
         fontSize: 13,
-        color: "#6B7280",
         marginBottom: 4,
         lineHeight: 18,
     },
@@ -2315,19 +2314,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     feedbackButtonPositive: {
-        backgroundColor: "#DCFCE7",
         borderWidth: 1,
-        borderColor: "#22C55E",
     },
     feedbackButtonNegative: {
-        backgroundColor: "#FEE2E2",
         borderWidth: 1,
-        borderColor: "#EF4444",
     },
     feedbackButtonText: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#29343D",
     },
     qaSection: {
         borderRadius: 12,
@@ -2412,22 +2406,18 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
     corsWarningCard: {
-        backgroundColor: "#FEF3C7",
         borderRadius: 12,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#FCD34D",
         marginBottom: 16,
     },
     corsWarningTitle: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#92400E",
         marginBottom: 8,
     },
     corsWarningText: {
         fontSize: 14,
-        color: "#78350F",
         lineHeight: 20,
     },
 });

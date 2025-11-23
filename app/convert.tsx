@@ -210,12 +210,10 @@ const styles = StyleSheet.create({
     },
     backText: {
         fontSize: 24,
-        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     scrollView: {
         flex: 1,

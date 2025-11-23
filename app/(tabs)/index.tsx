@@ -83,7 +83,7 @@ export default function HomeScreen() {
                             onPress={() => router.push("/convert")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={styles.actionIconText}>⟳</Text>
+                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>⟳</Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Convert
@@ -98,7 +98,7 @@ export default function HomeScreen() {
                             onPress={() => router.push("/send")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={styles.actionIconText}>↗</Text>
+                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>↗</Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>Send</Text>
                         </Pressable>
@@ -111,7 +111,7 @@ export default function HomeScreen() {
                             onPress={() => router.push("/receive")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={styles.actionIconText}>↙</Text>
+                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>↙</Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Receive
@@ -350,7 +350,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     actionIconText: {
-        color: "#FFFFFF",
         fontSize: 18,
         fontWeight: "bold",
     },

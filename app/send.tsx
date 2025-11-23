@@ -338,8 +338,8 @@ export default function SendScreen() {
                                 <Switch
                                     value={sendToPayPal}
                                     onValueChange={setSendToPayPal}
-                                    trackColor={{ false: "#E1E4E8", true: "#0891D1" }}
-                                    thumbColor="#FFFFFF"
+                                    trackColor={{ false: colors.border, true: colors.primary }}
+                                    thumbColor={colors.textInverse}
                                 />
                                 <View style={styles.switchLabelContainer}>
                                     <Text style={styles.switchLabel}>Send to PayPal</Text>
@@ -498,18 +498,32 @@ export default function SendScreen() {
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <Pressable onPress={() => router.back()} style={styles.cancelButton}>
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                        <Pressable
+                            onPress={() => router.back()}
+                            style={[
+                                styles.cancelButton,
+                                {
+                                    backgroundColor: colors.cardBackground,
+                                    borderColor: colors.border,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                                Cancel
+                            </Text>
                         </Pressable>
                         <Pressable
                             onPress={handleSend}
                             style={[
                                 styles.sendButton,
+                                { backgroundColor: colors.buttonPrimary },
                                 sendToPayPal && !payPalConnected && styles.sendButtonDisabled,
                             ]}
                             disabled={sendToPayPal && !payPalConnected}
                         >
-                            <Text style={styles.sendButtonText}>Send</Text>
+                            <Text style={[styles.sendButtonText, { color: colors.buttonPrimaryText }]}>
+                                Send
+                            </Text>
                         </Pressable>
                     </View>
                 </View>
@@ -521,7 +535,6 @@ export default function SendScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FAFAFA",
     },
     header: {
         flexDirection: "row",
@@ -530,20 +543,16 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#E1E4E8",
-        backgroundColor: "#FFFFFF",
     },
     backButton: {
         marginRight: 8,
     },
     backText: {
         fontSize: 24,
-        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#29343D",
     },
     scrollView: {
         flex: 1,
@@ -553,10 +562,8 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 24,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         gap: 24,
     },
     addressSection: {
@@ -567,23 +574,18 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 12,
-        color: "#737A82",
     },
     input: {
-        backgroundColor: "#E1E4E8",
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 12,
         padding: 16,
         fontSize: 12,
-        color: "#29343D",
     },
     inputRight: {
         textAlign: "right",
     },
     divider: {
         height: 1,
-        backgroundColor: "#E1E4E8",
     },
     amountSection: {
         alignItems: "center",
@@ -591,7 +593,6 @@ const styles = StyleSheet.create({
     },
     amountLabel: {
         fontSize: 14,
-        color: "#737A82",
     },
     conversionContainer: {
         flexDirection: "row",
@@ -687,31 +688,25 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 48,
         borderWidth: 1,
-        borderColor: "#E1E4E8",
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#FFFFFF",
     },
     cancelButtonText: {
-        color: "#29343D",
         fontSize: 16,
     },
     sendButton: {
         flex: 1,
         height: 48,
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
     },
     sendButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "500",
     },
     sendButtonDisabled: {
-        backgroundColor: "#E1E4E8",
         opacity: 0.6,
     },
     switchSection: {
@@ -730,12 +725,10 @@ const styles = StyleSheet.create({
     switchLabel: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
         marginBottom: 2,
     },
     switchSubtext: {
         fontSize: 12,
-        color: "#737A82",
     },
     paypalSection: {
         gap: 16,
@@ -743,24 +736,20 @@ const styles = StyleSheet.create({
     paypalTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
         marginBottom: 8,
     },
     paypalDescription: {
         fontSize: 14,
-        color: "#737A82",
         marginBottom: 16,
         lineHeight: 20,
     },
     connectButton: {
-        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 16,
         alignItems: "center",
         marginTop: 8,
     },
     connectButtonText: {
-        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "500",
     },
@@ -772,7 +761,6 @@ const styles = StyleSheet.create({
     connectingTitle: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
     },
     connectingSubtext: {
         fontSize: 14,

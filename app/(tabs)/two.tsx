@@ -22,7 +22,7 @@ export default function ActivityScreen() {
                             </Text>
                         </View>
                         <Pressable onPress={refreshTransactions} style={styles.refreshButton}>
-                            <Text style={styles.refreshText}>🔄</Text>
+                            <Text style={[styles.refreshText, { color: colors.text }]}>🔄</Text>
                         </Pressable>
                     </View>
 
@@ -57,8 +57,8 @@ export default function ActivityScreen() {
                                 >
                                     <View style={styles.transactionHeader}>
                                         <View style={styles.headerLeft}>
-                                            <View style={styles.iconContainer}>
-                                                <Text style={styles.icon}>
+                                            <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
+                                                <Text style={[styles.icon, { color: colors.primary }]}>
                                                     {tx.type === "sent"
                                                         ? "↗"
                                                         : tx.type === "received"
@@ -67,12 +67,12 @@ export default function ActivityScreen() {
                                                 </Text>
                                             </View>
                                             <View>
-                                                <Text style={styles.date}>{tx.date}</Text>
+                                                <Text style={[styles.date, { color: colors.text }]}>{tx.date}</Text>
                                                 <Text
                                                     style={[
                                                         styles.status,
-                                                        tx.status === "Failed" &&
-                                                            styles.statusFailed,
+                                                        { color: colors.success },
+                                                        tx.status === "Failed" && { color: colors.error },
                                                     ]}
                                                 >
                                                     {tx.status}
@@ -83,7 +83,8 @@ export default function ActivityScreen() {
                                             <Text
                                                 style={[
                                                     styles.fromAmount,
-                                                    tx.type === "received" && styles.receivedAmount,
+                                                    { color: colors.text },
+                                                    tx.type === "received" && { color: colors.success },
                                                 ]}
                                             >
                                                 {tx.type === "sent" ? "-" : "+"}
@@ -92,38 +93,38 @@ export default function ActivityScreen() {
                                         </View>
                                     </View>
 
-                                    <View style={styles.divider} />
+                                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                                     <View style={styles.addressRow}>
                                         <View style={styles.addressColumn}>
-                                            <Text style={styles.addressLabel}>From</Text>
-                                            <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
+                                            <Text style={[styles.addressLabel, { color: colors.textSecondary }]}>From</Text>
+                                            <Text style={[styles.addressLeft, { color: colors.textSecondary }]}>{tx.fromAddress}</Text>
                                         </View>
-                                        <Text style={styles.arrow}>→</Text>
+                                        <Text style={[styles.arrow, { color: colors.textSecondary }]}>→</Text>
                                         <View style={styles.addressColumn}>
-                                            <Text style={styles.addressLabel}>To</Text>
-                                            <Text style={styles.addressRight}>{tx.toAddress}</Text>
+                                            <Text style={[styles.addressLabel, { color: colors.textSecondary }]}>To</Text>
+                                            <Text style={[styles.addressRight, { color: colors.textSecondary }]}>{tx.toAddress}</Text>
                                         </View>
                                     </View>
 
-                                    <View style={styles.divider} />
+                                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                                     <View style={styles.detailsSection}>
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Transaction Fee:</Text>
-                                            <Text style={styles.detailValue}>
+                                            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
+                                            <Text style={[styles.detailValue, { color: colors.text }]}>
                                                 {tx.transactionFee}
                                             </Text>
                                         </View>
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Speed:</Text>
-                                            <Text style={styles.detailValue}>{tx.speed}</Text>
+                                            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Speed:</Text>
+                                            <Text style={[styles.detailValue, { color: colors.text }]}>{tx.speed}</Text>
                                         </View>
                                         {tx.signature && (
                                             <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Signature:</Text>
+                                                <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Signature:</Text>
                                                 <Text
-                                                    style={styles.signatureText}
+                                                    style={[styles.signatureText, { color: colors.textSecondary }]}
                                                     numberOfLines={1}
                                                     ellipsizeMode="middle"
                                                 >
@@ -162,12 +163,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#29343D",
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 14,
-        color: "#737A82",
     },
     refreshButton: {
         padding: 8,
@@ -183,7 +182,6 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 12,
         fontSize: 14,
-        color: "#737A82",
     },
     emptyContainer: {
         alignItems: "center",
@@ -193,12 +191,10 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#29343D",
         marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
-        color: "#737A82",
         textAlign: "center",
     },
     transactionsList: {
@@ -221,7 +217,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
     },
     iconContainer: {
-        backgroundColor: "#E0F2FE",
         borderRadius: 999,
         padding: 8,
         marginTop: 4,
@@ -231,22 +226,19 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     icon: {
-        color: "#0891D1",
         fontSize: 14,
         fontWeight: "bold",
     },
     date: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#29343D",
     },
     status: {
         fontSize: 12,
-        color: "#22C55E",
         marginTop: 2,
     },
     statusFailed: {
-        color: "#EF4444",
+        // Color handled inline
     },
     amounts: {
         alignItems: "flex-end",
@@ -254,14 +246,12 @@ const styles = StyleSheet.create({
     fromAmount: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#29343D",
     },
     receivedAmount: {
-        color: "#22C55E",
+        // Color handled inline
     },
     toAmount: {
         fontSize: 14,
-        color: "#737A82",
         marginTop: 2,
     },
     addressColumn: {
@@ -269,13 +259,11 @@ const styles = StyleSheet.create({
     },
     addressLabel: {
         fontSize: 10,
-        color: "#737A82",
         marginBottom: 4,
         fontWeight: "500",
     },
     divider: {
         height: 1,
-        backgroundColor: "#E1E4E8",
         marginVertical: 12,
     },
     addressRow: {
@@ -286,19 +274,16 @@ const styles = StyleSheet.create({
     },
     addressLeft: {
         fontSize: 12,
-        color: "#737A82",
         flex: 1,
         textAlign: "left",
     },
     addressRight: {
         fontSize: 12,
-        color: "#737A82",
         flex: 1,
         textAlign: "right",
     },
     arrow: {
         fontSize: 12,
-        color: "#737A82",
     },
     detailsSection: {
         gap: 8,
@@ -309,31 +294,25 @@ const styles = StyleSheet.create({
     },
     detailLabel: {
         fontSize: 12,
-        color: "#737A82",
     },
     detailValue: {
         fontSize: 12,
         fontWeight: "500",
-        color: "#29343D",
     },
     detailValueSuccess: {
         fontSize: 12,
         fontWeight: "500",
-        color: "#22C55E",
     },
     detailLabelBold: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#29343D",
     },
     detailValueBold: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#29343D",
     },
     signatureText: {
         fontSize: 10,
-        color: "#737A82",
         fontFamily: "monospace",
         maxWidth: 150,
     },

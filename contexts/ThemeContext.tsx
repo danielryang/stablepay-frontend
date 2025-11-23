@@ -49,6 +49,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    // Don't render children until theme is loaded to prevent flash of wrong theme
+    if (!loaded) {
+        return null;
+    }
+
     return (
         <ThemeContext.Provider value={{ theme, setTheme, isDark: theme === "dark" }}>
             {children}
