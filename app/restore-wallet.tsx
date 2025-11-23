@@ -1,13 +1,24 @@
-import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+
+import { useRouter } from "expo-router";
+
 import { useWallet } from "@/contexts/WalletContext";
 import { validateMnemonic } from "@/utils/wallet";
 
 export default function RestoreWalletScreen() {
     const router = useRouter();
     const { restoreWallet } = useWallet();
-    const [step, setStep] = useState<'mnemonic' | 'password'>('mnemonic');
+    const [step, setStep] = useState<"mnemonic" | "password">("mnemonic");
     const [mnemonic, setMnemonic] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,19 +27,19 @@ export default function RestoreWalletScreen() {
     const handleMnemonicSubmit = () => {
         const trimmedMnemonic = mnemonic.trim();
         const words = trimmedMnemonic.split(/\s+/);
-        
+
         if (words.length !== 12) {
             Alert.alert("Error", "Please enter a valid 12-word recovery phrase");
             return;
         }
-        
+
         // Validate mnemonic using BIP39 validation
         if (!validateMnemonic(trimmedMnemonic)) {
             Alert.alert("Error", "Invalid recovery phrase. Please check your words and try again.");
             return;
         }
-        
-        setStep('password');
+
+        setStep("password");
     };
 
     const handleRestoreWallet = async () => {
@@ -43,7 +54,7 @@ export default function RestoreWalletScreen() {
 
         // Set loading state immediately - this triggers a re-render
         setIsRestoring(true);
-        
+
         // Yield to React to allow it to render the loading state before heavy computation
         // Use a small delay to ensure React processes the state update and renders first
         setTimeout(async () => {
@@ -58,7 +69,7 @@ export default function RestoreWalletScreen() {
         }, 50); // Small delay to ensure UI renders loading state
     };
 
-    if (step === 'mnemonic') {
+    if (step === "mnemonic") {
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.scrollView}>
@@ -90,10 +101,7 @@ export default function RestoreWalletScreen() {
                                 />
                             </View>
 
-                            <Pressable
-                                style={styles.button}
-                                onPress={handleMnemonicSubmit}
-                            >
+                            <Pressable style={styles.button} onPress={handleMnemonicSubmit}>
                                 <Text style={styles.buttonText}>Continue</Text>
                             </Pressable>
                         </View>
@@ -114,7 +122,11 @@ export default function RestoreWalletScreen() {
             )}
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Pressable onPress={() => setStep('mnemonic')} style={styles.backButton} disabled={isRestoring}>
+                    <Pressable
+                        onPress={() => setStep("mnemonic")}
+                        style={styles.backButton}
+                        disabled={isRestoring}
+                    >
                         <Text style={styles.backText}>←</Text>
                     </Pressable>
                     <Text style={styles.headerTitle}>Set Password</Text>
@@ -123,7 +135,8 @@ export default function RestoreWalletScreen() {
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Set a Password</Text>
                     <Text style={styles.cardSubtitle}>
-                        This password will encrypt your wallet and be required to unlock it. Make sure it's strong and memorable.
+                        This password will encrypt your wallet and be required to unlock it. Make
+                        sure it's strong and memorable.
                     </Text>
 
                     <View style={styles.inputGroup}>
@@ -173,7 +186,7 @@ export default function RestoreWalletScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
+        backgroundColor: "#FAFAFA",
     },
     scrollView: {
         flex: 1,
@@ -182,8 +195,8 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         marginBottom: 24,
     },
     backButton: {
@@ -191,29 +204,29 @@ const styles = StyleSheet.create({
     },
     backText: {
         fontSize: 24,
-        color: '#29343D',
+        color: "#29343D",
     },
     headerTitle: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     card: {
         padding: 24,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         gap: 16,
     },
     cardTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     cardSubtitle: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
         marginBottom: 8,
     },
     inputGroup: {
@@ -221,68 +234,67 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
     },
     input: {
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
     },
     mnemonicInput: {
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
         minHeight: 120,
     },
     button: {
-        backgroundColor: '#0891D1',
+        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 16,
-        alignItems: 'center',
+        alignItems: "center",
         marginTop: 8,
     },
     buttonDisabled: {
         opacity: 0.5,
     },
     buttonText: {
-        color: '#FFFFFF',
+        color: "#FFFFFF",
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: "600",
     },
     loadingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         gap: 8,
     },
     fullScreenLoader: {
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
         zIndex: 1000,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         gap: 16,
     },
     loaderText: {
         fontSize: 18,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     loaderSubtext: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
 });
-

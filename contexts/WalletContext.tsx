@@ -1,21 +1,30 @@
-import React, { createContext, ReactNode, useContext, useState, useEffect, useCallback } from 'react';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from "@solana/web3.js";
+
+import React, {
+    ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
+
 import {
+    clearWallet,
+    connection,
     deriveKeypairFromMnemonic,
     generateMnemonic,
-    validateMnemonic,
-    storeEncryptedWallet,
-    loadEncryptedWallet,
-    walletExists,
-    clearWallet,
+    getBalance,
     getPublicKey,
+    getUSDCBalance,
+    loadEncryptedWallet,
+    sendTransaction,
     signMessage,
     signTransaction,
-    getBalance,
-    getUSDCBalance,
-    sendTransaction,
-    connection,
-} from '@/utils/wallet';
+    storeEncryptedWallet,
+    validateMnemonic,
+    walletExists,
+} from "@/utils/wallet";
 
 export interface WalletContextType {
     // Wallet state
@@ -26,7 +35,7 @@ export interface WalletContextType {
     isInitialized: boolean;
     isLoading: boolean;
     hasWallet: boolean;
-    
+
     // Wallet operations
     generateMnemonic: () => string;
     createWallet: (mnemonic: string, password: string) => Promise<void>;
@@ -35,7 +44,7 @@ export interface WalletContextType {
     logout: () => Promise<void>;
     switchAccount: () => Promise<void>;
     refreshBalance: () => Promise<void>;
-    
+
     // Wallet API
     getPublicKey: () => PublicKey | null;
     signMessage: (message: Uint8Array) => Uint8Array | null;
@@ -65,13 +74,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             setBalance(null);
             return;
         }
-        
+
         try {
             // Fetch USDC balance instead of SOL
             const bal = await getUSDCBalance(publicKey);
             setBalance(bal);
         } catch (error) {
-            console.error('Failed to refresh USDC balance:', error);
+            console.error("Failed to refresh USDC balance:", error);
             // Set to 0 if there's an error (likely no token account exists)
             setBalance(0);
         }
@@ -83,12 +92,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             // Defer balance refresh to avoid blocking navigation
             // Set initial balance to 0 immediately for instant UI feedback
             setBalance(0);
-            
+
             // Refresh balance in background after a short delay
             setTimeout(() => {
                 refreshBalance();
             }, 100);
-            
+
             // Set up periodic balance refresh (every 10 seconds)
             const interval = setInterval(() => {
                 refreshBalance();
@@ -104,7 +113,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             setIsInitialized(true);
             setIsLoading(false);
         } catch (error) {
-            console.error('Error checking wallet:', error);
+            console.error("Error checking wallet:", error);
             setHasWallet(false);
             setIsInitialized(true);
             setIsLoading(false);
@@ -119,16 +128,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         try {
             // Validate mnemonic
             if (!validateMnemonic(mnemonic)) {
-                throw new Error('Invalid mnemonic phrase');
+                throw new Error("Invalid mnemonic phrase");
             }
-            
+
             // Derive keypair from mnemonic
             const newKeypair = await deriveKeypairFromMnemonic(mnemonic);
-            
+
             // Store encrypted wallet (encrypts both private key and mnemonic)
             await storeEncryptedWallet(newKeypair, mnemonic, password);
             setHasWallet(true);
-            
+
             // Set wallet state
             setKeypair(newKeypair);
             const pubKey = getPublicKey(newKeypair);
@@ -143,16 +152,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         try {
             // Validate mnemonic
             if (!validateMnemonic(mnemonic)) {
-                throw new Error('Invalid mnemonic phrase');
+                throw new Error("Invalid mnemonic phrase");
             }
-            
+
             // Derive keypair from mnemonic
             const restoredKeypair = await deriveKeypairFromMnemonic(mnemonic);
-            
+
             // Store encrypted wallet (encrypts both private key and mnemonic)
             await storeEncryptedWallet(restoredKeypair, mnemonic, password);
             setHasWallet(true);
-            
+
             // Set wallet state
             setKeypair(restoredKeypair);
             const pubKey = getPublicKey(restoredKeypair);
@@ -166,16 +175,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const login = useCallback(async (password: string): Promise<void> => {
         try {
             setIsLoading(true);
-            
+
             // Load encrypted wallet (returns Keypair directly)
             const loadedKeypair = await loadEncryptedWallet(password);
-            
+
             // Set wallet state
             setKeypair(loadedKeypair);
             const pubKey = getPublicKey(loadedKeypair);
             setPublicKey(pubKey);
             setPublicKeyString(pubKey.toBase58());
-            
+
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
@@ -218,35 +227,44 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         return publicKey;
     }, [publicKey]);
 
-    const signMessageAPI = useCallback((message: Uint8Array): Uint8Array | null => {
-        if (!keypair) return null;
-        return signMessage(message, keypair);
-    }, [keypair]);
+    const signMessageAPI = useCallback(
+        (message: Uint8Array): Uint8Array | null => {
+            if (!keypair) return null;
+            return signMessage(message, keypair);
+        },
+        [keypair]
+    );
 
-    const signTransactionAPI = useCallback((transaction: any): any | null => {
-        if (!keypair) return null;
-        return signTransaction(transaction, keypair);
-    }, [keypair]);
+    const signTransactionAPI = useCallback(
+        (transaction: any): any | null => {
+            if (!keypair) return null;
+            return signTransaction(transaction, keypair);
+        },
+        [keypair]
+    );
 
     const getBalanceAPI = useCallback(async (): Promise<number | null> => {
         if (!publicKey) return null;
         try {
             return await getBalance(publicKey);
         } catch (error) {
-            console.error('Failed to get balance:', error);
+            console.error("Failed to get balance:", error);
             return null;
         }
     }, [publicKey]);
 
-    const sendTransactionAPI = useCallback(async (to: PublicKey, amount: number): Promise<string | null> => {
-        if (!keypair) return null;
-        try {
-            return await sendTransaction(keypair, to, amount);
-        } catch (error) {
-            console.error('Failed to send transaction:', error);
-            throw error;
-        }
-    }, [keypair]);
+    const sendTransactionAPI = useCallback(
+        async (to: PublicKey, amount: number): Promise<string | null> => {
+            if (!keypair) return null;
+            try {
+                return await sendTransaction(keypair, to, amount);
+            } catch (error) {
+                console.error("Failed to send transaction:", error);
+                throw error;
+            }
+        },
+        [keypair]
+    );
 
     const value: WalletContextType = {
         keypair,
@@ -270,18 +288,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         sendTransaction: sendTransactionAPI,
     };
 
-    return (
-        <WalletContext.Provider value={value}>
-            {children}
-        </WalletContext.Provider>
-    );
+    return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 
 export function useWallet() {
     const context = useContext(WalletContext);
     if (context === undefined) {
-        throw new Error('useWallet must be used within a WalletProvider');
+        throw new Error("useWallet must be used within a WalletProvider");
     }
     return context;
 }
-

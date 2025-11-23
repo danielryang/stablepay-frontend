@@ -1,8 +1,18 @@
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import QRCode from "react-native-qrcode-svg";
+
+import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+
 import { useWallet } from "@/contexts/WalletContext";
-import * as Clipboard from 'expo-clipboard';
-import QRCode from 'react-native-qrcode-svg';
 
 export default function ReceiveScreen() {
     const router = useRouter();
@@ -37,9 +47,7 @@ export default function ReceiveScreen() {
                     <View style={styles.card}>
                         <View style={styles.titleSection}>
                             <Text style={styles.title}>Receive Crypto</Text>
-                            <Text style={styles.subtitle}>
-                                Scan QR code or copy address below
-                            </Text>
+                            <Text style={styles.subtitle}>Scan QR code or copy address below</Text>
                         </View>
 
                         <View style={styles.qrContainer}>
@@ -71,26 +79,18 @@ export default function ReceiveScreen() {
 
                         <View style={styles.addressSection}>
                             <View style={styles.addressCard}>
-                                <Text style={styles.addressLabel}>
-                                    Your Solana Wallet Address
-                                </Text>
+                                <Text style={styles.addressLabel}>Your Solana Wallet Address</Text>
                                 <Text style={styles.addressText} selectable>
                                     {publicKeyString || "Not available"}
                                 </Text>
                             </View>
 
                             <View style={styles.buttonRow}>
-                                <Pressable
-                                    onPress={handleCopy}
-                                    style={styles.actionButton}
-                                >
+                                <Pressable onPress={handleCopy} style={styles.actionButton}>
                                     <Text style={styles.actionIcon}>📋</Text>
                                     <Text style={styles.actionText}>Copy</Text>
                                 </Pressable>
-                                <Pressable
-                                    onPress={handleShare}
-                                    style={styles.actionButton}
-                                >
+                                <Pressable onPress={handleShare} style={styles.actionButton}>
                                     <Text style={styles.actionIcon}>↗</Text>
                                     <Text style={styles.actionText}>Share</Text>
                                 </Pressable>
@@ -101,9 +101,7 @@ export default function ReceiveScreen() {
                     <View style={styles.notesCard}>
                         <Text style={styles.notesTitle}>Important Notes</Text>
                         <View style={styles.notesList}>
-                            <Text style={styles.noteItem}>
-                                • Only send crypto to this address
-                            </Text>
+                            <Text style={styles.noteItem}>• Only send crypto to this address</Text>
                             <Text style={styles.noteItem}>
                                 • Sending other assets may result in permanent loss
                             </Text>
@@ -121,29 +119,29 @@ export default function ReceiveScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
+        backgroundColor: "#FAFAFA",
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        flexDirection: "row",
+        alignItems: "flex-end",
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#E1E4E8',
-        backgroundColor: '#FFFFFF',
+        borderBottomColor: "#E1E4E8",
+        backgroundColor: "#FFFFFF",
     },
     backButton: {
         marginRight: 8,
     },
     backText: {
         fontSize: 24,
-        color: '#29343D',
+        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     scrollView: {
         flex: 1,
@@ -153,118 +151,118 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 24,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         gap: 24,
     },
     titleSection: {
-        alignItems: 'center',
+        alignItems: "center",
         gap: 8,
     },
     title: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     subtitle: {
         fontSize: 14,
-        color: '#737A82',
-        textAlign: 'center',
+        color: "#737A82",
+        textAlign: "center",
     },
     qrContainer: {
-        alignItems: 'center',
+        alignItems: "center",
     },
     qrOuter: {
         width: 256,
         height: 256,
-        backgroundColor: '#EFF1F3',
+        backgroundColor: "#EFF1F3",
         borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         borderWidth: 2,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
     },
     qrInner: {
         width: 192,
         height: 192,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     qrPlaceholder: {
         fontSize: 12,
-        color: '#737A82',
-        textAlign: 'center',
+        color: "#737A82",
+        textAlign: "center",
         paddingHorizontal: 16,
         marginTop: 12,
     },
     qrLoadingContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     addressSection: {
         gap: 12,
     },
     addressCard: {
         padding: 16,
-        backgroundColor: '#EFF1F3',
+        backgroundColor: "#EFF1F3",
         borderRadius: 8,
     },
     addressLabel: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
         marginBottom: 8,
     },
     addressText: {
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
     },
     buttonRow: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: 12,
     },
     actionButton: {
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         gap: 8,
         padding: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         borderRadius: 8,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
     },
     actionIcon: {
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
     },
     actionText: {
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
     },
     notesCard: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         gap: 8,
         marginTop: 24,
     },
     notesTitle: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     notesList: {
         gap: 4,
     },
     noteItem: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
 });

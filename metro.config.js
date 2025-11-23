@@ -8,17 +8,17 @@ config.resolver = {
     ...config.resolver,
     extraNodeModules: {
         ...config.resolver?.extraNodeModules,
-        buffer: require.resolve('buffer'),
-        process: require.resolve('process/browser'),
+        buffer: require.resolve("buffer"),
+        process: require.resolve("process/browser"),
         // Explicitly resolve subpath exports for @noble/hashes
-        '@noble/hashes/hmac': require.resolve('@noble/hashes/hmac.js'),
-        '@noble/hashes/sha2': require.resolve('@noble/hashes/sha2.js'),
+        "@noble/hashes/hmac": require.resolve("@noble/hashes/hmac.js"),
+        "@noble/hashes/sha2": require.resolve("@noble/hashes/sha2.js"),
         // Explicitly resolve subpath exports for @scure/bip39
-        '@scure/bip39/wordlists/english': require.resolve('@scure/bip39/wordlists/english.js'),
+        "@scure/bip39/wordlists/english": require.resolve("@scure/bip39/wordlists/english.js"),
     },
 };
 
 module.exports = withNativeWind(config, {
     input: "./global.css",
-    inlineRem: 16
+    inlineRem: 16,
 });

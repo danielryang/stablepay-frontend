@@ -1,31 +1,40 @@
 // Ensure polyfills are loaded before crypto imports
-import '../polyfills';
+import { hmac } from "@noble/hashes/hmac";
+import { sha512 } from "@noble/hashes/sha2";
+import * as bip39 from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
+import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
+import {
+    Connection,
+    Keypair,
+    LAMPORTS_PER_SOL,
+    PublicKey,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { Buffer } from "buffer";
+import CryptoJS from "crypto-js";
+import * as nacl from "tweetnacl";
 
-import { Buffer } from 'buffer';
-import * as bip39 from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
-import { hmac } from '@noble/hashes/hmac';
-import { sha512 } from '@noble/hashes/sha2';
-import { Keypair, PublicKey, Connection, Transaction, sendAndConfirmTransaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
-import * as nacl from 'tweetnacl';
-import * as SecureStore from 'expo-secure-store';
-import CryptoJS from 'crypto-js';
+import * as SecureStore from "expo-secure-store";
+
+import "../polyfills";
 
 // Solana derivation path: m/44'/501'/0'/0'
 const SOLANA_DERIVATION_PATH = "m/44'/501'/0'/0'";
-const WALLET_STORAGE_KEY = 'encrypted_wallet';
-const WALLET_SECRET_KEY = 'encrypted_secret_key';
-const WALLET_PASSWORD_KEY = 'wallet_password_hash';
+const WALLET_STORAGE_KEY = "encrypted_wallet";
+const WALLET_SECRET_KEY = "encrypted_secret_key";
+const WALLET_PASSWORD_KEY = "wallet_password_hash";
 
 // Connection to Solana devnet
-export const SOLANA_RPC_URL = 'https://api.devnet.solana.com';
-export const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
+export const SOLANA_RPC_URL = "https://api.devnet.solana.com";
+export const connection = new Connection(SOLANA_RPC_URL, "confirmed");
 
 // USDC mint address on Solana devnet
 // Official USDC devnet mint (test token)
 // For mainnet, use: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
-export const USDC_MINT_DEVNET = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
+export const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 
 /**
  * Derive Ed25519 key using BIP32-style derivation
@@ -33,18 +42,18 @@ export const USDC_MINT_DEVNET = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
  */
 function deriveEd25519Path(seed: Uint8Array, path: string): Uint8Array {
     const segments = path
-        .split('/')
+        .split("/")
         .slice(1)
-        .map((part) => {
+        .map(part => {
             if (!part.endsWith("'")) {
-                throw new Error('Only hardened paths are allowed');
+                throw new Error("Only hardened paths are allowed");
             }
             return (parseInt(part.slice(0, -1)) | 0x80000000) >>> 0;
         });
 
     // Initial HMAC-SHA512 with "ed25519 seed"
     // @noble/hashes hmac(key, message) - key first, then message
-    const seedKey = new TextEncoder().encode('ed25519 seed');
+    const seedKey = new TextEncoder().encode("ed25519 seed");
     let key = hmac(sha512, seedKey, seed);
     let priv = key.slice(0, 32);
     let chainCode = key.slice(32);
@@ -58,7 +67,7 @@ function deriveEd25519Path(seed: Uint8Array, path: string): Uint8Array {
         data[34] = (index >> 16) & 0xff;
         data[35] = (index >> 8) & 0xff;
         data[36] = index & 0xff;
-        
+
         // @noble/hashes hmac(key, message)
         const I = hmac(sha512, chainCode, data);
         priv = I.slice(0, 32);
@@ -86,36 +95,36 @@ function encryptWalletData(data: string, password: string): string {
     const salt = CryptoJS.lib.WordArray.random(128 / 8).toString();
     const key = deriveEncryptionKey(password, salt);
     const iv = CryptoJS.lib.WordArray.random(128 / 8);
-    
+
     const encrypted = CryptoJS.AES.encrypt(data, key, {
         iv: iv,
         padding: CryptoJS.pad.Pkcs7,
         mode: CryptoJS.mode.CBC,
     });
-    
+
     // Combine salt, iv, and encrypted data
-    return salt + ':' + iv.toString() + ':' + encrypted.toString();
+    return salt + ":" + iv.toString() + ":" + encrypted.toString();
 }
 
 /**
  * Decrypt wallet data
  */
 function decryptWalletData(encryptedData: string, password: string): string {
-    const parts = encryptedData.split(':');
+    const parts = encryptedData.split(":");
     if (parts.length !== 3) {
-        throw new Error('Invalid encrypted data format');
+        throw new Error("Invalid encrypted data format");
     }
-    
+
     const [salt, ivHex, encrypted] = parts;
     const key = deriveEncryptionKey(password, salt);
     const iv = CryptoJS.enc.Hex.parse(ivHex);
-    
+
     const decrypted = CryptoJS.AES.decrypt(encrypted, key, {
         iv: iv,
         padding: CryptoJS.pad.Pkcs7,
         mode: CryptoJS.mode.CBC,
     });
-    
+
     return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
@@ -139,18 +148,18 @@ export function validateMnemonic(mnemonic: string): boolean {
 export async function deriveKeypairFromMnemonic(mnemonic: string): Promise<Keypair> {
     // Validate mnemonic
     if (!bip39.validateMnemonic(mnemonic, wordlist)) {
-        throw new Error('Invalid mnemonic phrase');
+        throw new Error("Invalid mnemonic phrase");
     }
-    
+
     // Generate seed from mnemonic (returns Uint8Array)
     const seed = await bip39.mnemonicToSeed(mnemonic);
-    
+
     // Derive key using Solana derivation path
     const privateKey = deriveEd25519Path(seed, SOLANA_DERIVATION_PATH);
-    
+
     // Create keypair from derived private key
     const keypair = Keypair.fromSeed(privateKey);
-    
+
     return keypair;
 }
 
@@ -166,17 +175,17 @@ export async function storeEncryptedWallet(
 ): Promise<void> {
     try {
         // Convert secretKey (Uint8Array) to base64 string for encryption
-        const secretKeyBase64 = Buffer.from(keypair.secretKey).toString('base64');
-        
+        const secretKeyBase64 = Buffer.from(keypair.secretKey).toString("base64");
+
         // Calculate password hash (fast operation)
         const passwordHash = CryptoJS.SHA256(password).toString();
-        
+
         // Encrypt both secret key and mnemonic in parallel for better performance
         const [encryptedSecretKey, encryptedMnemonic] = await Promise.all([
             Promise.resolve(encryptWalletData(secretKeyBase64, password)),
             Promise.resolve(encryptWalletData(mnemonic, password)),
         ]);
-        
+
         // Store all encrypted data in parallel
         await Promise.all([
             SecureStore.setItemAsync(WALLET_SECRET_KEY, encryptedSecretKey),
@@ -196,44 +205,44 @@ export async function loadEncryptedWallet(password: string): Promise<Keypair> {
     try {
         // Try to load encrypted secret key first (preferred method)
         const encryptedSecretKey = await SecureStore.getItemAsync(WALLET_SECRET_KEY);
-        
+
         if (encryptedSecretKey) {
             // Verify password
             const storedPasswordHash = await SecureStore.getItemAsync(WALLET_PASSWORD_KEY);
             const passwordHash = CryptoJS.SHA256(password).toString();
-            
+
             if (storedPasswordHash !== passwordHash) {
-                throw new Error('Invalid password');
+                throw new Error("Invalid password");
             }
-            
+
             // Decrypt secret key
             const secretKeyBase64 = decryptWalletData(encryptedSecretKey, password);
-            const secretKey = Buffer.from(secretKeyBase64, 'base64');
-            
+            const secretKey = Buffer.from(secretKeyBase64, "base64");
+
             // Reconstruct keypair from secret key
             return Keypair.fromSecretKey(secretKey);
         }
-        
+
         // Fallback: if no encrypted secret key, try to load from mnemonic (legacy support)
         const encryptedMnemonic = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
-        
+
         if (!encryptedMnemonic) {
-            throw new Error('No wallet found');
+            throw new Error("No wallet found");
         }
-        
+
         // Verify password
         const storedPasswordHash = await SecureStore.getItemAsync(WALLET_PASSWORD_KEY);
         const passwordHash = CryptoJS.SHA256(password).toString();
-        
+
         if (storedPasswordHash !== passwordHash) {
-            throw new Error('Invalid password');
+            throw new Error("Invalid password");
         }
-        
+
         // Decrypt mnemonic and derive keypair
         const mnemonic = decryptWalletData(encryptedMnemonic, password);
         return await deriveKeypairFromMnemonic(mnemonic);
     } catch (error: any) {
-        if (error.message === 'Invalid password' || error.message === 'No wallet found') {
+        if (error.message === "Invalid password" || error.message === "No wallet found") {
             throw error;
         }
         throw new Error(`Failed to load wallet: ${error.message || error}`);
@@ -307,13 +316,10 @@ export async function getBalance(publicKey: PublicKey): Promise<number> {
 export async function getUSDCBalance(publicKey: PublicKey): Promise<number> {
     try {
         const usdcMint = new PublicKey(USDC_MINT_DEVNET);
-        
+
         // Get the associated token address for this wallet
-        const tokenAccount = await getAssociatedTokenAddress(
-            usdcMint,
-            publicKey
-        );
-        
+        const tokenAccount = await getAssociatedTokenAddress(usdcMint, publicKey);
+
         try {
             // Try to get the token account
             const accountInfo = await getAccount(connection, tokenAccount);
@@ -323,21 +329,21 @@ export async function getUSDCBalance(publicKey: PublicKey): Promise<number> {
             // If account doesn't exist, balance is 0
             // Check for TokenAccountNotFoundError or related error messages
             if (
-                error.name === 'TokenAccountNotFoundError' ||
-                error.message?.includes('could not find account') ||
-                error.message?.includes('TokenAccountNotFoundError') ||
-                error.message?.includes('Invalid param: could not find account')
+                error.name === "TokenAccountNotFoundError" ||
+                error.message?.includes("could not find account") ||
+                error.message?.includes("TokenAccountNotFoundError") ||
+                error.message?.includes("Invalid param: could not find account")
             ) {
                 return 0;
             }
             // Log other errors but don't throw - return 0 instead
-            console.warn('Error fetching USDC balance:', error);
+            console.warn("Error fetching USDC balance:", error);
             return 0;
         }
     } catch (error: any) {
         // Catch all errors and return 0 instead of throwing
         // This prevents the app from crashing when token account doesn't exist
-        console.warn('Failed to get USDC balance:', error);
+        console.warn("Failed to get USDC balance:", error);
         return 0;
     }
 }
@@ -345,89 +351,95 @@ export async function getUSDCBalance(publicKey: PublicKey): Promise<number> {
 /**
  * Get recent transactions for a public key
  */
-export async function getRecentTransactions(publicKey: PublicKey, limit: number = 10): Promise<any[]> {
+export async function getRecentTransactions(
+    publicKey: PublicKey,
+    limit: number = 10
+): Promise<any[]> {
     try {
         // Get signatures for this address
         const signatures = await connection.getSignaturesForAddress(publicKey, { limit });
-        
+
         // Fetch transaction details
         const transactions = await Promise.all(
-            signatures.map(async (sigInfo) => {
+            signatures.map(async sigInfo => {
                 try {
                     const tx = await connection.getTransaction(sigInfo.signature, {
                         maxSupportedTransactionVersion: 0,
                     });
-                    
+
                     if (!tx) return null;
-                    
+
                     // Parse transaction to extract relevant info
-                    const blockTime = sigInfo.blockTime 
-                        ? new Date(sigInfo.blockTime * 1000).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                        })
-                        : 'Unknown';
-                    
+                    const blockTime = sigInfo.blockTime
+                        ? new Date(sigInfo.blockTime * 1000).toLocaleString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                          })
+                        : "Unknown";
+
                     // Determine transaction type and amounts
-                    let type: 'sent' | 'received' | 'unknown' = 'unknown';
-                    let amount = '0';
-                    let toAddress = '';
-                    
+                    let type: "sent" | "received" | "unknown" = "unknown";
+                    let amount = "0";
+                    let toAddress = "";
+
                     if (tx.meta) {
                         const preBalances = tx.meta.preBalances;
                         const postBalances = tx.meta.postBalances;
                         const accountKeys = tx.transaction.message.accountKeys;
-                        
+
                         // Find the account index for our public key
                         const ourAccountIndex = accountKeys.findIndex(
-                            (key) => key.pubkey.toBase58() === publicKey.toBase58()
+                            key => key.pubkey.toBase58() === publicKey.toBase58()
                         );
-                        
+
                         if (ourAccountIndex >= 0 && preBalances && postBalances) {
-                            const balanceChange = (postBalances[ourAccountIndex] - preBalances[ourAccountIndex]) / LAMPORTS_PER_SOL;
-                            
+                            const balanceChange =
+                                (postBalances[ourAccountIndex] - preBalances[ourAccountIndex]) /
+                                LAMPORTS_PER_SOL;
+
                             if (balanceChange < 0) {
-                                type = 'sent';
+                                type = "sent";
                                 amount = Math.abs(balanceChange).toFixed(4);
                             } else if (balanceChange > 0) {
-                                type = 'received';
+                                type = "received";
                                 amount = balanceChange.toFixed(4);
                             }
-                            
+
                             // Try to find the other address
                             const otherAccountIndex = accountKeys.findIndex(
-                                (key, idx) => idx !== ourAccountIndex && 
-                                    (preBalances[idx] !== postBalances[idx])
+                                (key, idx) =>
+                                    idx !== ourAccountIndex &&
+                                    preBalances[idx] !== postBalances[idx]
                             );
                             if (otherAccountIndex >= 0) {
                                 toAddress = accountKeys[otherAccountIndex].pubkey.toBase58();
                             }
                         }
                     }
-                    
+
                     return {
                         signature: sigInfo.signature,
                         date: blockTime,
                         type,
                         amount,
-                        toAddress: toAddress || 'Unknown',
+                        toAddress: toAddress || "Unknown",
                         fromAddress: publicKey.toBase58(),
-                        status: sigInfo.err ? 'Failed' : 'Confirmed',
-                        fee: tx.meta?.fee ? (tx.meta.fee / LAMPORTS_PER_SOL).toFixed(6) : '0',
+                        status: sigInfo.err ? "Failed" : "Confirmed",
+                        fee: tx.meta?.fee ? (tx.meta.fee / LAMPORTS_PER_SOL).toFixed(6) : "0",
                     };
                 } catch (error) {
-                    console.error('Error parsing transaction:', error);
+                    console.error("Error parsing transaction:", error);
                     return null;
                 }
             })
         );
-        
+
         return transactions.filter(tx => tx !== null);
     } catch (error) {
-        console.error('Failed to get recent transactions:', error);
+        console.error("Failed to get recent transactions:", error);
         return [];
     }
 }
@@ -448,19 +460,15 @@ export async function sendTransaction(
                 lamports: amount * LAMPORTS_PER_SOL,
             })
         );
-        
+
         // Get recent blockhash
         const { blockhash } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = keypair.publicKey;
-        
+
         // Sign and send transaction
-        const signature = await sendAndConfirmTransaction(
-            connection,
-            transaction,
-            [keypair]
-        );
-        
+        const signature = await sendAndConfirmTransaction(connection, transaction, [keypair]);
+
         return signature;
     } catch (error) {
         throw new Error(`Failed to send transaction: ${error}`);

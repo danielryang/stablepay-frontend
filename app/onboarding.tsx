@@ -1,5 +1,6 @@
-import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import { useRouter } from "expo-router";
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -51,57 +52,57 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: "#FAFAFA",
+        alignItems: "center",
+        justifyContent: "center",
         padding: 16,
     },
     content: {
-        width: '100%',
+        width: "100%",
         maxWidth: 400,
         gap: 32,
     },
     logoContainer: {
-        alignItems: 'center',
+        alignItems: "center",
         gap: 8,
     },
     logo: {
-        backgroundColor: '#0891D1',
+        backgroundColor: "#0891D1",
         borderRadius: 999,
         padding: 16,
         width: 80,
         height: 80,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     logoIcon: {
         fontSize: 48,
     },
     title: {
         fontSize: 30,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     subtitle: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
     card: {
         padding: 24,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         gap: 16,
     },
     cardTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     cardSubtitle: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
         marginBottom: 8,
     },
     buttonGroup: {
@@ -109,36 +110,35 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     primaryButton: {
-        backgroundColor: '#0891D1',
+        backgroundColor: "#0891D1",
         borderRadius: 8,
         padding: 16,
-        alignItems: 'center',
+        alignItems: "center",
     },
     primaryButtonText: {
-        color: '#FFFFFF',
+        color: "#FFFFFF",
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: "600",
     },
     secondaryButton: {
-        backgroundColor: '#EFF1F3',
+        backgroundColor: "#EFF1F3",
         borderRadius: 8,
         padding: 16,
-        alignItems: 'center',
+        alignItems: "center",
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
     },
     secondaryButtonText: {
-        color: '#29343D',
+        color: "#29343D",
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: "600",
     },
     footer: {
-        alignItems: 'center',
+        alignItems: "center",
     },
     footerText: {
         fontSize: 12,
-        color: '#737A82',
-        textAlign: 'center',
+        color: "#737A82",
+        textAlign: "center",
     },
 });
-

@@ -1,5 +1,6 @@
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
 import { useTransactions } from "@/contexts/TransactionContext";
-import { ScrollView, StyleSheet, Text, View, ActivityIndicator, Pressable } from "react-native";
 
 export default function ActivityScreen() {
     const { transactions, isLoading, refreshTransactions } = useTransactions();
@@ -25,70 +26,95 @@ export default function ActivityScreen() {
                     ) : transactions.length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyText}>No transactions yet</Text>
-                            <Text style={styles.emptySubtext}>Your transaction history will appear here</Text>
+                            <Text style={styles.emptySubtext}>
+                                Your transaction history will appear here
+                            </Text>
                         </View>
                     ) : (
                         <View style={styles.transactionsList}>
-                            {transactions.map((tx) => (
-                            <View key={tx.id} style={styles.transactionCard}>
-                                <View style={styles.transactionHeader}>
-                                    <View style={styles.headerLeft}>
-                                        <View style={styles.iconContainer}>
-                                            <Text style={styles.icon}>
-                                                {tx.type === "sent" ? "↗" : tx.type === "received" ? "↙" : "⟳"}
+                            {transactions.map(tx => (
+                                <View key={tx.id} style={styles.transactionCard}>
+                                    <View style={styles.transactionHeader}>
+                                        <View style={styles.headerLeft}>
+                                            <View style={styles.iconContainer}>
+                                                <Text style={styles.icon}>
+                                                    {tx.type === "sent"
+                                                        ? "↗"
+                                                        : tx.type === "received"
+                                                          ? "↙"
+                                                          : "⟳"}
+                                                </Text>
+                                            </View>
+                                            <View>
+                                                <Text style={styles.date}>{tx.date}</Text>
+                                                <Text
+                                                    style={[
+                                                        styles.status,
+                                                        tx.status === "Failed" &&
+                                                            styles.statusFailed,
+                                                    ]}
+                                                >
+                                                    {tx.status}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.amounts}>
+                                            <Text
+                                                style={[
+                                                    styles.fromAmount,
+                                                    tx.type === "received" && styles.receivedAmount,
+                                                ]}
+                                            >
+                                                {tx.type === "sent" ? "-" : "+"}
+                                                {tx.fromAmount} {tx.fromToken}
                                             </Text>
                                         </View>
-                                        <View>
-                                            <Text style={styles.date}>{tx.date}</Text>
-                                            <Text style={[styles.status, tx.status === 'Failed' && styles.statusFailed]}>
-                                                {tx.status}
-                                            </Text>
+                                    </View>
+
+                                    <View style={styles.divider} />
+
+                                    <View style={styles.addressRow}>
+                                        <View style={styles.addressColumn}>
+                                            <Text style={styles.addressLabel}>From</Text>
+                                            <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
+                                        </View>
+                                        <Text style={styles.arrow}>→</Text>
+                                        <View style={styles.addressColumn}>
+                                            <Text style={styles.addressLabel}>To</Text>
+                                            <Text style={styles.addressRight}>{tx.toAddress}</Text>
                                         </View>
                                     </View>
-                                    <View style={styles.amounts}>
-                                        <Text style={[styles.fromAmount, tx.type === 'received' && styles.receivedAmount]}>
-                                            {tx.type === 'sent' ? '-' : '+'}{tx.fromAmount} {tx.fromToken}
-                                        </Text>
-                                    </View>
-                                </View>
 
-                                <View style={styles.divider} />
+                                    <View style={styles.divider} />
 
-                                <View style={styles.addressRow}>
-                                    <View style={styles.addressColumn}>
-                                        <Text style={styles.addressLabel}>From</Text>
-                                        <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
-                                    </View>
-                                    <Text style={styles.arrow}>→</Text>
-                                    <View style={styles.addressColumn}>
-                                        <Text style={styles.addressLabel}>To</Text>
-                                        <Text style={styles.addressRight}>{tx.toAddress}</Text>
-                                    </View>
-                                </View>
-
-                                <View style={styles.divider} />
-
-                                <View style={styles.detailsSection}>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Transaction Fee:</Text>
-                                        <Text style={styles.detailValue}>{tx.transactionFee}</Text>
-                                    </View>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Speed:</Text>
-                                        <Text style={styles.detailValue}>{tx.speed}</Text>
-                                    </View>
-                                    {tx.signature && (
+                                    <View style={styles.detailsSection}>
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Signature:</Text>
-                                            <Text style={styles.signatureText} numberOfLines={1} ellipsizeMode="middle">
-                                                {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                                            <Text style={styles.detailLabel}>Transaction Fee:</Text>
+                                            <Text style={styles.detailValue}>
+                                                {tx.transactionFee}
                                             </Text>
                                         </View>
-                                    )}
+                                        <View style={styles.detailRow}>
+                                            <Text style={styles.detailLabel}>Speed:</Text>
+                                            <Text style={styles.detailValue}>{tx.speed}</Text>
+                                        </View>
+                                        {tx.signature && (
+                                            <View style={styles.detailRow}>
+                                                <Text style={styles.detailLabel}>Signature:</Text>
+                                                <Text
+                                                    style={styles.signatureText}
+                                                    numberOfLines={1}
+                                                    ellipsizeMode="middle"
+                                                >
+                                                    {tx.signature.slice(0, 8)}...
+                                                    {tx.signature.slice(-8)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </View>
                                 </View>
-                            </View>
-                        ))}
-                    </View>
+                            ))}
+                        </View>
                     )}
                 </View>
             </ScrollView>
@@ -99,7 +125,7 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
+        backgroundColor: "#FAFAFA",
     },
     scrollView: {
         flex: 1,
@@ -108,20 +134,20 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
         marginBottom: 16,
     },
     title: {
         fontSize: 18,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
     refreshButton: {
         padding: 8,
@@ -130,94 +156,94 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     loadingContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         padding: 40,
     },
     loadingText: {
         marginTop: 12,
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
     emptyContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         padding: 40,
     },
     emptyText: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
         marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
-        color: '#737A82',
-        textAlign: 'center',
+        color: "#737A82",
+        textAlign: "center",
     },
     transactionsList: {
         gap: 12,
     },
     transactionCard: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
     },
     transactionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
         marginBottom: 12,
     },
     headerLeft: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: 12,
-        alignItems: 'flex-start',
+        alignItems: "flex-start",
     },
     iconContainer: {
-        backgroundColor: '#E0F2FE',
+        backgroundColor: "#E0F2FE",
         borderRadius: 999,
         padding: 8,
         marginTop: 4,
         width: 32,
         height: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     icon: {
-        color: '#0891D1',
+        color: "#0891D1",
         fontSize: 14,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
     date: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
     },
     status: {
         fontSize: 12,
-        color: '#22C55E',
+        color: "#22C55E",
         marginTop: 2,
     },
     statusFailed: {
-        color: '#EF4444',
+        color: "#EF4444",
     },
     amounts: {
-        alignItems: 'flex-end',
+        alignItems: "flex-end",
     },
     fromAmount: {
         fontSize: 14,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     receivedAmount: {
-        color: '#22C55E',
+        color: "#22C55E",
     },
     toAmount: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
         marginTop: 2,
     },
     addressColumn: {
@@ -225,72 +251,72 @@ const styles = StyleSheet.create({
     },
     addressLabel: {
         fontSize: 10,
-        color: '#737A82',
+        color: "#737A82",
         marginBottom: 4,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     divider: {
         height: 1,
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
         marginVertical: 12,
     },
     addressRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         gap: 8,
     },
     addressLeft: {
         fontSize: 12,
-        color: '#737A82',
+        color: "#737A82",
         flex: 1,
-        textAlign: 'left',
+        textAlign: "left",
     },
     addressRight: {
         fontSize: 12,
-        color: '#737A82',
+        color: "#737A82",
         flex: 1,
-        textAlign: 'right',
+        textAlign: "right",
     },
     arrow: {
         fontSize: 12,
-        color: '#737A82',
+        color: "#737A82",
     },
     detailsSection: {
         gap: 8,
     },
     detailRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
     detailLabel: {
         fontSize: 12,
-        color: '#737A82',
+        color: "#737A82",
     },
     detailValue: {
         fontSize: 12,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
     },
     detailValueSuccess: {
         fontSize: 12,
-        fontWeight: '500',
-        color: '#22C55E',
+        fontWeight: "500",
+        color: "#22C55E",
     },
     detailLabelBold: {
         fontSize: 12,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     detailValueBold: {
         fontSize: 12,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     signatureText: {
         fontSize: 10,
-        color: '#737A82',
-        fontFamily: 'monospace',
+        color: "#737A82",
+        fontFamily: "monospace",
         maxWidth: 150,
     },
 });

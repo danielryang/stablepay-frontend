@@ -1,13 +1,11 @@
 // IMPORTANT: Polyfills must be imported FIRST before any other imports
-import "../polyfills";
-
 import { useEffect } from "react";
+import { View } from "react-native";
 import "react-native-reanimated";
 
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { View } from "react-native";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -18,10 +16,11 @@ import { TransactionProvider } from "@/contexts/TransactionContext";
 import { WalletProvider } from "@/contexts/WalletContext";
 
 import "../global.css";
+import "../polyfills";
 
 export {
     // Catch any errors thrown by the Layout component.
-    ErrorBoundary
+    ErrorBoundary,
 } from "expo-router";
 
 export const unstable_settings = {
@@ -62,7 +61,7 @@ function RootLayoutNav() {
         <WalletProvider>
             <TransactionProvider>
                 <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-                    <View style={{ flex: 1, paddingTop: 30, backgroundColor: '#FFFFFF' }}>
+                    <View style={{ flex: 1, paddingTop: 30, backgroundColor: "#FFFFFF" }}>
                         <Stack>
                             <Stack.Screen name="login" options={{ headerShown: false }} />
                             <Stack.Screen name="onboarding" options={{ headerShown: false }} />

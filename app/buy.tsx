@@ -1,7 +1,18 @@
-import { useTransactions } from "@/contexts/TransactionContext";
-import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+    Alert,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+
+import { useRouter } from "expo-router";
+
+import { useTransactions } from "@/contexts/TransactionContext";
 
 export default function BuyScreen() {
     const router = useRouter();
@@ -23,8 +34,8 @@ export default function BuyScreen() {
             hour12: true,
         });
 
-        const transactionFee = 2.00;
-        const feesSaved = 8.50;
+        const transactionFee = 2.0;
+        const feesSaved = 8.5;
         const finalTotal = parseFloat(amount) + transactionFee;
 
         addTransaction({
@@ -45,7 +56,7 @@ export default function BuyScreen() {
 
         // Navigate to home immediately
         router.push("/(tabs)");
-        
+
         // Show success alert after navigation
         setTimeout(() => {
             Alert.alert("Success", "Purchase completed successfully!");
@@ -54,9 +65,9 @@ export default function BuyScreen() {
 
     const formatCardNumber = (text: string) => {
         // Remove all non-digits
-        const cleaned = text.replace(/\D/g, '');
+        const cleaned = text.replace(/\D/g, "");
         // Add space every 4 digits
-        const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
+        const formatted = cleaned.match(/.{1,4}/g)?.join(" ") || cleaned;
         return formatted.slice(0, 19); // Limit to 16 digits + 3 spaces
     };
 
@@ -66,9 +77,9 @@ export default function BuyScreen() {
     };
 
     const formatExpiryDate = (text: string) => {
-        const cleaned = text.replace(/\D/g, '');
+        const cleaned = text.replace(/\D/g, "");
         if (cleaned.length >= 2) {
-            return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+            return cleaned.slice(0, 2) + "/" + cleaned.slice(2, 4);
         }
         return cleaned;
     };
@@ -131,7 +142,9 @@ export default function BuyScreen() {
                                     <Text style={styles.label}>CVV</Text>
                                     <TextInput
                                         value={cvv}
-                                        onChangeText={(text) => setCvv(text.replace(/\D/g, '').slice(0, 3))}
+                                        onChangeText={text =>
+                                            setCvv(text.replace(/\D/g, "").slice(0, 3))
+                                        }
                                         style={styles.input}
                                         placeholder="123"
                                         placeholderTextColor="#737A82"
@@ -189,10 +202,7 @@ export default function BuyScreen() {
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <Pressable
-                            onPress={() => router.back()}
-                            style={styles.cancelButton}
-                        >
+                        <Pressable onPress={() => router.back()} style={styles.cancelButton}>
                             <Text style={styles.cancelButtonText}>Cancel</Text>
                         </Pressable>
                         <Pressable onPress={handleBuy} style={styles.buyButton}>
@@ -208,29 +218,29 @@ export default function BuyScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
+        backgroundColor: "#FAFAFA",
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        flexDirection: "row",
+        alignItems: "flex-end",
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#E1E4E8',
-        backgroundColor: '#FFFFFF',
+        borderBottomColor: "#E1E4E8",
+        backgroundColor: "#FFFFFF",
     },
     backButton: {
         marginRight: 8,
     },
     backText: {
         fontSize: 24,
-        color: '#29343D',
+        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     scrollView: {
         flex: 1,
@@ -240,10 +250,10 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 24,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         gap: 24,
     },
     cardSection: {
@@ -251,8 +261,8 @@ const styles = StyleSheet.create({
     },
     sectionLabel: {
         fontSize: 14,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
         marginBottom: 8,
     },
     inputGroup: {
@@ -260,122 +270,134 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 12,
-        color: '#737A82',
+        color: "#737A82",
     },
     input: {
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
-        color: '#29343D',
+        color: "#29343D",
     },
     cardRow: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: 0,
     },
     divider: {
         height: 1,
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
     },
     amountSection: {
-        alignItems: 'center',
+        alignItems: "center",
         gap: 12,
     },
     amountLabel: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
     amountContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...(Platform.OS === 'web' ? {} : { gap: 2 }),
-        flexWrap: 'wrap',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        ...(Platform.OS === "web" ? {} : { gap: 2 }),
+        flexWrap: "wrap",
         paddingHorizontal: 8,
     },
     dollarSign: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#29343D',
-        ...(Platform.OS === 'web' ? {
-            marginRight: 2,
-        } : {}),
+        fontWeight: "bold",
+        color: "#29343D",
+        ...(Platform.OS === "web"
+            ? {
+                  marginRight: 2,
+              }
+            : {}),
     },
     amountInput: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#29343D',
-        textAlign: 'center',
+        fontWeight: "bold",
+        color: "#29343D",
+        textAlign: "center",
         paddingHorizontal: 0,
-        ...(Platform.OS === 'web' ? {
-            marginRight: 2,
-            padding: 0,
-            borderWidth: 0,
-            outline: 'none',
-            width: 'auto',
-        } : {}),
+        ...(Platform.OS === "web"
+            ? {
+                  marginRight: 2,
+                  padding: 0,
+                  borderWidth: 0,
+                  outline: "none",
+                  width: "auto",
+              }
+            : {}),
     },
     currencyLabel: {
         fontSize: 18,
-        color: '#737A82',
-        ...(Platform.OS === 'web' ? {
-            marginRight: 2,
-        } : {}),
+        color: "#737A82",
+        ...(Platform.OS === "web"
+            ? {
+                  marginRight: 2,
+              }
+            : {}),
     },
     equals: {
         fontSize: 18,
-        color: '#737A82',
-        ...(Platform.OS === 'web' ? {
-            marginLeft: 2,
-            marginRight: 2,
-        } : {}),
+        color: "#737A82",
+        ...(Platform.OS === "web"
+            ? {
+                  marginLeft: 2,
+                  marginRight: 2,
+              }
+            : {}),
     },
     convertedValue: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#29343D',
-        ...(Platform.OS === 'web' ? {
-            marginLeft: 2,
-            marginRight: 2,
-        } : {}),
+        fontWeight: "bold",
+        color: "#29343D",
+        ...(Platform.OS === "web"
+            ? {
+                  marginLeft: 2,
+                  marginRight: 2,
+              }
+            : {}),
     },
     currencyInput: {
         fontSize: 18,
-        color: '#737A82',
-        textAlign: 'center',
-        ...(Platform.OS === 'web' ? {
-            marginLeft: 0,
-            padding: 0,
-            borderWidth: 0,
-            outline: 'none',
-            width: 'auto',
-        } : {}),
+        color: "#737A82",
+        textAlign: "center",
+        ...(Platform.OS === "web"
+            ? {
+                  marginLeft: 0,
+                  padding: 0,
+                  borderWidth: 0,
+                  outline: "none",
+                  width: "auto",
+              }
+            : {}),
     },
     feesSection: {
         gap: 12,
     },
     feeRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
     feeLabel: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
     feeValue: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
     },
     feeValueSuccess: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#22C55E',
+        fontWeight: "500",
+        color: "#22C55E",
     },
     buttonContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: 12,
         marginTop: 16,
     },
@@ -383,28 +405,27 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 48,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
+        borderColor: "#E1E4E8",
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#FFFFFF",
     },
     cancelButtonText: {
-        color: '#29343D',
+        color: "#29343D",
         fontSize: 16,
     },
     buyButton: {
         flex: 1,
         height: 48,
-        backgroundColor: '#0891D1',
+        backgroundColor: "#0891D1",
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     buyButtonText: {
-        color: '#FFFFFF',
+        color: "#FFFFFF",
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: "500",
     },
 });
-

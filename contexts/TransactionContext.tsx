@@ -1,6 +1,15 @@
-import React, { createContext, ReactNode, useContext, useState, useEffect, useCallback } from "react";
-import { useWallet } from "./WalletContext";
+import React, {
+    ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
+
 import { getRecentTransactions } from "@/utils/wallet";
+
+import { useWallet } from "./WalletContext";
 
 export interface Transaction {
     id: string;
@@ -44,21 +53,23 @@ function TransactionProviderInner({ children }: { children: ReactNode }) {
         try {
             setIsLoading(true);
             const recentTxs = await getRecentTransactions(publicKey, 20);
-            
+
             const formattedTransactions: Transaction[] = recentTxs.map((tx, index) => ({
                 id: tx.signature || `tx-${index}`,
                 date: tx.date,
-                fromAddress: tx.fromAddress.length > 16 
-                    ? tx.fromAddress.slice(0, 8) + '...' + tx.fromAddress.slice(-8)
-                    : tx.fromAddress,
-                toAddress: tx.toAddress.length > 16 
-                    ? tx.toAddress.slice(0, 8) + '...' + tx.toAddress.slice(-8)
-                    : tx.toAddress,
+                fromAddress:
+                    tx.fromAddress.length > 16
+                        ? tx.fromAddress.slice(0, 8) + "..." + tx.fromAddress.slice(-8)
+                        : tx.fromAddress,
+                toAddress:
+                    tx.toAddress.length > 16
+                        ? tx.toAddress.slice(0, 8) + "..." + tx.toAddress.slice(-8)
+                        : tx.toAddress,
                 fromAmount: tx.amount,
                 fromToken: "USDC",
                 toAmount: tx.amount,
                 toToken: "USDC",
-                type: tx.type === 'sent' ? 'sent' : tx.type === 'received' ? 'received' : 'sent',
+                type: tx.type === "sent" ? "sent" : tx.type === "received" ? "received" : "sent",
                 status: tx.status,
                 transactionFee: `${tx.fee} SOL`,
                 speed: "~1s",
@@ -66,10 +77,10 @@ function TransactionProviderInner({ children }: { children: ReactNode }) {
                 finalTotal: tx.amount + " USDC",
                 signature: tx.signature,
             }));
-            
+
             setTransactions(formattedTransactions);
         } catch (error) {
-            console.error('Failed to fetch transactions:', error);
+            console.error("Failed to fetch transactions:", error);
             setTransactions([]);
         } finally {
             setIsLoading(false);
@@ -94,7 +105,9 @@ function TransactionProviderInner({ children }: { children: ReactNode }) {
     };
 
     return (
-        <TransactionContext.Provider value={{ transactions, isLoading, refreshTransactions, addTransaction }}>
+        <TransactionContext.Provider
+            value={{ transactions, isLoading, refreshTransactions, addTransaction }}
+        >
             {children}
         </TransactionContext.Provider>
     );
