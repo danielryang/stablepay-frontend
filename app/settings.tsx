@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
     Alert,
+    Image,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -78,6 +79,11 @@ export default function SettingsScreen() {
                     <Pressable onPress={() => router.back()} style={styles.backButton}>
                         <Text style={[styles.backText, { color: colors.text }]}>←</Text>
                     </Pressable>
+                    <Image
+                        source={require("@/assets/images/logo.png")}
+                        style={styles.headerLogo}
+                        resizeMode="contain"
+                    />
                     <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
                 </View>
             </View>
@@ -374,10 +380,15 @@ const styles = StyleSheet.create({
     },
     headerLeft: {
         flexDirection: "row",
-        alignItems: "flex-end",
+        alignItems: "center",
+        gap: 12,
+    },
+    headerLogo: {
+        width: 24,
+        height: 24,
     },
     backButton: {
-        marginRight: 8,
+        marginRight: 0,
     },
     backText: {
         fontSize: 24,

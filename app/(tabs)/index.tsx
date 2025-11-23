@@ -1,4 +1,12 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+    ActivityIndicator,
+    Image,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -30,13 +38,22 @@ export default function HomeScreen() {
                     { backgroundColor: colors.background, borderBottomColor: colors.border },
                 ]}
             >
-                <View>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Solana Wallet</Text>
-                    {publicKeyString && (
-                        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                            {formatAddress(publicKeyString)}
+                <View style={styles.headerLeft}>
+                    <Image
+                        source={require("@/assets/images/logo.png")}
+                        style={styles.headerLogo}
+                        resizeMode="contain"
+                    />
+                    <View>
+                        <Text style={[styles.headerTitle, { color: colors.text }]}>
+                            Solana Wallet
                         </Text>
-                    )}
+                        {publicKeyString && (
+                            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                                {formatAddress(publicKeyString)}
+                            </Text>
+                        )}
+                    </View>
                 </View>
                 <Pressable onPress={() => router.push("/settings")}>
                     <Text style={styles.settingsIcon}>⚙️</Text>
@@ -83,7 +100,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/convert")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>⟳</Text>
+                                <Text
+                                    style={[styles.actionIconText, { color: colors.textInverse }]}
+                                >
+                                    ⟳
+                                </Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Convert
@@ -98,7 +119,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/send")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>↗</Text>
+                                <Text
+                                    style={[styles.actionIconText, { color: colors.textInverse }]}
+                                >
+                                    ↗
+                                </Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>Send</Text>
                         </Pressable>
@@ -111,7 +136,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/receive")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text style={[styles.actionIconText, { color: colors.textInverse }]}>↙</Text>
+                                <Text
+                                    style={[styles.actionIconText, { color: colors.textInverse }]}
+                                >
+                                    ↙
+                                </Text>
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Receive
@@ -132,15 +161,12 @@ export default function HomeScreen() {
                             ]}
                         >
                             <View style={styles.tokenInfo}>
-                                <View
-                                    style={[
-                                        styles.tokenIconContainer,
-                                        { backgroundColor: colors.primaryLight },
-                                    ]}
-                                >
-                                    <Text style={[styles.tokenIconText, { color: colors.primary }]}>
-                                        $
-                                    </Text>
+                                <View style={styles.tokenIconContainer}>
+                                    <Image
+                                        source={require("@/assets/images/usdc.png")}
+                                        style={styles.tokenIconImage}
+                                        resizeMode="contain"
+                                    />
                                 </View>
                                 <View>
                                     <Text style={[styles.tokenName, { color: colors.text }]}>
@@ -152,7 +178,7 @@ export default function HomeScreen() {
                                             { color: colors.textSecondary },
                                         ]}
                                     >
-                                        USD Coin • Ethereum
+                                        USDC Coin • Solana
                                     </Text>
                                 </View>
                             </View>
@@ -176,6 +202,10 @@ export default function HomeScreen() {
                                 )}
                             </View>
                         </View>
+                    </View>
+
+                    <View style={styles.fiatSection}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Fiat</Text>
 
                         <View
                             style={[
@@ -187,61 +217,12 @@ export default function HomeScreen() {
                             ]}
                         >
                             <View style={styles.tokenInfo}>
-                                <View
-                                    style={[
-                                        styles.tokenIconContainer,
-                                        { backgroundColor: colors.successLight },
-                                    ]}
-                                >
-                                    <Text style={[styles.tokenIconText, { color: colors.success }]}>
-                                        T
-                                    </Text>
-                                </View>
-                                <View>
-                                    <Text style={[styles.tokenName, { color: colors.text }]}>
-                                        USDT
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.tokenSubtext,
-                                            { color: colors.textSecondary },
-                                        ]}
-                                    >
-                                        Tether • Polygon
-                                    </Text>
-                                </View>
-                            </View>
-                            <View style={styles.tokenBalance}>
-                                <Text style={[styles.tokenAmount, { color: colors.text }]}>
-                                    $700
-                                </Text>
-                                <Text
-                                    style={[styles.tokenSubtext, { color: colors.textSecondary }]}
-                                >
-                                    700 USDT
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View
-                            style={[
-                                styles.tokenCard,
-                                {
-                                    backgroundColor: colors.cardBackground,
-                                    borderColor: colors.border,
-                                },
-                            ]}
-                        >
-                            <View style={styles.tokenInfo}>
-                                <View
-                                    style={[
-                                        styles.tokenIconContainer,
-                                        { backgroundColor: colors.warningLight },
-                                    ]}
-                                >
-                                    <Text style={[styles.tokenIconText, { color: colors.warning }]}>
-                                        ₱
-                                    </Text>
+                                <View style={styles.tokenIconContainer}>
+                                    <Image
+                                        source={require("@/assets/images/ars.png")}
+                                        style={styles.tokenIconImage}
+                                        resizeMode="contain"
+                                    />
                                 </View>
                                 <View>
                                     <Text style={[styles.tokenName, { color: colors.text }]}>
@@ -287,6 +268,15 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
+    },
+    headerLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+    headerLogo: {
+        width: 32,
+        height: 32,
     },
     headerTitle: {
         fontSize: 20,
@@ -361,6 +351,10 @@ const styles = StyleSheet.create({
         gap: 16,
         marginTop: 24,
     },
+    fiatSection: {
+        gap: 16,
+        marginTop: 24,
+    },
     sectionTitle: {
         fontSize: 18,
         fontWeight: "600",
@@ -384,6 +378,11 @@ const styles = StyleSheet.create({
         borderRadius: 999,
         alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden",
+    },
+    tokenIconImage: {
+        width: 40,
+        height: 40,
     },
     tokenIconText: {
         fontSize: 14,

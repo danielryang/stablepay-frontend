@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Image,
     Pressable,
     StyleSheet,
     Text,
@@ -94,8 +95,12 @@ export default function LoginScreen() {
         <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    <View style={[styles.logo, { backgroundColor: colors.primary }]}>
-                        <Text style={styles.logoIcon}>💲</Text>
+                    <View style={styles.logo}>
+                        <Image
+                            source={require("@/assets/images/logo.png")}
+                            style={styles.logoImage}
+                            resizeMode="contain"
+                        />
                     </View>
                     <Text style={[styles.title, { color: colors.text }]}>StablePay</Text>
                     <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -186,15 +191,14 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     logo: {
-        borderRadius: 999,
-        padding: 16,
         width: 80,
         height: 80,
         alignItems: "center",
         justifyContent: "center",
     },
-    logoIcon: {
-        fontSize: 48,
+    logoImage: {
+        width: 80,
+        height: 80,
     },
     title: {
         fontSize: 30,
