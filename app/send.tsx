@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 
 import { useTransactions } from "@/contexts/TransactionContext";
+import { fetchFeeInfo } from "@/utils/feeApi";
 
 // Complete auth session on web
 if (Platform.OS === "web") {
@@ -36,6 +37,12 @@ export default function SendScreen() {
     const [toAddress, setToAddress] = useState("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063");
     const exchangeRate = 1050;
     const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
+
+    // Fee state
+    const [minimizedFee, setMinimizedFee] = useState<number>(2.0);
+    const [feesSaved, setFeesSaved] = useState<number>(8.5);
+    const [feesLoading, setFeesLoading] = useState<boolean>(false);
+    const [feesError, setFeesError] = useState<string | null>(null);
 
     // PayPal OAuth configuration
     // makeRedirectUri automatically handles:
@@ -179,6 +186,39 @@ export default function SendScreen() {
         }
     }, [response, payPalConnecting, handlePayPalCallback]);
 
+    // Fetch fees when amount or currency changes
+    useEffect(() => {
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            // Reset to default values if amount is invalid
+            setMinimizedFee(2.0);
+            setFeesSaved(8.5);
+            setFeesError(null);
+            return;
+        }
+
+        const fetchFees = async () => {
+            setFeesLoading(true);
+            setFeesError(null);
+            try {
+                // Use the converted amount (in destination currency) for fee calculation
+                const feeInfo = await fetchFeeInfo(convertedAmount, toCurrency);
+                setMinimizedFee(feeInfo.minimizedFee);
+                setFeesSaved(feeInfo.feesSaved);
+            } catch (error: any) {
+                console.error("Failed to fetch fees:", error);
+                setFeesError(error.message || "Failed to fetch fees");
+                // Keep previous values on error
+            } finally {
+                setFeesLoading(false);
+            }
+        };
+
+        // Debounce the API call to avoid too many requests
+        const timeoutId = setTimeout(fetchFees, 500);
+        return () => clearTimeout(timeoutId);
+    }, [amount, toCurrency, convertedAmount]);
+
     const handlePayPalLogin = async () => {
         try {
             setPayPalConnecting(true);
@@ -223,8 +263,8 @@ export default function SendScreen() {
             return addr;
         };
 
-        const transactionFee = 2.0;
-        const feesSaved = 8.5;
+        // Use the minimized fee as the transaction fee
+        const transactionFee = minimizedFee;
         const finalTotal = convertedAmount + transactionFee;
 
         const toAddressDisplay = sendToPayPal
@@ -414,11 +454,27 @@ export default function SendScreen() {
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
                                 <Text style={styles.feeLabel}>Total Fees Saved:</Text>
-                                <Text style={styles.feeValueSuccess}>8.50 {toCurrency}</Text>
+                                {feesLoading ? (
+                                    <Text style={styles.feeValue}>Loading...</Text>
+                                ) : feesError ? (
+                                    <Text style={styles.feeValueError}>Error</Text>
+                                ) : (
+                                    <Text style={styles.feeValueSuccess}>
+                                        {feesSaved.toFixed(2)} {toCurrency}
+                                    </Text>
+                                )}
                             </View>
                             <View style={styles.feeRow}>
                                 <Text style={styles.feeLabel}>Transaction Fee:</Text>
-                                <Text style={styles.feeValue}>2.00 {toCurrency}</Text>
+                                {feesLoading ? (
+                                    <Text style={styles.feeValue}>Loading...</Text>
+                                ) : feesError ? (
+                                    <Text style={styles.feeValueError}>Error</Text>
+                                ) : (
+                                    <Text style={styles.feeValue}>
+                                        {minimizedFee.toFixed(2)} {toCurrency}
+                                    </Text>
+                                )}
                             </View>
                             <View style={styles.feeRow}>
                                 <Text style={styles.feeLabel}>Speed:</Text>
@@ -602,6 +658,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "500",
         color: "#22C55E",
+    },
+    feeValueError: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: "#EF4444",
     },
     buttonContainer: {
         flexDirection: "row",
