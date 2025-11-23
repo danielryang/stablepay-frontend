@@ -2,9 +2,9 @@
  * Optimizer Settings Context
  * Stores user preferences for the Smart Allocation Optimizer
  */
-
-import React, { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
 
 export interface OptimizerSettings {
     minimumMonthlyExpenses: number;
@@ -15,10 +15,10 @@ export interface OptimizerSettings {
 const DEFAULT_SETTINGS: OptimizerSettings = {
     minimumMonthlyExpenses: 800,
     spendingPercentage: 0.15, // 15%
-    country: 'argentina',
+    country: "argentina",
 };
 
-const STORAGE_KEY = '@optimizer_settings';
+const STORAGE_KEY = "@optimizer_settings";
 
 interface OptimizerSettingsContextType {
     settings: OptimizerSettings;
@@ -45,7 +45,7 @@ export function OptimizerSettingsProvider({ children }: { children: ReactNode })
                 setSettings({ ...DEFAULT_SETTINGS, ...parsed });
             }
         } catch (error) {
-            console.warn('Failed to load optimizer settings:', error);
+            console.warn("Failed to load optimizer settings:", error);
         } finally {
             setLoaded(true);
         }
@@ -57,7 +57,7 @@ export function OptimizerSettingsProvider({ children }: { children: ReactNode })
         try {
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
         } catch (error) {
-            console.warn('Failed to save optimizer settings:', error);
+            console.warn("Failed to save optimizer settings:", error);
         }
     };
 
@@ -66,7 +66,7 @@ export function OptimizerSettingsProvider({ children }: { children: ReactNode })
         try {
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_SETTINGS));
         } catch (error) {
-            console.warn('Failed to reset optimizer settings:', error);
+            console.warn("Failed to reset optimizer settings:", error);
         }
     };
 
@@ -84,4 +84,3 @@ export function useOptimizerSettings() {
     }
     return context;
 }
-

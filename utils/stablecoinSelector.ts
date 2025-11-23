@@ -2,8 +2,7 @@
  * Determines which stablecoin is best for user's situation
  * Considers: chain, country, liquidity, conversion fees, stability
  */
-
-import { StablecoinLiquidityData } from './realDataFetcher';
+import { StablecoinLiquidityData } from "./realDataFetcher";
 
 export interface UserContext {
     country: string;
@@ -78,7 +77,7 @@ export function selectOptimalStablecoin(
 ): StablecoinRecommendation {
     const { country } = userContext;
 
-    const stablecoins = ['USDC', 'USDT', 'DAI'];
+    const stablecoins = ["USDC", "USDT", "DAI"];
     const scores: { [key: string]: StablecoinScore } = {};
 
     for (const stable of stablecoins) {
@@ -108,9 +107,11 @@ export function selectOptimalStablecoin(
             argentina: { USDT: 1.2, USDC: 1.0, DAI: 0.8 }, // USDT popular in LatAm
             venezuela: { USDT: 1.3, USDC: 0.9, DAI: 0.7 },
             turkey: { USDT: 1.1, USDC: 1.0, DAI: 0.9 },
-            default: { USDC: 1.0, USDT: 1.0, DAI: 1.0 }
+            default: { USDC: 1.0, USDT: 1.0, DAI: 1.0 },
         };
-        const regionalBonus = (regionalPreferences[country.toLowerCase()] || regionalPreferences.default)[stable] || 1.0;
+        const regionalBonus =
+            (regionalPreferences[country.toLowerCase()] || regionalPreferences.default)[stable] ||
+            1.0;
         score += (regionalBonus - 0.7) * 20; // Normalize
         if (regionalBonus > 1.0) {
             reasons.push(`Popular in ${country}`);
@@ -119,9 +120,9 @@ export function selectOptimalStablecoin(
         // Factor 4: Price stability (10% weight)
         // USDC and USDT are typically more stable than DAI
         const stabilityScores: { [key: string]: number } = {
-            USDC: 1.0,  // Most stable (Circle backed)
+            USDC: 1.0, // Most stable (Circle backed)
             USDT: 0.95, // Very stable (Tether)
-            DAI: 0.90   // Decentralized, slightly more volatile
+            DAI: 0.9, // Decentralized, slightly more volatile
         };
         score += stabilityScores[stable] * 10;
 
@@ -132,7 +133,7 @@ export function selectOptimalStablecoin(
             regionalFit: regionalBonus,
             reasons: reasons,
             price: data.price,
-            volume24h: data.volume24h
+            volume24h: data.volume24h,
         };
     }
 
@@ -144,7 +145,7 @@ export function selectOptimalStablecoin(
     return {
         recommended: ranked[0],
         alternatives: ranked.slice(1),
-        comparison: ranked
+        comparison: ranked,
     };
 }
 
@@ -177,7 +178,6 @@ export function shouldSwitchStablecoin(
         monthlySavings: monthlySavings,
         breakEvenMonths: breakEvenMonths,
         switchCost: switchCost,
-        sixMonthSavings: (monthlySavings * 6) - switchCost
+        sixMonthSavings: monthlySavings * 6 - switchCost,
     };
 }
-

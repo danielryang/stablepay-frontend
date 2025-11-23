@@ -2,9 +2,8 @@
  * Simple Markdown Renderer for React Native
  * Converts markdown text to React Native components
  */
-
-import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface MarkdownTextProps {
     children: string;
@@ -14,7 +13,7 @@ interface MarkdownTextProps {
 export function MarkdownText({ children, style }: MarkdownTextProps) {
     if (!children) return null;
 
-    const lines = children.split('\n');
+    const lines = children.split("\n");
     const elements: React.ReactNode[] = [];
     let listItems: string[] = [];
     let inList = false;
@@ -27,17 +26,21 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
         const processText = (str: string, parentStyle: any = style): React.ReactNode[] => {
             const result: React.ReactNode[] = [];
             let i = 0;
-            let currentText = '';
+            let currentText = "";
             let currentKey = key;
 
             while (i < str.length) {
                 // Check for **bold**
-                if (str.substring(i, i + 2) === '**') {
+                if (str.substring(i, i + 2) === "**") {
                     if (currentText) {
-                        result.push(<Text key={`text-${currentKey++}`} style={parentStyle}>{currentText}</Text>);
-                        currentText = '';
+                        result.push(
+                            <Text key={`text-${currentKey++}`} style={parentStyle}>
+                                {currentText}
+                            </Text>
+                        );
+                        currentText = "";
                     }
-                    const endBold = str.indexOf('**', i + 2);
+                    const endBold = str.indexOf("**", i + 2);
                     if (endBold !== -1) {
                         const boldText = str.substring(i + 2, endBold);
                         result.push(
@@ -52,12 +55,16 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
                     }
                 }
                 // Check for `code`
-                else if (str[i] === '`') {
+                else if (str[i] === "`") {
                     if (currentText) {
-                        result.push(<Text key={`text-${currentKey++}`} style={parentStyle}>{currentText}</Text>);
-                        currentText = '';
+                        result.push(
+                            <Text key={`text-${currentKey++}`} style={parentStyle}>
+                                {currentText}
+                            </Text>
+                        );
+                        currentText = "";
                     }
-                    const endCode = str.indexOf('`', i + 1);
+                    const endCode = str.indexOf("`", i + 1);
                     if (endCode !== -1) {
                         const codeText = str.substring(i + 1, endCode);
                         result.push(
@@ -79,11 +86,21 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
             }
 
             if (currentText) {
-                result.push(<Text key={`text-${currentKey++}`} style={parentStyle}>{currentText}</Text>);
+                result.push(
+                    <Text key={`text-${currentKey++}`} style={parentStyle}>
+                        {currentText}
+                    </Text>
+                );
             }
 
             key = currentKey;
-            return result.length > 0 ? result : [<Text key={`default-${key++}`} style={parentStyle}>{str}</Text>];
+            return result.length > 0
+                ? result
+                : [
+                      <Text key={`default-${key++}`} style={parentStyle}>
+                          {str}
+                      </Text>,
+                  ];
         };
 
         return processText(text);
@@ -93,12 +110,14 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
         const trimmedLine = line.trim();
 
         // Handle headers
-        if (trimmedLine.startsWith('# ')) {
+        if (trimmedLine.startsWith("# ")) {
             if (inList) {
                 elements.push(
                     <View key={`list-${index}`} style={styles.listContainer}>
                         {listItems.map((item, i) => (
-                            <Text key={i} style={[style, styles.listItem]}>• {item.replace(/^-\s*/, '')}</Text>
+                            <Text key={i} style={[style, styles.listItem]}>
+                                • {item.replace(/^-\s*/, "")}
+                            </Text>
                         ))}
                     </View>
                 );
@@ -110,12 +129,14 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
                     {parseInlineMarkdown(trimmedLine.substring(2))}
                 </Text>
             );
-        } else if (trimmedLine.startsWith('## ')) {
+        } else if (trimmedLine.startsWith("## ")) {
             if (inList) {
                 elements.push(
                     <View key={`list-${index}`} style={styles.listContainer}>
                         {listItems.map((item, i) => (
-                            <Text key={i} style={[style, styles.listItem]}>• {item.replace(/^-\s*/, '')}</Text>
+                            <Text key={i} style={[style, styles.listItem]}>
+                                • {item.replace(/^-\s*/, "")}
+                            </Text>
                         ))}
                     </View>
                 );
@@ -127,12 +148,14 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
                     {parseInlineMarkdown(trimmedLine.substring(3))}
                 </Text>
             );
-        } else if (trimmedLine.startsWith('### ')) {
+        } else if (trimmedLine.startsWith("### ")) {
             if (inList) {
                 elements.push(
                     <View key={`list-${index}`} style={styles.listContainer}>
                         {listItems.map((item, i) => (
-                            <Text key={i} style={[style, styles.listItem]}>• {item.replace(/^-\s*/, '')}</Text>
+                            <Text key={i} style={[style, styles.listItem]}>
+                                • {item.replace(/^-\s*/, "")}
+                            </Text>
                         ))}
                     </View>
                 );
@@ -146,20 +169,20 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
             );
         }
         // Handle list items
-        else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+        else if (trimmedLine.startsWith("- ") || trimmedLine.startsWith("* ")) {
             if (!inList) {
                 inList = true;
             }
             listItems.push(trimmedLine);
         }
         // Handle empty lines
-        else if (trimmedLine === '') {
+        else if (trimmedLine === "") {
             if (inList && listItems.length > 0) {
                 elements.push(
                     <View key={`list-${index}`} style={styles.listContainer}>
                         {listItems.map((item, i) => (
                             <Text key={i} style={[style, styles.listItem]}>
-                                • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ''))}
+                                • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ""))}
                             </Text>
                         ))}
                     </View>
@@ -176,7 +199,7 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
                     <View key={`list-${index}`} style={styles.listContainer}>
                         {listItems.map((item, i) => (
                             <Text key={i} style={[style, styles.listItem]}>
-                                • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ''))}
+                                • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ""))}
                             </Text>
                         ))}
                     </View>
@@ -198,7 +221,7 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
             <View key="list-final" style={styles.listContainer}>
                 {listItems.map((item, i) => (
                     <Text key={i} style={[style, styles.listItem]}>
-                        • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ''))}
+                        • {parseInlineMarkdown(item.replace(/^[-*]\s*/, ""))}
                     </Text>
                 ))}
             </View>
@@ -211,34 +234,34 @@ export function MarkdownText({ children, style }: MarkdownTextProps) {
 const styles = StyleSheet.create({
     h1: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginTop: 16,
         marginBottom: 8,
-        color: '#29343D',
+        color: "#29343D",
     },
     h2: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginTop: 12,
         marginBottom: 6,
-        color: '#29343D',
+        color: "#29343D",
     },
     h3: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: "600",
         marginTop: 10,
         marginBottom: 4,
-        color: '#29343D',
+        color: "#29343D",
     },
     bold: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
     italic: {
-        fontStyle: 'italic',
+        fontStyle: "italic",
     },
     code: {
-        fontFamily: 'monospace',
-        backgroundColor: '#F3F4F6',
+        fontFamily: "monospace",
+        backgroundColor: "#F3F4F6",
         paddingHorizontal: 4,
         paddingVertical: 2,
         borderRadius: 4,
@@ -255,4 +278,3 @@ const styles = StyleSheet.create({
         height: 8,
     },
 });
-

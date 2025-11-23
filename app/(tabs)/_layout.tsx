@@ -97,7 +97,12 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                     });
                 };
 
-                const iconName = route.name === "index" ? "home" : route.name === "two" ? "bar-chart" : "lightbulb-o";
+                const iconName =
+                    route.name === "index"
+                        ? "home"
+                        : route.name === "two"
+                          ? "bar-chart"
+                          : "lightbulb-o";
 
                 return (
                     <Pressable

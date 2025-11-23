@@ -1,19 +1,34 @@
+import React, { useState } from "react";
+import {
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+
+import { useRouter } from "expo-router";
+
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
 import { useWallet } from "@/contexts/WalletContext";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
 export default function SettingsScreen() {
     const router = useRouter();
     const { logout, publicKeyString } = useWallet();
     const { settings, updateSettings } = useOptimizerSettings();
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-    
+
     // Local state for optimizer settings (for editing)
-    const [minMonthlyExpenses, setMinMonthlyExpenses] = useState(settings.minimumMonthlyExpenses.toString());
-    const [spendingPercent, setSpendingPercent] = useState((settings.spendingPercentage * 100).toString());
-    
+    const [minMonthlyExpenses, setMinMonthlyExpenses] = useState(
+        settings.minimumMonthlyExpenses.toString()
+    );
+    const [spendingPercent, setSpendingPercent] = useState(
+        (settings.spendingPercentage * 100).toString()
+    );
+
     // Sync local state when settings change
     React.useEffect(() => {
         setMinMonthlyExpenses(settings.minimumMonthlyExpenses.toString());
@@ -119,15 +134,19 @@ export default function SettingsScreen() {
                     <View style={styles.section}>
                         <View style={styles.card}>
                             <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionHeaderText}>📊 Smart Allocation Optimizer</Text>
+                                <Text style={styles.sectionHeaderText}>
+                                    📊 Smart Allocation Optimizer
+                                </Text>
                             </View>
-                            
+
                             <View style={styles.divider} />
-                            
+
                             <View style={styles.settingItem}>
                                 <Text style={styles.settingIcon}>💰</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>Minimum Monthly Expenses</Text>
+                                    <Text style={styles.settingTitle}>
+                                        Minimum Monthly Expenses
+                                    </Text>
                                     <Text style={styles.settingSubtitle}>
                                         Minimum spending threshold (default: $800)
                                     </Text>
@@ -165,7 +184,10 @@ export default function SettingsScreen() {
                                         keyboardType="numeric"
                                         onBlur={() => {
                                             const value = parseFloat(spendingPercent) || 15;
-                                            const decimalValue = Math.max(0.01, Math.min(1, value / 100));
+                                            const decimalValue = Math.max(
+                                                0.01,
+                                                Math.min(1, value / 100)
+                                            );
                                             updateSettings({ spendingPercentage: decimalValue });
                                             setSpendingPercent(value.toString());
                                         }}
@@ -328,13 +350,13 @@ const styles = StyleSheet.create({
     },
     sectionHeaderText: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#29343D',
+        fontWeight: "600",
+        color: "#29343D",
     },
     inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F3F4F6',
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#F3F4F6",
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -342,21 +364,21 @@ const styles = StyleSheet.create({
     },
     inputPrefix: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
         marginRight: 4,
     },
     inputSuffix: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
         marginLeft: 4,
     },
     numberInput: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
         minWidth: 50,
-        textAlign: 'right',
+        textAlign: "right",
     },
 });

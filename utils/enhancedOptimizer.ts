@@ -2,9 +2,18 @@
  * ENHANCED OPTIMIZER
  * Now includes: timing recommendations + stablecoin selection
  */
-
-import { analyzeOptimalTiming, FiatExchangeRate, HistoricalDataResult, StablecoinLiquidityData } from './realDataFetcher';
-import { selectOptimalStablecoin, shouldSwitchStablecoin, StablecoinScore, UserContext } from './stablecoinSelector';
+import {
+    FiatExchangeRate,
+    HistoricalDataResult,
+    StablecoinLiquidityData,
+    analyzeOptimalTiming,
+} from "./realDataFetcher";
+import {
+    StablecoinScore,
+    UserContext,
+    selectOptimalStablecoin,
+    shouldSwitchStablecoin,
+} from "./stablecoinSelector";
 
 export interface UserBalance {
     chain: string;
@@ -54,8 +63,13 @@ export interface AnalysisItem {
 }
 
 export interface Recommendation {
-    type: 'switch_stablecoin' | 'convert_with_timing' | 'bridge' | 'timing_insight' | 'fiat_to_stablecoin';
-    priority?: 'high' | 'medium';
+    type:
+        | "switch_stablecoin"
+        | "convert_with_timing"
+        | "bridge"
+        | "timing_insight"
+        | "fiat_to_stablecoin";
+    priority?: "high" | "medium";
     chain?: string;
     from?: string;
     to?: string;
@@ -69,7 +83,7 @@ export interface Recommendation {
         liquidityImprovement?: boolean;
         regionalFit?: string[];
     };
-    timing?: 'urgent' | 'wait' | 'now';
+    timing?: "urgent" | "wait" | "now";
     token?: string;
     dueDate?: string;
     daysUntil?: number;
@@ -126,13 +140,19 @@ export function analyzeAndOptimize(
         USDT: StablecoinLiquidityData;
         DAI: StablecoinLiquidityData;
     },
-    userContext: UserContext & { monthlyTransactionFrequency?: number; monthlyExpenses?: number; upcomingExpenses?: UpcomingExpense[] },
+    userContext: UserContext & {
+        monthlyTransactionFrequency?: number;
+        monthlyExpenses?: number;
+        upcomingExpenses?: UpcomingExpense[];
+    },
     fiatBalances?: FiatBalance[],
     fiatExchangeRate?: FiatExchangeRate
 ): OptimizationResult {
     const analysis: AnalysisItem[] = [];
     const timingRecommendations: { [chain: string]: ReturnType<typeof analyzeOptimalTiming> } = {};
-    const stablecoinRecommendations: { [chain: string]: ReturnType<typeof selectOptimalStablecoin> } = {};
+    const stablecoinRecommendations: {
+        [chain: string]: ReturnType<typeof selectOptimalStablecoin>;
+    } = {};
 
     // Step 1: Analyze each balance position
     for (const balance of userBalances) {
@@ -150,10 +170,7 @@ export function analyzeAndOptimize(
         const volatility = calculateStdDev(costs) / mean(costs);
 
         // Analyze optimal timing for this chain
-        const timingAnalysis = analyzeOptimalTiming(
-            chainHistory,
-            currentCost
-        );
+        const timingAnalysis = analyzeOptimalTiming(chainHistory, currentCost);
         timingRecommendations[balance.chain] = timingAnalysis;
 
         // Analyze optimal stablecoin for this chain
@@ -165,14 +182,20 @@ export function analyzeAndOptimize(
         stablecoinRecommendations[balance.chain] = stablecoinAnalysis;
 
         // Calculate conversion fees
-        const currentStableData = stablecoinLiquidityData[balance.token as keyof typeof stablecoinLiquidityData] || stablecoinLiquidityData.USDC;
-        const monthlyConversionCost = ((userContext.monthlyExpenses || 800) / 12) * (currentStableData.conversionFees[balance.chain] || 0.02);
+        const currentStableData =
+            stablecoinLiquidityData[balance.token as keyof typeof stablecoinLiquidityData] ||
+            stablecoinLiquidityData.USDC;
+        const monthlyConversionCost =
+            ((userContext.monthlyExpenses || 800) / 12) *
+            (currentStableData.conversionFees[balance.chain] || 0.02);
 
         // Total monthly cost
         const totalMonthlyCost = avgMonthlyCost + monthlyConversionCost;
 
         // Find current stablecoin score
-        const currentStablecoinScore = stablecoinAnalysis.comparison.find(s => s.name === balance.token);
+        const currentStablecoinScore = stablecoinAnalysis.comparison.find(
+            s => s.name === balance.token
+        );
 
         analysis.push({
             chain: balance.chain,
@@ -186,7 +209,7 @@ export function analyzeAndOptimize(
             efficiency: 1 / totalMonthlyCost,
             timingData: timingAnalysis,
             recommendedStablecoin: stablecoinAnalysis.recommended,
-            currentStablecoinScore: currentStablecoinScore
+            currentStablecoinScore: currentStablecoinScore,
         });
     }
 
@@ -214,7 +237,7 @@ export function analyzeAndOptimize(
         timingRecommendations,
         stablecoinRecommendations,
         mostEfficientChain: mostEfficient.chain,
-        totalPotentialSavings: calculateSavings(recommendations)
+        totalPotentialSavings: calculateSavings(recommendations),
     };
 }
 
@@ -222,7 +245,11 @@ function generateEnhancedRecommendations(
     analysis: AnalysisItem[],
     mostEfficient: AnalysisItem,
     userBalances: UserBalance[],
-    userContext: UserContext & { monthlyTransactionFrequency?: number; monthlyExpenses?: number; upcomingExpenses?: UpcomingExpense[] },
+    userContext: UserContext & {
+        monthlyTransactionFrequency?: number;
+        monthlyExpenses?: number;
+        upcomingExpenses?: UpcomingExpense[];
+    },
     timingData: { [chain: string]: ReturnType<typeof analyzeOptimalTiming> },
     stablecoinData: { [chain: string]: ReturnType<typeof selectOptimalStablecoin> },
     liquidityData: {
@@ -242,16 +269,12 @@ function generateEnhancedRecommendations(
         const current = position.currentStablecoinScore;
 
         if (balance && balance.token !== recommended.name) {
-            const switchAnalysis = shouldSwitchStablecoin(
-                current,
-                recommended,
-                balance.amount
-            );
+            const switchAnalysis = shouldSwitchStablecoin(current, recommended, balance.amount);
 
             if (switchAnalysis.shouldSwitch) {
                 recommendations.push({
-                    type: 'switch_stablecoin',
-                    priority: switchAnalysis.sixMonthSavings > 50 ? 'high' : 'medium',
+                    type: "switch_stablecoin",
+                    priority: switchAnalysis.sixMonthSavings > 50 ? "high" : "medium",
                     chain: position.chain,
                     from: balance.token,
                     to: recommended.name,
@@ -260,11 +283,14 @@ function generateEnhancedRecommendations(
                     monthlySavings: switchAnalysis.monthlySavings.toFixed(2),
                     sixMonthSavings: switchAnalysis.sixMonthSavings.toFixed(2),
                     details: {
-                        currentFee: current ? (current.conversionFee * 100).toFixed(2) + '%' : 'N/A',
-                        newFee: (recommended.conversionFee * 100).toFixed(2) + '%',
-                        liquidityImprovement: recommended.liquidityScore > (current?.liquidityScore || 0),
-                        regionalFit: recommended.reasons
-                    }
+                        currentFee: current
+                            ? (current.conversionFee * 100).toFixed(2) + "%"
+                            : "N/A",
+                        newFee: (recommended.conversionFee * 100).toFixed(2) + "%",
+                        liquidityImprovement:
+                            recommended.liquidityScore > (current?.liquidityScore || 0),
+                        regionalFit: recommended.reasons,
+                    },
                 });
             }
         }
@@ -293,27 +319,31 @@ function generateEnhancedRecommendations(
                     const shouldWait = !timing.currentStatus.isGoodTimeNow && daysUntil > 3;
 
                     recommendations.push({
-                        type: 'convert_with_timing',
-                        timing: daysUntil < 2 ? 'urgent' : shouldWait ? 'wait' : 'now',
+                        type: "convert_with_timing",
+                        timing: daysUntil < 2 ? "urgent" : shouldWait ? "wait" : "now",
                         chain: best.chain,
                         token: best.currentToken,
                         amount: expense.amount,
                         dueDate: expense.dueDate,
                         daysUntil: daysUntil,
                         estimatedFee: (best.currentGasCost + expense.amount * 0.02).toFixed(2),
-                        reason: `${expense.type || 'payment'} due ${expense.dueDate}`,
+                        reason: `${expense.type || "payment"} due ${expense.dueDate}`,
                         timingAdvice: shouldWait
                             ? {
-                                recommendation: `Wait for ${timing.bestDayOfWeek.dayName}`,
-                                potentialSavings: timing.potentialSavings.amount.toFixed(2),
-                                bestTime: timing.timeOfDayRecommendations[best.chain]?.best || 'Check timing',
-                                currentPercentile: `Currently ${(timing.currentStatus.percentile * 100).toFixed(0)}th percentile (higher = more expensive)`
-                            }
+                                  recommendation: `Wait for ${timing.bestDayOfWeek.dayName}`,
+                                  potentialSavings: timing.potentialSavings.amount.toFixed(2),
+                                  bestTime:
+                                      timing.timeOfDayRecommendations[best.chain]?.best ||
+                                      "Check timing",
+                                  currentPercentile: `Currently ${(timing.currentStatus.percentile * 100).toFixed(0)}th percentile (higher = more expensive)`,
+                              }
                             : {
-                                recommendation: 'Convert now - good timing',
-                                currentPercentile: `Currently ${(timing.currentStatus.percentile * 100).toFixed(0)}th percentile`,
-                                bestTime: timing.timeOfDayRecommendations[best.chain]?.best || 'Check timing'
-                            }
+                                  recommendation: "Convert now - good timing",
+                                  currentPercentile: `Currently ${(timing.currentStatus.percentile * 100).toFixed(0)}th percentile`,
+                                  bestTime:
+                                      timing.timeOfDayRecommendations[best.chain]?.best ||
+                                      "Check timing",
+                              },
                     });
                 }
             }
@@ -325,7 +355,7 @@ function generateEnhancedRecommendations(
         ethereum: { polygon: 8, arbitrum: 6, solana: 12 },
         polygon: { ethereum: 5, arbitrum: 3, solana: 10 },
         arbitrum: { ethereum: 5, polygon: 3, solana: 9 },
-        solana: { ethereum: 12, polygon: 10, arbitrum: 9 }
+        solana: { ethereum: 12, polygon: 10, arbitrum: 9 },
     };
 
     for (const current of analysis) {
@@ -338,8 +368,8 @@ function generateEnhancedRecommendations(
 
         if (breakEvenMonths < 4 && monthlySavings > 2) {
             recommendations.push({
-                type: 'bridge',
-                priority: breakEvenMonths < 2 ? 'high' : 'medium',
+                type: "bridge",
+                priority: breakEvenMonths < 2 ? "high" : "medium",
                 from: current.chain,
                 to: mostEfficient.chain,
                 amount: current.amount * 0.6,
@@ -348,8 +378,8 @@ function generateEnhancedRecommendations(
                 breakEvenMonths: breakEvenMonths.toFixed(1),
                 sixMonthSavings: (monthlySavings * 6 - bridgeCost).toFixed(2),
                 timingAdvice: timingData[current.chain]?.currentStatus.isGoodTimeNow
-                    ? 'Good time to bridge (low gas)'
-                    : `Consider waiting for ${timingData[current.chain]?.bestDayOfWeek.dayName} for lower gas fees`
+                    ? "Good time to bridge (low gas)"
+                    : `Consider waiting for ${timingData[current.chain]?.bestDayOfWeek.dayName} for lower gas fees`,
             });
         }
     }
@@ -358,7 +388,9 @@ function generateEnhancedRecommendations(
     if (fiatBalances && fiatBalances.length > 0 && fiatExchangeRate) {
         console.log(`💰 Analyzing fiat distribution for ${fiatBalances.length} fiat balance(s)`);
         for (const fiatBalance of fiatBalances) {
-            console.log(`💱 Processing ${fiatBalance.amount} ${fiatBalance.currency} (exchange rate: 1 USD = ${fiatExchangeRate.usdRate} ${fiatExchangeRate.fiatCurrency})`);
+            console.log(
+                `💱 Processing ${fiatBalance.amount} ${fiatBalance.currency} (exchange rate: 1 USD = ${fiatExchangeRate.usdRate} ${fiatExchangeRate.fiatCurrency})`
+            );
             const fiatDistribution = analyzeFiatToStablecoinDistribution(
                 fiatBalance,
                 fiatExchangeRate,
@@ -368,45 +400,52 @@ function generateEnhancedRecommendations(
                 userContext,
                 mostEfficient
             );
-            
+
             if (fiatDistribution && fiatDistribution.distribution.length > 0) {
-                console.log(`✅ Generated fiat distribution recommendation with ${fiatDistribution.distribution.length} allocations`);
+                console.log(
+                    `✅ Generated fiat distribution recommendation with ${fiatDistribution.distribution.length} allocations`
+                );
                 recommendations.push({
-                    type: 'fiat_to_stablecoin',
-                    priority: fiatBalance.amount > 1000 ? 'high' : 'medium',
+                    type: "fiat_to_stablecoin",
+                    priority: fiatBalance.amount > 1000 ? "high" : "medium",
                     fiatAmount: fiatBalance.amount,
                     fiatCurrency: fiatBalance.currency,
                     distribution: fiatDistribution.distribution,
-                    totalConversionFee: fiatDistribution.totalConversionFee.toFixed(2) + '%',
+                    totalConversionFee: fiatDistribution.totalConversionFee.toFixed(2) + "%",
                     estimatedSavings6Months: fiatDistribution.estimatedSavings6Months.toFixed(2),
                     reason: fiatDistribution.reason,
-                    sixMonthSavings: fiatDistribution.estimatedSavings6Months.toFixed(2)
+                    sixMonthSavings: fiatDistribution.estimatedSavings6Months.toFixed(2),
                 });
             } else {
-                console.warn(`⚠️ No fiat distribution generated for ${fiatBalance.currency}. Distribution result:`, fiatDistribution);
+                console.warn(
+                    `⚠️ No fiat distribution generated for ${fiatBalance.currency}. Distribution result:`,
+                    fiatDistribution
+                );
             }
         }
     } else {
         if (!fiatBalances || fiatBalances.length === 0) {
-            console.log('ℹ️ No fiat balances provided for analysis');
+            console.log("ℹ️ No fiat balances provided for analysis");
         }
         if (!fiatExchangeRate) {
-            console.warn('⚠️ No fiat exchange rate available - fiat distribution analysis skipped');
+            console.warn("⚠️ No fiat exchange rate available - fiat distribution analysis skipped");
         }
     }
 
     // CATEGORY 5: General timing insights
     recommendations.push({
-        type: 'timing_insight',
+        type: "timing_insight",
         insights: Object.entries(timingData).map(([chain, data]) => ({
             chain,
             bestDay: data.bestDayOfWeek.dayName,
             worstDay: data.worstDayOfWeek.dayName,
-            bestTimeOfDay: data.timeOfDayRecommendations[chain]?.best || 'N/A',
-            avoidTimeOfDay: data.timeOfDayRecommendations[chain]?.avoid || 'N/A',
+            bestTimeOfDay: data.timeOfDayRecommendations[chain]?.best || "N/A",
+            avoidTimeOfDay: data.timeOfDayRecommendations[chain]?.avoid || "N/A",
             weekendVsWeekday: data.weekendVsWeekday.recommendation,
-            volatilityWarning: data.volatilityWarning ? 'High volatility - timing matters more' : null
-        }))
+            volatilityWarning: data.volatilityWarning
+                ? "High volatility - timing matters more"
+                : null,
+        })),
     });
 
     return recommendations;
@@ -442,23 +481,26 @@ function analyzeFiatToStablecoinDistribution(
 } | null {
     // Convert fiat to USD
     const fiatAmountUSD = fiatBalance.amount / exchangeRate.usdRate;
-    
+
     if (fiatAmountUSD < 10) {
         return null; // Too small to recommend
     }
 
     const monthlyExpenses = userContext.monthlyExpenses || 800;
     const monthlyTransactionFrequency = userContext.monthlyTransactionFrequency || 15;
-    
+
     // Calculate optimal distribution based on:
     // 1. Daily expenses (30-40%): USDT on Polygon (lower fees, LatAm preference)
     // 2. Savings (40-50%): USDC on Ethereum (higher liquidity, stability)
     // 3. Active use (10-20%): DAI on Arbitrum (lower gas costs)
-    
-    const dailyExpensesPercent = Math.min(40, Math.max(30, (monthlyExpenses / fiatAmountUSD) * 100));
+
+    const dailyExpensesPercent = Math.min(
+        40,
+        Math.max(30, (monthlyExpenses / fiatAmountUSD) * 100)
+    );
     const savingsPercent = Math.min(50, Math.max(40, 100 - dailyExpensesPercent - 15));
     const activeUsePercent = 100 - dailyExpensesPercent - savingsPercent;
-    
+
     const distribution: Array<{
         stablecoin: string;
         chain: string;
@@ -466,93 +508,110 @@ function analyzeFiatToStablecoinDistribution(
         amountUSD: number;
         reason: string;
     }> = [];
-    
+
     // 1. Daily expenses allocation
     const dailyExpensesUSD = fiatAmountUSD * (dailyExpensesPercent / 100);
-    const polygonStablecoin = stablecoinData['polygon']?.recommended || stablecoinData['ethereum']?.recommended;
+    const polygonStablecoin =
+        stablecoinData["polygon"]?.recommended || stablecoinData["ethereum"]?.recommended;
     if (polygonStablecoin) {
-        const conversionFee = liquidityData[polygonStablecoin.name as keyof typeof liquidityData]?.conversionFees['polygon'] || 0.02;
+        const conversionFee =
+            liquidityData[polygonStablecoin.name as keyof typeof liquidityData]?.conversionFees[
+                "polygon"
+            ] || 0.02;
         distribution.push({
             stablecoin: polygonStablecoin.name,
-            chain: 'polygon',
+            chain: "polygon",
             percentage: dailyExpensesPercent,
             amountUSD: dailyExpensesUSD,
-            reason: `Daily expenses: USDT popular in ${userContext.country}, Polygon has lower fees (${(conversionFee * 100).toFixed(2)}%)`
+            reason: `Daily expenses: USDT popular in ${userContext.country}, Polygon has lower fees (${(conversionFee * 100).toFixed(2)}%)`,
         });
     }
-    
+
     // 2. Savings allocation
     const savingsUSD = fiatAmountUSD * (savingsPercent / 100);
-    const ethereumStablecoin = stablecoinData['ethereum']?.recommended || stablecoinData['polygon']?.recommended;
+    const ethereumStablecoin =
+        stablecoinData["ethereum"]?.recommended || stablecoinData["polygon"]?.recommended;
     if (ethereumStablecoin) {
-        const conversionFee = liquidityData[ethereumStablecoin.name as keyof typeof liquidityData]?.conversionFees['ethereum'] || 0.02;
+        const conversionFee =
+            liquidityData[ethereumStablecoin.name as keyof typeof liquidityData]?.conversionFees[
+                "ethereum"
+            ] || 0.02;
         distribution.push({
             stablecoin: ethereumStablecoin.name,
-            chain: 'ethereum',
+            chain: "ethereum",
             percentage: savingsPercent,
             amountUSD: savingsUSD,
-            reason: `Savings: Higher liquidity and stability, ${(conversionFee * 100).toFixed(2)}% conversion fee`
+            reason: `Savings: Higher liquidity and stability, ${(conversionFee * 100).toFixed(2)}% conversion fee`,
         });
     }
-    
+
     // 3. Active use allocation (if significant amount)
     if (activeUsePercent > 5) {
         const activeUseUSD = fiatAmountUSD * (activeUsePercent / 100);
-        const arbitrumStablecoin = stablecoinData['arbitrum']?.recommended || stablecoinData['ethereum']?.recommended;
+        const arbitrumStablecoin =
+            stablecoinData["arbitrum"]?.recommended || stablecoinData["ethereum"]?.recommended;
         if (arbitrumStablecoin) {
-            const conversionFee = liquidityData[arbitrumStablecoin.name as keyof typeof liquidityData]?.conversionFees['arbitrum'] || 0.02;
-            const gasCost = analysis.find(a => a.chain === 'arbitrum')?.avgGasCost || 0.5;
+            const conversionFee =
+                liquidityData[arbitrumStablecoin.name as keyof typeof liquidityData]
+                    ?.conversionFees["arbitrum"] || 0.02;
+            const gasCost = analysis.find(a => a.chain === "arbitrum")?.avgGasCost || 0.5;
             distribution.push({
                 stablecoin: arbitrumStablecoin.name,
-                chain: 'arbitrum',
+                chain: "arbitrum",
                 percentage: activeUsePercent,
                 amountUSD: activeUseUSD,
-                reason: `Active use: Lower gas costs ($${gasCost.toFixed(2)}), ${(conversionFee * 100).toFixed(2)}% conversion fee`
+                reason: `Active use: Lower gas costs ($${gasCost.toFixed(2)}), ${(conversionFee * 100).toFixed(2)}% conversion fee`,
             });
         }
     }
-    
+
     // Calculate total conversion fees
     const totalConversionFee = distribution.reduce((sum, dist) => {
-        const fee = liquidityData[dist.stablecoin as keyof typeof liquidityData]?.conversionFees[dist.chain] || 0.02;
-        return sum + (dist.amountUSD * fee);
+        const fee =
+            liquidityData[dist.stablecoin as keyof typeof liquidityData]?.conversionFees[
+                dist.chain
+            ] || 0.02;
+        return sum + dist.amountUSD * fee;
     }, 0);
     const totalConversionFeePercent = (totalConversionFee / fiatAmountUSD) * 100;
-    
+
     // Estimate 6-month savings based on:
     // - Lower conversion fees vs average
     // - Lower gas costs vs average
     // - Better liquidity = lower slippage
     const avgConversionFee = 0.025; // 2.5% average
     const avgGasCost = mean(analysis.map(a => a.avgGasCost));
-    const optimizedGasCost = mean(distribution.map(d => {
-        const chainAnalysis = analysis.find(a => a.chain === d.chain);
-        return chainAnalysis?.avgGasCost || avgGasCost;
-    }));
-    
+    const optimizedGasCost = mean(
+        distribution.map(d => {
+            const chainAnalysis = analysis.find(a => a.chain === d.chain);
+            return chainAnalysis?.avgGasCost || avgGasCost;
+        })
+    );
+
     const monthlyGasSavings = (avgGasCost - optimizedGasCost) * monthlyTransactionFrequency;
-    const monthlyConversionSavings = (avgConversionFee - (totalConversionFeePercent / 100)) * monthlyExpenses;
+    const monthlyConversionSavings =
+        (avgConversionFee - totalConversionFeePercent / 100) * monthlyExpenses;
     const estimatedSavings6Months = (monthlyGasSavings + monthlyConversionSavings) * 6;
-    
+
     const reason = `Optimal distribution based on ${userContext.country} regional preferences, chain efficiency, and your spending patterns (${monthlyExpenses.toFixed(0)} USD/month expenses)`;
-    
+
     return {
         distribution,
         totalConversionFee: totalConversionFeePercent,
         estimatedSavings6Months: Math.max(0, estimatedSavings6Months),
-        reason
+        reason,
     };
 }
 
 function calculateSavings(recommendations: Recommendation[]): number {
     return recommendations.reduce((sum, rec) => {
-        if (rec.type === 'bridge' && rec.sixMonthSavings) {
+        if (rec.type === "bridge" && rec.sixMonthSavings) {
             return sum + parseFloat(rec.sixMonthSavings);
         }
-        if (rec.type === 'switch_stablecoin' && rec.sixMonthSavings) {
+        if (rec.type === "switch_stablecoin" && rec.sixMonthSavings) {
             return sum + parseFloat(rec.sixMonthSavings);
         }
-        if (rec.type === 'convert_with_timing' && rec.timingAdvice?.potentialSavings) {
+        if (rec.type === "convert_with_timing" && rec.timingAdvice?.potentialSavings) {
             return sum + parseFloat(rec.timingAdvice.potentialSavings);
         }
         return sum;
@@ -575,4 +634,3 @@ function calculateStdDev(arr: number[]): number {
     const squareDiffs = arr.map(val => Math.pow(val - avg, 2));
     return Math.sqrt(mean(squareDiffs));
 }
-
