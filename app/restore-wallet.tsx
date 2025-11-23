@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from "react-native";
 import { useWallet } from "@/contexts/WalletContext";
 import { validateMnemonic } from "@/utils/wallet";
 
@@ -41,20 +41,21 @@ export default function RestoreWalletScreen() {
             return;
         }
 
-        try {
-            setIsRestoring(true);
-            await restoreWallet(mnemonic.trim(), password);
-            Alert.alert("Success", "Wallet restored successfully!", [
-                {
-                    text: "OK",
-                    onPress: () => router.replace("/(tabs)"),
-                },
-            ]);
-        } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to restore wallet");
-        } finally {
-            setIsRestoring(false);
-        }
+        // Set loading state immediately - this triggers a re-render
+        setIsRestoring(true);
+        
+        // Yield to React to allow it to render the loading state before heavy computation
+        // Use a small delay to ensure React processes the state update and renders first
+        setTimeout(async () => {
+            try {
+                await restoreWallet(mnemonic.trim(), password);
+                // Navigate immediately without showing alert to speed up flow
+                router.replace("/(tabs)");
+            } catch (error: any) {
+                setIsRestoring(false);
+                Alert.alert("Error", error.message || "Failed to restore wallet");
+            }
+        }, 50); // Small delay to ensure UI renders loading state
     };
 
     if (step === 'mnemonic') {
@@ -104,9 +105,16 @@ export default function RestoreWalletScreen() {
 
     return (
         <View style={styles.container}>
+            {isRestoring && (
+                <View style={styles.fullScreenLoader}>
+                    <ActivityIndicator size="large" color="#0891D1" />
+                    <Text style={styles.loaderText}>Restoring your wallet...</Text>
+                    <Text style={styles.loaderSubtext}>This may take a few seconds</Text>
+                </View>
+            )}
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Pressable onPress={() => setStep('mnemonic')} style={styles.backButton}>
+                    <Pressable onPress={() => setStep('mnemonic')} style={styles.backButton} disabled={isRestoring}>
                         <Text style={styles.backText}>←</Text>
                     </Pressable>
                     <Text style={styles.headerTitle}>Set Password</Text>
@@ -147,9 +155,14 @@ export default function RestoreWalletScreen() {
                         onPress={handleRestoreWallet}
                         disabled={isRestoring}
                     >
-                        <Text style={styles.buttonText}>
-                            {isRestoring ? "Restoring..." : "Restore Wallet"}
-                        </Text>
+                        {isRestoring ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                                <Text style={styles.buttonText}>Restoring Wallet...</Text>
+                            </View>
+                        ) : (
+                            <Text style={styles.buttonText}>Restore Wallet</Text>
+                        )}
                     </Pressable>
                 </View>
             </View>
@@ -244,6 +257,32 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+    },
+    loadingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    fullScreenLoader: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        zIndex: 1000,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 16,
+    },
+    loaderText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    loaderSubtext: {
+        fontSize: 14,
+        color: '#737A82',
     },
 });
 

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState, useEffect } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, ActivityIndicator } from "react-native";
 import { useWallet } from "@/contexts/WalletContext";
 import * as Clipboard from 'expo-clipboard';
 
@@ -67,20 +67,21 @@ export default function CreateWalletScreen() {
             return;
         }
 
-        try {
-            setIsCreating(true);
-            await createWallet(mnemonic.join(' '), password);
-            Alert.alert("Success", "Wallet created successfully!", [
-                {
-                    text: "OK",
-                    onPress: () => router.replace("/(tabs)"),
-                },
-            ]);
-        } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to create wallet");
-        } finally {
-            setIsCreating(false);
-        }
+        // Set loading state immediately - this triggers a re-render
+        setIsCreating(true);
+        
+        // Yield to React to allow it to render the loading state before heavy computation
+        // Use a small delay to ensure React processes the state update and renders first
+        setTimeout(async () => {
+            try {
+                await createWallet(mnemonic.join(' '), password);
+                // Navigate immediately without showing alert to speed up flow
+                router.replace("/(tabs)");
+            } catch (error: any) {
+                setIsCreating(false);
+                Alert.alert("Error", error.message || "Failed to create wallet");
+            }
+        }, 50); // Small delay to ensure UI renders loading state
     };
 
     // Step 1: Show mnemonic
@@ -222,9 +223,16 @@ export default function CreateWalletScreen() {
     // Step 4: Set password
     return (
         <View style={styles.container}>
+            {isCreating && (
+                <View style={styles.fullScreenLoader}>
+                    <ActivityIndicator size="large" color="#0891D1" />
+                    <Text style={styles.loaderText}>Creating your wallet...</Text>
+                    <Text style={styles.loaderSubtext}>This may take a few seconds</Text>
+                </View>
+            )}
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Pressable onPress={() => setStep('confirm')} style={styles.backButton}>
+                    <Pressable onPress={() => setStep('confirm')} style={styles.backButton} disabled={isCreating}>
                         <Text style={styles.backText}>←</Text>
                     </Pressable>
                     <Text style={styles.headerTitle}>Set Password</Text>
@@ -265,9 +273,14 @@ export default function CreateWalletScreen() {
                         onPress={handleCreateWallet}
                         disabled={isCreating}
                     >
-                        <Text style={styles.buttonText}>
-                            {isCreating ? "Creating Wallet..." : "Create Wallet"}
-                        </Text>
+                        {isCreating ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                                <Text style={styles.buttonText}>Creating Wallet...</Text>
+                            </View>
+                        ) : (
+                            <Text style={styles.buttonText}>Create Wallet</Text>
+                        )}
                     </Pressable>
                 </View>
             </View>
@@ -440,5 +453,31 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#29343D',
         padding: 4,
+    },
+    loadingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    fullScreenLoader: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        zIndex: 1000,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 16,
+    },
+    loaderText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    loaderSubtext: {
+        fontSize: 14,
+        color: '#737A82',
     },
 });

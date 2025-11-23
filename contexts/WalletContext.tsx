@@ -33,6 +33,7 @@ export interface WalletContextType {
     restoreWallet: (mnemonic: string, password: string) => Promise<void>;
     login: (password: string) => Promise<void>;
     logout: () => Promise<void>;
+    switchAccount: () => Promise<void>;
     refreshBalance: () => Promise<void>;
     
     // Wallet API
@@ -76,10 +77,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
     }, [publicKey]);
 
-    // Refresh balance when wallet is loaded
+    // Refresh balance when wallet is loaded (defer to avoid blocking)
     useEffect(() => {
         if (keypair && publicKey) {
-            refreshBalance();
+            // Defer balance refresh to avoid blocking navigation
+            // Set initial balance to 0 immediately for instant UI feedback
+            setBalance(0);
+            
+            // Refresh balance in background after a short delay
+            setTimeout(() => {
+                refreshBalance();
+            }, 100);
+            
             // Set up periodic balance refresh (every 10 seconds)
             const interval = setInterval(() => {
                 refreshBalance();
@@ -176,17 +185,31 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(async (): Promise<void> => {
         try {
-            // Clear wallet from storage
+            // Clear wallet state from memory (but keep encrypted wallet in storage)
+            // This allows user to unlock again with password
+            setKeypair(null);
+            setPublicKey(null);
+            setPublicKeyString(null);
+            setBalance(null);
+            // Note: We keep hasWallet=true because encrypted wallet still exists
+            // User can unlock again with password
+        } catch (error) {
+            throw new Error(`Failed to logout: ${error}`);
+        }
+    }, []);
+
+    const switchAccount = useCallback(async (): Promise<void> => {
+        try {
+            // Completely clear wallet from storage and memory
+            // This allows user to create/restore a new wallet
             await clearWallet();
             setHasWallet(false);
-            
-            // Clear wallet state
             setKeypair(null);
             setPublicKey(null);
             setPublicKeyString(null);
             setBalance(null);
         } catch (error) {
-            throw new Error(`Failed to logout: ${error}`);
+            throw new Error(`Failed to switch account: ${error}`);
         }
     }, []);
 
@@ -238,6 +261,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         restoreWallet,
         login,
         logout,
+        switchAccount,
         refreshBalance,
         getPublicKey: getPublicKeyAPI,
         signMessage: signMessageAPI,

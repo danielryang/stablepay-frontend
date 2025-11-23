@@ -7,7 +7,8 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 
-import { Link, Tabs } from "expo-router";
+import { useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -16,6 +17,7 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { useWallet } from "@/contexts/WalletContext";
 
 const { width } = Dimensions.get("window");
 const TAB_COUNT = 2;
@@ -125,6 +127,26 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
+    const router = useRouter();
+    const { keypair, isInitialized, hasWallet } = useWallet();
+
+    // Protect tabs - redirect to login if wallet exists but not unlocked
+    useEffect(() => {
+        if (isInitialized) {
+            if (hasWallet && !keypair) {
+                // Wallet exists but not unlocked - redirect to login
+                router.replace("/login");
+            } else if (!hasWallet) {
+                // No wallet exists - redirect to onboarding
+                router.replace("/onboarding");
+            }
+        }
+    }, [isInitialized, hasWallet, keypair, router]);
+
+    // Don't render tabs if not authenticated
+    if (isInitialized && (!keypair || !hasWallet)) {
+        return null;
+    }
 
     return (
         <Tabs

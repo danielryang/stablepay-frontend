@@ -1,6 +1,8 @@
-import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View, Alert } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+
+import { useRouter } from "expo-router";
+
 import { useWallet } from "@/contexts/WalletContext";
 
 export default function SettingsScreen() {
@@ -10,22 +12,22 @@ export default function SettingsScreen() {
 
     const handleLogout = () => {
         Alert.alert(
-            "Sign Out",
-            "Are you sure you want to sign out? You'll need to enter your password to access your wallet again.",
+            "Lock Wallet",
+            "Your wallet will be locked. You'll need to enter your password to unlock it again.",
             [
                 {
                     text: "Cancel",
                     style: "cancel",
                 },
                 {
-                    text: "Sign Out",
+                    text: "Lock",
                     style: "destructive",
                     onPress: async () => {
                         try {
                             await logout();
                             router.replace("/login");
                         } catch (error: any) {
-                            Alert.alert("Error", error.message || "Failed to sign out");
+                            Alert.alert("Error", error.message || "Failed to lock wallet");
                         }
                     },
                 },
@@ -69,15 +71,13 @@ export default function SettingsScreen() {
                                 <Text style={styles.settingIcon}>🔔</Text>
                                 <View style={styles.settingContent}>
                                     <Text style={styles.settingTitle}>Notifications</Text>
-                                    <Text style={styles.settingSubtitle}>
-                                        Push notifications
-                                    </Text>
+                                    <Text style={styles.settingSubtitle}>Push notifications</Text>
                                 </View>
                                 <Switch
                                     value={notificationsEnabled}
                                     onValueChange={setNotificationsEnabled}
-                                    trackColor={{ false: '#E1E4E8', true: '#0891D1' }}
-                                    thumbColor={notificationsEnabled ? '#FFFFFF' : '#FFFFFF'}
+                                    trackColor={{ false: "#E1E4E8", true: "#0891D1" }}
+                                    thumbColor={notificationsEnabled ? "#FFFFFF" : "#FFFFFF"}
                                 />
                             </View>
 
@@ -98,9 +98,7 @@ export default function SettingsScreen() {
                             <Pressable style={styles.settingItem}>
                                 <Text style={styles.settingIcon}>🌍</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.settingTitle}>
-                                        Language & Region
-                                    </Text>
+                                    <Text style={styles.settingTitle}>Language & Region</Text>
                                     <Text style={styles.settingSubtitle}>English (US)</Text>
                                 </View>
                             </Pressable>
@@ -125,15 +123,12 @@ export default function SettingsScreen() {
 
                     <View style={styles.section}>
                         <View style={styles.card}>
-                            <Pressable
-                                onPress={handleLogout}
-                                style={styles.settingItem}
-                            >
+                            <Pressable onPress={handleLogout} style={styles.settingItem}>
                                 <Text style={styles.destructiveIcon}>🚪</Text>
                                 <View style={styles.settingContent}>
-                                    <Text style={styles.destructiveText}>Sign Out</Text>
+                                    <Text style={styles.destructiveText}>Lock Wallet</Text>
                                     <Text style={styles.settingSubtitle}>
-                                        Clear wallet from this device
+                                        Lock your wallet and require password to unlock
                                     </Text>
                                 </View>
                             </Pressable>
@@ -152,34 +147,34 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAFAFA',
+        backgroundColor: "#FAFAFA",
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#E1E4E8',
-        backgroundColor: '#FFFFFF',
+        borderBottomColor: "#E1E4E8",
+        backgroundColor: "#FFFFFF",
     },
     headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        flexDirection: "row",
+        alignItems: "flex-end",
     },
     backButton: {
         marginRight: 8,
     },
     backText: {
         fontSize: 24,
-        color: '#29343D',
+        color: "#29343D",
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#29343D',
+        fontWeight: "bold",
+        color: "#29343D",
     },
     scrollView: {
         flex: 1,
@@ -192,68 +187,68 @@ const styles = StyleSheet.create({
         gap: 0,
     },
     card: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1E4E8',
-        overflow: 'hidden',
+        borderColor: "#E1E4E8",
+        overflow: "hidden",
     },
     settingItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         gap: 12,
         padding: 16,
     },
     settingIcon: {
         fontSize: 18,
-        color: '#737A82',
+        color: "#737A82",
     },
     iconContainer: {
-        backgroundColor: '#E0F2FE',
+        backgroundColor: "#E0F2FE",
         borderRadius: 999,
         padding: 8,
         width: 36,
         height: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     iconText: {
         fontSize: 14,
-        color: '#0891D1',
+        color: "#0891D1",
     },
     settingContent: {
         flex: 1,
     },
     settingTitle: {
         fontSize: 16,
-        fontWeight: '500',
-        color: '#29343D',
+        fontWeight: "500",
+        color: "#29343D",
     },
     settingSubtitle: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
         marginTop: 2,
     },
     divider: {
         height: 1,
-        backgroundColor: '#E1E4E8',
+        backgroundColor: "#E1E4E8",
         marginLeft: 16,
     },
     destructiveIcon: {
         fontSize: 18,
-        color: '#EF4444',
+        color: "#EF4444",
     },
     destructiveText: {
         fontSize: 16,
-        fontWeight: '500',
-        color: '#EF4444',
+        fontWeight: "500",
+        color: "#EF4444",
     },
     versionContainer: {
-        alignItems: 'center',
+        alignItems: "center",
         paddingTop: 16,
     },
     versionText: {
         fontSize: 14,
-        color: '#737A82',
+        color: "#737A82",
     },
 });
