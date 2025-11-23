@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TextInput } from "react-native";
-import { fetchRealHistoricalData, fetchStablecoinLiquidityData } from "@/utils/realDataFetcher";
-import { analyzeAndOptimize, UserBalance } from "@/utils/enhancedOptimizer";
-import { enhanceRecommendationWithAI, generateAISummary, answerPortfolioQuestion } from "@/utils/aiEnhancer";
+import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
+import { useTransactions } from "@/contexts/TransactionContext";
+import { answerPortfolioQuestion, enhanceRecommendationWithAI, generateAISummary } from "@/utils/aiEnhancer";
+import { analyzeAndOptimize, FiatBalance, UserBalance } from "@/utils/enhancedOptimizer";
+import { MarkdownText } from "@/utils/markdownRenderer";
 import { fetchMarketSentiment } from "@/utils/marketSentiment";
-import { trackUserAction, getUserPreferencesForAI } from "@/utils/userLearning";
+import { fetchFiatExchangeRate, fetchRealHistoricalData, fetchStablecoinLiquidityData, FiatExchangeRate } from "@/utils/realDataFetcher";
+import { calculateMonthlyTransactionFrequency } from "@/utils/transactionUtils";
+import { getUserPreferencesForAI, trackUserAction } from "@/utils/userLearning";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 // Extract balances from home screen structure
 // USDC: $500 on Ethereum, USDT: $700 on Polygon, ARS: 50,000 ARS
@@ -15,7 +19,19 @@ const getUserBalances = (): UserBalance[] => {
     ];
 };
 
+// Extract fiat balances from home screen structure
+const getFiatBalances = (): FiatBalance[] => {
+    // TODO: Extract from actual home screen component
+    // For now, hardcoded based on home screen: ARS: 50,000
+    return [
+        { currency: 'ARS', amount: 50000 },
+    ];
+};
+
 export default function OptimizerScreen() {
+    const { settings } = useOptimizerSettings();
+    const { transactions } = useTransactions();
+    
     const [loading, setLoading] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -76,21 +92,55 @@ export default function OptimizerScreen() {
                 throw new Error('Failed to fetch stablecoin liquidity data');
             }
 
+            // Step 4.5: Get fiat balances and exchange rates
+            const fiatBalances = getFiatBalances();
+            let fiatExchangeRate: FiatExchangeRate | undefined = undefined;
+            
+            if (fiatBalances.length > 0) {
+                // Fetch exchange rate for the first fiat currency (assuming single fiat for now)
+                try {
+                    console.log(`💱 Fetching exchange rate for ${fiatBalances[0].currency}...`);
+                    fiatExchangeRate = await fetchFiatExchangeRate(fiatBalances[0].currency);
+                    console.log(`✅ Exchange rate: 1 USD = ${fiatExchangeRate.usdRate} ${fiatExchangeRate.fiatCurrency}`);
+                } catch (error: any) {
+                    console.warn(`⚠️ Failed to fetch exchange rate for ${fiatBalances[0].currency}:`, error.message);
+                    // Continue without fiat analysis if exchange rate fetch fails
+                }
+            }
+
             // Step 5: Run enhanced analysis
             console.log('🧮 Running enhanced analysis...');
+            
+            // Calculate monthly expenses from user balances using settings
+            const totalBalance = userBalances.reduce((sum, b) => sum + b.amount, 0);
+            // Use spending percentage from settings (default 15%)
+            const estimatedMonthlyExpenses = Math.max(
+                settings.minimumMonthlyExpenses, 
+                Math.round(totalBalance * settings.spendingPercentage)
+            );
+            
+            // Calculate transaction frequency from actual transaction history
+            const monthlyTransactionFrequency = calculateMonthlyTransactionFrequency(transactions);
+            
+            // Transaction volume multiplier: 1.5x monthly expenses (hardcoded as requested)
+            // This represents that users typically transact more than they spend (includes transfers, conversions, etc.)
+            const TRANSACTION_VOLUME_MULTIPLIER = 1.5;
+            
             const optimization = analyzeAndOptimize(
                 userBalances,
                 historical,
                 currentPrices,
                 stablecoinData,
                 {
-                    country: 'argentina',
+                    country: settings.country,
                     primaryUse: 'daily_expenses',
-                    monthlyTransactionVolume: 1200,
-                    monthlyTransactionFrequency: 15,
-                    monthlyExpenses: 800,
+                    monthlyTransactionVolume: estimatedMonthlyExpenses * TRANSACTION_VOLUME_MULTIPLIER,
+                    monthlyTransactionFrequency: monthlyTransactionFrequency,
+                    monthlyExpenses: estimatedMonthlyExpenses,
                     upcomingExpenses: []
-                }
+                },
+                fiatBalances.length > 0 ? fiatBalances : undefined,
+                fiatExchangeRate
             );
 
             setResults(optimization);
@@ -117,7 +167,7 @@ export default function OptimizerScreen() {
                             try {
                                 return await enhanceRecommendationWithAI(rec, {
                                     userBalances,
-                                    userCountry: 'argentina',
+                                    userCountry: settings.country,
                                     totalSavings: optimization.totalPotentialSavings,
                                 });
                             } catch (error) {
@@ -130,9 +180,16 @@ export default function OptimizerScreen() {
                     
                     // Generate AI summary
                     try {
+                        // Calculate monthly expenses using settings
+                        const totalBalance = userBalances.reduce((sum, b) => sum + b.amount, 0);
+                        const estimatedMonthlyExpenses = Math.max(
+                            settings.minimumMonthlyExpenses,
+                            Math.round(totalBalance * settings.spendingPercentage)
+                        );
+                        
                         const summary = await generateAISummary(optimization, {
-                            userCountry: 'argentina',
-                            monthlyExpenses: 800,
+                            userCountry: settings.country,
+                            monthlyExpenses: estimatedMonthlyExpenses,
                         });
                         setAiSummary(summary);
                     } catch (error) {
@@ -182,7 +239,7 @@ export default function OptimizerScreen() {
         try {
             const answer = await answerPortfolioQuestion(question, results, {
                 userBalances: getUserBalances(),
-                userCountry: 'argentina',
+                userCountry: settings.country,
             });
             setAiAnswer(answer);
         } catch (error) {
@@ -259,6 +316,7 @@ export default function OptimizerScreen() {
     const stablecoinRecs = results?.recommendations.filter(r => r.type === 'switch_stablecoin') || [];
     const conversionRecs = results?.recommendations.filter(r => r.type === 'convert_with_timing') || [];
     const bridgeRecs = results?.recommendations.filter(r => r.type === 'bridge') || [];
+    const fiatRecs = results?.recommendations.filter(r => r.type === 'fiat_to_stablecoin') || [];
     const timingInsights = results?.recommendations.find(r => r.type === 'timing_insight');
 
     return (
@@ -267,7 +325,7 @@ export default function OptimizerScreen() {
                 <View style={styles.content}>
                     {/* Header */}
                     <View style={styles.headerCard}>
-                        <Text style={styles.headerTitle}>Smart Allocation Optimizer</Text>
+                        <Text style={styles.headerTitle}>Allocation Optimizer</Text>
                         <Text style={styles.headerSubtitle}>
                             Real data from {dataSource || 'CoinGecko API'} • Analyzes timing, stablecoins, and network efficiency
                         </Text>
@@ -286,7 +344,7 @@ export default function OptimizerScreen() {
                             {/* CORS Warning Banner (if AI failed due to CORS) */}
                             {aiEnhancedRecs.length === 0 && results.recommendations.length > 0 && (
                                 <View style={styles.corsWarningCard}>
-                                    <Text style={styles.corsWarningTitle}>⚠️ AI Features Limited in Browser</Text>
+                                    <Text style={styles.corsWarningTitle}> AI Features Limited in Browser</Text>
                                     <Text style={styles.corsWarningText}>
                                         Anthropic API doesn't support browser CORS. AI explanations work on native devices (iOS/Android) or require a backend proxy. Algorithmic recommendations are fully functional below.
                                     </Text>
@@ -294,11 +352,13 @@ export default function OptimizerScreen() {
                             )}
 
                             {/* AI Summary */}
-                            {aiSummary && (
+                            {aiSummary && typeof aiSummary === 'object' && aiSummary !== null && (
                                 <View style={styles.aiSummaryCard}>
-                                    <Text style={styles.aiSummaryTitle}>🤖 AI Analysis Summary</Text>
-                                    <Text style={styles.aiSummaryText}>{aiSummary.summary}</Text>
-                                    {aiSummary.keyInsights && aiSummary.keyInsights.length > 0 && (
+                                    <Text style={styles.aiSummaryTitle}>Analysis Summary</Text>
+                                    {aiSummary.summary && typeof aiSummary.summary === 'string' && (
+                                        <Text style={styles.aiSummaryText}>{aiSummary.summary}</Text>
+                                    )}
+                                    {aiSummary.keyInsights && Array.isArray(aiSummary.keyInsights) && aiSummary.keyInsights.length > 0 && (
                                         <View style={styles.aiInsightsContainer}>
                                             <Text style={styles.aiInsightsTitle}>Key Insights:</Text>
                                             {aiSummary.keyInsights.map((insight: string, i: number) => (
@@ -306,7 +366,7 @@ export default function OptimizerScreen() {
                                             ))}
                                         </View>
                                     )}
-                                    {aiSummary.actionItems && aiSummary.actionItems.length > 0 && (
+                                    {aiSummary.actionItems && Array.isArray(aiSummary.actionItems) && aiSummary.actionItems.length > 0 && (
                                         <View style={styles.aiInsightsContainer}>
                                             <Text style={styles.aiInsightsTitle}>Action Items:</Text>
                                             {aiSummary.actionItems.map((item: string, i: number) => (
@@ -320,7 +380,7 @@ export default function OptimizerScreen() {
                             {/* Market Sentiment */}
                             {marketSentiment && (
                                 <View style={styles.sentimentCard}>
-                                    <Text style={styles.sentimentTitle}>📊 Market Sentiment</Text>
+                                    <Text style={styles.sentimentTitle}>Market Sentiment</Text>
                                     <View style={styles.sentimentRow}>
                                         <Text style={styles.sentimentLabel}>Sentiment:</Text>
                                         <Text style={[
@@ -351,6 +411,77 @@ export default function OptimizerScreen() {
                                             </Text>
                                         </View>
                                     )}
+                                </View>
+                            )}
+
+                            {/* Fiat to Stablecoin Distribution Recommendations */}
+                            {fiatRecs.length > 0 && (
+                                <View style={styles.sectionCard}>
+                                    <Text style={styles.sectionTitle}>Fiat to Stablecoin Distribution</Text>
+                                    {fiatRecs.map((rec, idx) => {
+                                        const enhancedRec = aiEnhancedRecs.find((e: any) => 
+                                            e.type === rec.type && e.fiatCurrency === rec.fiatCurrency
+                                        ) || rec;
+                                        const recId = `${rec.type}-${rec.fiatCurrency}-${idx}`;
+                                        
+                                        return (
+                                            <View key={idx} style={styles.recommendationCard}>
+                                                <View style={styles.recommendationHeader}>
+                                                    <View style={styles.recommendationHeaderLeft}>
+                                                        <Text style={styles.recommendationTitle}>
+                                                            Convert {rec.fiatAmount?.toLocaleString()} {rec.fiatCurrency} to Stablecoins
+                                                        </Text>
+                                                        <Text style={styles.recommendationReason}>{rec.reason}</Text>
+                                                    </View>
+                                                    <View style={[styles.priorityBadge, rec.priority === 'high' ? styles.priorityHigh : styles.priorityMedium]}>
+                                                        <Text style={styles.priorityText}>{rec.priority?.toUpperCase()}</Text>
+                                                    </View>
+                                                </View>
+                                                
+                                                {/* Distribution Breakdown */}
+                                                {rec.distribution && rec.distribution.length > 0 && (
+                                                    <View style={styles.distributionContainer}>
+                                                        <Text style={styles.distributionTitle}>Recommended Distribution:</Text>
+                                                        {rec.distribution.map((dist, distIdx) => (
+                                                            <View key={distIdx} style={styles.distributionItem}>
+                                                                <View style={styles.distributionHeader}>
+                                                                    <Text style={styles.distributionStablecoin}>
+                                                                        {dist.stablecoin} on {dist.chain}
+                                                                    </Text>
+                                                                    <Text style={styles.distributionPercentage}>
+                                                                        {dist.percentage.toFixed(0)}%
+                                                                    </Text>
+                                                                </View>
+                                                                <Text style={styles.distributionAmount}>
+                                                                    ${dist.amountUSD.toFixed(2)} USD
+                                                                </Text>
+                                                                <Text style={styles.distributionReason}>{dist.reason}</Text>
+                                                            </View>
+                                                        ))}
+                                                    </View>
+                                                )}
+                                                
+                                                <View style={styles.statsGrid}>
+                                                    <View style={styles.statItem}>
+                                                        <Text style={styles.statLabel}>Total Conversion Fee</Text>
+                                                        <Text style={styles.statValue}>{rec.totalConversionFee}</Text>
+                                                    </View>
+                                                    <View style={styles.statItem}>
+                                                        <Text style={styles.statLabel}>6-Month Savings</Text>
+                                                        <Text style={styles.statValue}>${rec.estimatedSavings6Months}</Text>
+                                                    </View>
+                                                </View>
+                                                
+                                                {/* AI Explanation */}
+                                                {enhancedRec.aiExplanation && (
+                                                    <View style={styles.aiExplanationCard}>
+                                                        <Text style={styles.aiExplanationLabel}>AI Explanation:</Text>
+                                                        <MarkdownText style={styles.aiExplanationText}>{enhancedRec.aiExplanation}</MarkdownText>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        );
+                                    })}
                                 </View>
                             )}
 
@@ -574,7 +705,13 @@ export default function OptimizerScreen() {
                                                     <Text style={[styles.bridgeStatValue, styles.savingsValue]}>${rec.sixMonthSavings}</Text>
                                                 </View>
                                             </View>
-                                            <Text style={styles.bridgeAdvice}>💡 {rec.timingAdvice}</Text>
+                                            {rec.timingAdvice && (
+                                                <Text style={styles.bridgeAdvice}>
+                                                    💡 {typeof rec.timingAdvice === 'string' 
+                                                        ? rec.timingAdvice 
+                                                        : rec.timingAdvice.recommendation || 'Timing advice available'}
+                                                </Text>
+                                            )}
                                         </View>
                                     ))}
                                 </View>
@@ -631,7 +768,7 @@ export default function OptimizerScreen() {
 
                             {/* Interactive Q&A */}
                             <View style={styles.qaSection}>
-                                <Text style={styles.qaTitle}>💬 Ask about your portfolio</Text>
+                                <Text style={styles.qaTitle}>Ask about your portfolio</Text>
                                 <TextInput
                                     value={question}
                                     onChangeText={setQuestion}
@@ -651,7 +788,7 @@ export default function OptimizerScreen() {
                                 {aiAnswer && (
                                     <View style={styles.qaAnswer}>
                                         <Text style={styles.qaAnswerLabel}>🤖 AI Answer:</Text>
-                                        <Text style={styles.qaAnswerText}>{aiAnswer}</Text>
+                                        <MarkdownText style={styles.qaAnswerText}>{aiAnswer}</MarkdownText>
                                     </View>
                                 )}
                             </View>
@@ -1320,6 +1457,52 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#29343D',
         lineHeight: 20,
+    },
+    distributionContainer: {
+        marginTop: 12,
+        padding: 12,
+        backgroundColor: '#F9FAFB',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+    },
+    distributionTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#29343D',
+        marginBottom: 12,
+    },
+    distributionItem: {
+        marginBottom: 12,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E1E4E8',
+    },
+    distributionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    distributionStablecoin: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    distributionPercentage: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#0891D1',
+    },
+    distributionAmount: {
+        fontSize: 14,
+        color: '#6B7280',
+        marginBottom: 4,
+    },
+    distributionReason: {
+        fontSize: 13,
+        color: '#6B7280',
+        lineHeight: 18,
     },
     corsWarningCard: {
         backgroundColor: '#FEF3C7',

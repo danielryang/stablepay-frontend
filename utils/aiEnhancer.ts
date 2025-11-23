@@ -115,25 +115,36 @@ async function callOpenAI(prompt: string, systemPrompt: string): Promise<string>
 /**
  * Call Anthropic Claude API
  */
-async function callAnthropic(prompt: string, systemPrompt: string): Promise<string> {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-        throw new Error('Anthropic API key not found');
+/**
+ * Get proxy server URL (falls back to direct API if proxy not available)
+ */
+function getProxyUrl(): string {
+    // Check if proxy server is configured
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env.EXPO_PUBLIC_PROXY_URL || 'http://localhost:3000/api/claude';
     }
+    try {
+        const Constants = require('expo-constants').default;
+        return Constants.expoConfig?.extra?.proxyUrl || 'http://localhost:3000/api/claude';
+    } catch {
+        return 'http://localhost:3000/api/claude';
+    }
+}
 
+async function callAnthropic(prompt: string, systemPrompt: string): Promise<string> {
     // Get current config (in case model changed)
     const config = getAIConfig();
     console.log(`🔑 Using Claude model: ${config.model}`);
 
-    // Anthropic API call - correct format per official docs
-    // Note: CORS is blocked in browsers - this will only work on native devices
+    // Use proxy server to bypass CORS
+    const proxyUrl = getProxyUrl();
+    console.log(`📡 Using proxy: ${proxyUrl}`);
+
     try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const response = await fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01', // Latest stable version
             },
             body: JSON.stringify({
                 model: config.model,
@@ -147,18 +158,19 @@ async function callAnthropic(prompt: string, systemPrompt: string): Promise<stri
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            throw new Error(`Anthropic API error: ${error.error?.message || 'Unknown error'}`);
+            throw new Error(`Proxy/API error: ${error.error?.message || 'Unknown error'}`);
         }
 
         const data = await response.json();
         return data.content[0]?.text || 'Unable to generate explanation';
     } catch (fetchError: any) {
-        // CORS errors are expected in browsers - silently handle
         const errorMsg = fetchError?.message || String(fetchError);
-        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('CORS') || errorMsg.includes('Access-Control')) {
-            // Silently handle CORS - expected behavior in browsers
-            throw new Error('CORS_BLOCKED');
+        
+        // Check if proxy server is not running
+        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('ECONNREFUSED')) {
+            throw new Error('PROXY_ERROR: Proxy server not running. Start it with: npm run server');
         }
+        
         throw fetchError;
     }
 }
@@ -328,7 +340,7 @@ export async function enhanceRecommendationWithAI(
 ): Promise<Recommendation & { aiExplanation?: string; aiInsights?: string[] }> {
     const systemPrompt = `You are a financial advisor specializing in cryptocurrency and stablecoin optimization. 
 Provide clear, concise explanations in plain language. Be factual and avoid financial advice disclaimers unless necessary.
-Keep responses under 150 words.`;
+Keep responses under 150 words. Do not use emojis in your responses.`;
 
     let prompt = '';
     
@@ -338,21 +350,31 @@ Keep responses under 150 words.`;
 Context: User has $${recommendation.amount} in ${recommendation.from} on ${recommendation.chain}.
 Monthly savings: $${recommendation.monthlySavings}. 6-month savings: $${recommendation.sixMonthSavings}.
 User is in ${context.userCountry}.
-Provide 2-3 key reasons in simple terms.`;
+Provide 2-3 key reasons in simple terms. Do not use emojis.`;
             break;
             
         case 'convert_with_timing':
             prompt = `Explain the timing recommendation for converting ${recommendation.amount} ${recommendation.token} to fiat.
 Timing: ${recommendation.timing}. Due date: ${recommendation.dueDate}.
 Best time: ${recommendation.timingAdvice?.bestTime}.
-Explain why ${recommendation.timing === 'wait' ? 'waiting' : 'converting now'} makes sense.`;
+Explain why ${recommendation.timing === 'wait' ? 'waiting' : 'converting now'} makes sense. Do not use emojis.`;
             break;
             
         case 'bridge':
             prompt = `Explain why bridging $${recommendation.amount} from ${recommendation.from} to ${recommendation.to} is recommended.
 Cost: $${recommendation.cost}. Monthly savings: $${recommendation.monthlySavings}.
 Break-even: ${recommendation.breakEvenMonths} months.
-Explain the benefits in simple terms.`;
+Explain the benefits in simple terms. Do not use emojis.`;
+            break;
+            
+        case 'fiat_to_stablecoin':
+            const distSummary = recommendation.distribution?.map(d => 
+                `${d.percentage.toFixed(0)}% to ${d.stablecoin} on ${d.chain} (${d.reason})`
+            ).join(', ') || 'N/A';
+            prompt = `Explain why converting ${recommendation.fiatAmount} ${recommendation.fiatCurrency} to stablecoins is recommended.
+Distribution: ${distSummary}
+Total conversion fee: ${recommendation.totalConversionFee}. Estimated 6-month savings: $${recommendation.estimatedSavings6Months}.
+Explain the benefits of this distribution strategy in simple terms. Do not use emojis.`;
             break;
             
         default:
@@ -391,7 +413,7 @@ export async function generateAISummary(
     actionItems: string[];
 }> {
     const systemPrompt = `You are a financial advisor analyzing a cryptocurrency portfolio optimization report.
-Summarize the key findings and provide actionable insights. Be concise and practical.`;
+Summarize the key findings and provide actionable insights. Be concise and practical. Do not use emojis in your responses.`;
 
     const prompt = `Summarize this optimization analysis:
 - Total potential savings: $${results.totalPotentialSavings.toFixed(2)}
@@ -405,27 +427,49 @@ Provide:
 2. Top 3 key insights
 3. Top 3 action items
 
-Format as JSON: { summary: string, keyInsights: string[], actionItems: string[] }`;
+Format as JSON: { summary: string, keyInsights: string[], actionItems: string[] }
+
+Important: Do not use emojis in any part of your response (summary, insights, or action items).`;
 
     try {
         const response = await callAI(prompt, systemPrompt);
         
-        // Try to parse JSON response
+        // Try to parse JSON response - handle cases where JSON is wrapped in markdown code blocks
         try {
-            const parsed = JSON.parse(response);
-            return {
-                summary: parsed.summary || response,
-                keyInsights: parsed.keyInsights || [],
-                actionItems: parsed.actionItems || [],
-            };
-        } catch {
-            // If not JSON, return as summary
-            return {
-                summary: response,
-                keyInsights: extractInsights(response),
-                actionItems: [],
-            };
+            // Remove markdown code blocks if present
+            let cleanedResponse = response.trim();
+            if (cleanedResponse.startsWith('```json')) {
+                cleanedResponse = cleanedResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            } else if (cleanedResponse.startsWith('```')) {
+                cleanedResponse = cleanedResponse.replace(/```\n?/g, '').trim();
+            }
+            
+            // Try to extract JSON object if it's embedded in text
+            const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+            const jsonString = jsonMatch ? jsonMatch[0] : cleanedResponse;
+            
+            const parsed = JSON.parse(jsonString);
+            
+            // Validate parsed structure
+            if (typeof parsed === 'object' && parsed !== null) {
+                return {
+                    summary: parsed.summary || response,
+                    keyInsights: Array.isArray(parsed.keyInsights) ? parsed.keyInsights : [],
+                    actionItems: Array.isArray(parsed.actionItems) ? parsed.actionItems : [],
+                };
+            }
+        } catch (parseError) {
+            console.warn('Failed to parse AI JSON response, extracting text:', parseError);
         }
+        
+        // If not JSON, extract text and return as summary
+        // Remove any JSON-like structures that might be visible
+        const textOnly = response.replace(/\{[\s\S]*?\}/g, '').trim();
+        return {
+            summary: textOnly || response,
+            keyInsights: extractInsights(response),
+            actionItems: [],
+        };
     } catch (error) {
         console.warn('AI summary generation failed:', error);
         return {
@@ -455,7 +499,7 @@ export async function answerPortfolioQuestion(
     }
 ): Promise<string> {
     const systemPrompt = `You are a helpful financial advisor. Answer questions about cryptocurrency portfolio optimization.
-Use the provided data to give accurate, helpful answers. Be concise (under 200 words).`;
+Use the provided data to give accurate, helpful answers. Be concise (under 200 words). Do not use emojis in your responses.`;
 
     const prompt = `User question: "${question}"
 
@@ -466,7 +510,7 @@ Portfolio data:
 - Recommendations: ${results.recommendations.length} total
 - User country: ${context.userCountry}
 
-Answer the question based on this data.`;
+Answer the question based on this data. Do not use emojis.`;
 
     try {
         return await callAI(prompt, systemPrompt);

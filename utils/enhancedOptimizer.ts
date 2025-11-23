@@ -3,13 +3,18 @@
  * Now includes: timing recommendations + stablecoin selection
  */
 
-import { analyzeOptimalTiming, ChainHistoricalData, HistoricalDataResult, StablecoinLiquidityData } from './realDataFetcher';
-import { selectOptimalStablecoin, shouldSwitchStablecoin, UserContext, StablecoinScore } from './stablecoinSelector';
+import { analyzeOptimalTiming, FiatExchangeRate, HistoricalDataResult, StablecoinLiquidityData } from './realDataFetcher';
+import { selectOptimalStablecoin, shouldSwitchStablecoin, StablecoinScore, UserContext } from './stablecoinSelector';
 
 export interface UserBalance {
     chain: string;
     token: string;
     amount: number;
+}
+
+export interface FiatBalance {
+    currency: string; // e.g., 'ARS'
+    amount: number; // Amount in fiat currency
 }
 
 export interface UpcomingExpense {
@@ -49,7 +54,7 @@ export interface AnalysisItem {
 }
 
 export interface Recommendation {
-    type: 'switch_stablecoin' | 'convert_with_timing' | 'bridge' | 'timing_insight';
+    type: 'switch_stablecoin' | 'convert_with_timing' | 'bridge' | 'timing_insight' | 'fiat_to_stablecoin';
     priority?: 'high' | 'medium';
     chain?: string;
     from?: string;
@@ -86,6 +91,17 @@ export interface Recommendation {
         weekendVsWeekday: string;
         volatilityWarning: string | null;
     }>;
+    fiatAmount?: number;
+    fiatCurrency?: string;
+    distribution?: Array<{
+        stablecoin: string;
+        chain: string;
+        percentage: number;
+        amountUSD: number;
+        reason: string;
+    }>;
+    totalConversionFee?: string;
+    estimatedSavings6Months?: string;
 }
 
 export interface OptimizationResult {
@@ -110,7 +126,9 @@ export function analyzeAndOptimize(
         USDT: StablecoinLiquidityData;
         DAI: StablecoinLiquidityData;
     },
-    userContext: UserContext & { monthlyTransactionFrequency?: number; monthlyExpenses?: number; upcomingExpenses?: UpcomingExpense[] }
+    userContext: UserContext & { monthlyTransactionFrequency?: number; monthlyExpenses?: number; upcomingExpenses?: UpcomingExpense[] },
+    fiatBalances?: FiatBalance[],
+    fiatExchangeRate?: FiatExchangeRate
 ): OptimizationResult {
     const analysis: AnalysisItem[] = [];
     const timingRecommendations: { [chain: string]: ReturnType<typeof analyzeOptimalTiming> } = {};
@@ -185,7 +203,9 @@ export function analyzeAndOptimize(
         userContext,
         timingRecommendations,
         stablecoinRecommendations,
-        stablecoinLiquidityData
+        stablecoinLiquidityData,
+        fiatBalances,
+        fiatExchangeRate
     );
 
     return {
@@ -209,7 +229,9 @@ function generateEnhancedRecommendations(
         USDC: StablecoinLiquidityData;
         USDT: StablecoinLiquidityData;
         DAI: StablecoinLiquidityData;
-    }
+    },
+    fiatBalances?: FiatBalance[],
+    fiatExchangeRate?: FiatExchangeRate
 ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
@@ -332,7 +354,48 @@ function generateEnhancedRecommendations(
         }
     }
 
-    // CATEGORY 4: General timing insights
+    // CATEGORY 4: Fiat to stablecoin distribution recommendations
+    if (fiatBalances && fiatBalances.length > 0 && fiatExchangeRate) {
+        console.log(`💰 Analyzing fiat distribution for ${fiatBalances.length} fiat balance(s)`);
+        for (const fiatBalance of fiatBalances) {
+            console.log(`💱 Processing ${fiatBalance.amount} ${fiatBalance.currency} (exchange rate: 1 USD = ${fiatExchangeRate.usdRate} ${fiatExchangeRate.fiatCurrency})`);
+            const fiatDistribution = analyzeFiatToStablecoinDistribution(
+                fiatBalance,
+                fiatExchangeRate,
+                analysis,
+                stablecoinData,
+                liquidityData,
+                userContext,
+                mostEfficient
+            );
+            
+            if (fiatDistribution && fiatDistribution.distribution.length > 0) {
+                console.log(`✅ Generated fiat distribution recommendation with ${fiatDistribution.distribution.length} allocations`);
+                recommendations.push({
+                    type: 'fiat_to_stablecoin',
+                    priority: fiatBalance.amount > 1000 ? 'high' : 'medium',
+                    fiatAmount: fiatBalance.amount,
+                    fiatCurrency: fiatBalance.currency,
+                    distribution: fiatDistribution.distribution,
+                    totalConversionFee: fiatDistribution.totalConversionFee.toFixed(2) + '%',
+                    estimatedSavings6Months: fiatDistribution.estimatedSavings6Months.toFixed(2),
+                    reason: fiatDistribution.reason,
+                    sixMonthSavings: fiatDistribution.estimatedSavings6Months.toFixed(2)
+                });
+            } else {
+                console.warn(`⚠️ No fiat distribution generated for ${fiatBalance.currency}. Distribution result:`, fiatDistribution);
+            }
+        }
+    } else {
+        if (!fiatBalances || fiatBalances.length === 0) {
+            console.log('ℹ️ No fiat balances provided for analysis');
+        }
+        if (!fiatExchangeRate) {
+            console.warn('⚠️ No fiat exchange rate available - fiat distribution analysis skipped');
+        }
+    }
+
+    // CATEGORY 5: General timing insights
     recommendations.push({
         type: 'timing_insight',
         insights: Object.entries(timingData).map(([chain, data]) => ({
@@ -347,6 +410,138 @@ function generateEnhancedRecommendations(
     });
 
     return recommendations;
+}
+
+/**
+ * Analyze optimal distribution of fiat currency into stablecoins
+ * Similar to stablecoin analysis but for fiat -> stablecoin conversion
+ */
+function analyzeFiatToStablecoinDistribution(
+    fiatBalance: FiatBalance,
+    exchangeRate: FiatExchangeRate,
+    analysis: AnalysisItem[],
+    stablecoinData: { [chain: string]: ReturnType<typeof selectOptimalStablecoin> },
+    liquidityData: {
+        USDC: StablecoinLiquidityData;
+        USDT: StablecoinLiquidityData;
+        DAI: StablecoinLiquidityData;
+    },
+    userContext: UserContext & { monthlyTransactionFrequency?: number; monthlyExpenses?: number },
+    mostEfficient: AnalysisItem
+): {
+    distribution: Array<{
+        stablecoin: string;
+        chain: string;
+        percentage: number;
+        amountUSD: number;
+        reason: string;
+    }>;
+    totalConversionFee: number;
+    estimatedSavings6Months: number;
+    reason: string;
+} | null {
+    // Convert fiat to USD
+    const fiatAmountUSD = fiatBalance.amount / exchangeRate.usdRate;
+    
+    if (fiatAmountUSD < 10) {
+        return null; // Too small to recommend
+    }
+
+    const monthlyExpenses = userContext.monthlyExpenses || 800;
+    const monthlyTransactionFrequency = userContext.monthlyTransactionFrequency || 15;
+    
+    // Calculate optimal distribution based on:
+    // 1. Daily expenses (30-40%): USDT on Polygon (lower fees, LatAm preference)
+    // 2. Savings (40-50%): USDC on Ethereum (higher liquidity, stability)
+    // 3. Active use (10-20%): DAI on Arbitrum (lower gas costs)
+    
+    const dailyExpensesPercent = Math.min(40, Math.max(30, (monthlyExpenses / fiatAmountUSD) * 100));
+    const savingsPercent = Math.min(50, Math.max(40, 100 - dailyExpensesPercent - 15));
+    const activeUsePercent = 100 - dailyExpensesPercent - savingsPercent;
+    
+    const distribution: Array<{
+        stablecoin: string;
+        chain: string;
+        percentage: number;
+        amountUSD: number;
+        reason: string;
+    }> = [];
+    
+    // 1. Daily expenses allocation
+    const dailyExpensesUSD = fiatAmountUSD * (dailyExpensesPercent / 100);
+    const polygonStablecoin = stablecoinData['polygon']?.recommended || stablecoinData['ethereum']?.recommended;
+    if (polygonStablecoin) {
+        const conversionFee = liquidityData[polygonStablecoin.name as keyof typeof liquidityData]?.conversionFees['polygon'] || 0.02;
+        distribution.push({
+            stablecoin: polygonStablecoin.name,
+            chain: 'polygon',
+            percentage: dailyExpensesPercent,
+            amountUSD: dailyExpensesUSD,
+            reason: `Daily expenses: USDT popular in ${userContext.country}, Polygon has lower fees (${(conversionFee * 100).toFixed(2)}%)`
+        });
+    }
+    
+    // 2. Savings allocation
+    const savingsUSD = fiatAmountUSD * (savingsPercent / 100);
+    const ethereumStablecoin = stablecoinData['ethereum']?.recommended || stablecoinData['polygon']?.recommended;
+    if (ethereumStablecoin) {
+        const conversionFee = liquidityData[ethereumStablecoin.name as keyof typeof liquidityData]?.conversionFees['ethereum'] || 0.02;
+        distribution.push({
+            stablecoin: ethereumStablecoin.name,
+            chain: 'ethereum',
+            percentage: savingsPercent,
+            amountUSD: savingsUSD,
+            reason: `Savings: Higher liquidity and stability, ${(conversionFee * 100).toFixed(2)}% conversion fee`
+        });
+    }
+    
+    // 3. Active use allocation (if significant amount)
+    if (activeUsePercent > 5) {
+        const activeUseUSD = fiatAmountUSD * (activeUsePercent / 100);
+        const arbitrumStablecoin = stablecoinData['arbitrum']?.recommended || stablecoinData['ethereum']?.recommended;
+        if (arbitrumStablecoin) {
+            const conversionFee = liquidityData[arbitrumStablecoin.name as keyof typeof liquidityData]?.conversionFees['arbitrum'] || 0.02;
+            const gasCost = analysis.find(a => a.chain === 'arbitrum')?.avgGasCost || 0.5;
+            distribution.push({
+                stablecoin: arbitrumStablecoin.name,
+                chain: 'arbitrum',
+                percentage: activeUsePercent,
+                amountUSD: activeUseUSD,
+                reason: `Active use: Lower gas costs ($${gasCost.toFixed(2)}), ${(conversionFee * 100).toFixed(2)}% conversion fee`
+            });
+        }
+    }
+    
+    // Calculate total conversion fees
+    const totalConversionFee = distribution.reduce((sum, dist) => {
+        const fee = liquidityData[dist.stablecoin as keyof typeof liquidityData]?.conversionFees[dist.chain] || 0.02;
+        return sum + (dist.amountUSD * fee);
+    }, 0);
+    const totalConversionFeePercent = (totalConversionFee / fiatAmountUSD) * 100;
+    
+    // Estimate 6-month savings based on:
+    // - Lower conversion fees vs average
+    // - Lower gas costs vs average
+    // - Better liquidity = lower slippage
+    const avgConversionFee = 0.025; // 2.5% average
+    const avgGasCost = mean(analysis.map(a => a.avgGasCost));
+    const optimizedGasCost = mean(distribution.map(d => {
+        const chainAnalysis = analysis.find(a => a.chain === d.chain);
+        return chainAnalysis?.avgGasCost || avgGasCost;
+    }));
+    
+    const monthlyGasSavings = (avgGasCost - optimizedGasCost) * monthlyTransactionFrequency;
+    const monthlyConversionSavings = (avgConversionFee - (totalConversionFeePercent / 100)) * monthlyExpenses;
+    const estimatedSavings6Months = (monthlyGasSavings + monthlyConversionSavings) * 6;
+    
+    const reason = `Optimal distribution based on ${userContext.country} regional preferences, chain efficiency, and your spending patterns (${monthlyExpenses.toFixed(0)} USD/month expenses)`;
+    
+    return {
+        distribution,
+        totalConversionFee: totalConversionFeePercent,
+        estimatedSavings6Months: Math.max(0, estimatedSavings6Months),
+        reason
+    };
 }
 
 function calculateSavings(recommendations: Recommendation[]): number {
