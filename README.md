@@ -24,7 +24,7 @@ A comprehensive mobile and web application for managing stablecoin portfolios, o
 
 ## Overview
 
-Stable Living Frontend is a financial management application designed to help users optimize their stablecoin holdings across multiple blockchain networks. The app provides:
+Stable Pay Frontend is a financial management application designed to help users optimize their stablecoin holdings across multiple blockchain networks. The app provides:
 
 - **Multi-chain wallet support** for Solana-based stablecoins (USDC, USDT, etc.)
 - **Intelligent path finding** for optimal currency conversions with minimal fees
