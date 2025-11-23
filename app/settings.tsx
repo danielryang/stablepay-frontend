@@ -1,21 +1,13 @@
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
-
-export default function SettingsScreen() {
-    const router = useRouter();
-    const { settings, updateSettings } = useOptimizerSettings();
-import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-
-import { useRouter } from "expo-router";
-
-import { useWallet } from "@/contexts/WalletContext";
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
 export default function SettingsScreen() {
     const router = useRouter();
     const { logout, publicKeyString } = useWallet();
+    const { settings, updateSettings } = useOptimizerSettings();
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     
     // Local state for optimizer settings (for editing)

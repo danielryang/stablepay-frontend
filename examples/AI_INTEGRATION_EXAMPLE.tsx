@@ -4,13 +4,13 @@
  * This shows how to enhance recommendations with AI-generated explanations
  */
 
-import { useState } from "react";
-import { View, Text, ActivityIndicator, Pressable } from "react-native";
-import { analyzeAndOptimize, UserBalance } from "@/utils/enhancedOptimizer";
-import { 
-    enhanceRecommendationWithAI, 
-    generateAISummary 
+import {
+    enhanceRecommendationWithAI,
+    generateAISummary
 } from "@/utils/aiEnhancer";
+import { UserBalance } from "@/utils/enhancedOptimizer";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 
 export default function OptimizerWithAI() {
     const [loading, setLoading] = useState(false);

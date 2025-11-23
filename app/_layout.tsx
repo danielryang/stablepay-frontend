@@ -80,30 +80,28 @@ function RootLayoutNav() {
     const colorScheme = useColorScheme();
 
     return (
-        <TransactionProvider>
-            <OptimizerSettingsProvider>
         <WalletProvider>
             <TransactionProvider>
-                <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-                    <View style={{ flex: 1, paddingTop: 30, backgroundColor: '#FFFFFF' }}>
-                        <Stack>
-                            <Stack.Screen name="login" options={{ headerShown: false }} />
-                            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-                            <Stack.Screen name="create-wallet" options={{ headerShown: false }} />
-                            <Stack.Screen name="restore-wallet" options={{ headerShown: false }} />
-                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                            <Stack.Screen name="send" options={{ headerShown: false }} />
-                            <Stack.Screen name="receive" options={{ headerShown: false }} />
-                            <Stack.Screen name="convert" options={{ headerShown: false }} />
-                            <Stack.Screen name="buy" options={{ headerShown: false }} />
-                            <Stack.Screen name="activity" options={{ headerShown: false }} />
-                            <Stack.Screen name="settings" options={{ headerShown: false }} />
-                            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-                        </Stack>
-                    </View>
-                </ThemeProvider>
-            </OptimizerSettingsProvider>
-        </TransactionProvider>
+                <OptimizerSettingsProvider>
+                    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+                        <View style={{ flex: 1, paddingTop: 30, backgroundColor: '#FFFFFF' }}>
+                            <Stack>
+                                <Stack.Screen name="login" options={{ headerShown: false }} />
+                                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                                <Stack.Screen name="create-wallet" options={{ headerShown: false }} />
+                                <Stack.Screen name="restore-wallet" options={{ headerShown: false }} />
+                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                                <Stack.Screen name="send" options={{ headerShown: false }} />
+                                <Stack.Screen name="receive" options={{ headerShown: false }} />
+                                <Stack.Screen name="convert" options={{ headerShown: false }} />
+                                <Stack.Screen name="buy" options={{ headerShown: false }} />
+                                <Stack.Screen name="activity" options={{ headerShown: false }} />
+                                <Stack.Screen name="settings" options={{ headerShown: false }} />
+                                <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+                            </Stack>
+                        </View>
+                    </ThemeProvider>
+                </OptimizerSettingsProvider>
             </TransactionProvider>
         </WalletProvider>
     );

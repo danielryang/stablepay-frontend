@@ -787,7 +787,7 @@ export default function OptimizerScreen() {
                                 </Pressable>
                                 {aiAnswer && (
                                     <View style={styles.qaAnswer}>
-                                        <Text style={styles.qaAnswerLabel}>🤖 AI Answer:</Text>
+                                        <Text style={styles.qaAnswerLabel}>AI Answer:</Text>
                                         <MarkdownText style={styles.qaAnswerText}>{aiAnswer}</MarkdownText>
                                     </View>
                                 )}
