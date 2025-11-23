@@ -4,6 +4,9 @@ module.exports = {
     presets: [require("nativewind/preset")],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ["Inter_400Regular", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+            },
             colors: {
                 border: "#E1E4E8",
                 input: "#E1E4E8",

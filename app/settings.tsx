@@ -1,3 +1,11 @@
+import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+
+export default function SettingsScreen() {
+    const router = useRouter();
+    const { settings, updateSettings } = useOptimizerSettings();
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 
@@ -9,6 +17,16 @@ export default function SettingsScreen() {
     const router = useRouter();
     const { logout, publicKeyString } = useWallet();
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    
+    // Local state for optimizer settings (for editing)
+    const [minMonthlyExpenses, setMinMonthlyExpenses] = useState(settings.minimumMonthlyExpenses.toString());
+    const [spendingPercent, setSpendingPercent] = useState((settings.spendingPercentage * 100).toString());
+    
+    // Sync local state when settings change
+    React.useEffect(() => {
+        setMinMonthlyExpenses(settings.minimumMonthlyExpenses.toString());
+        setSpendingPercent((settings.spendingPercentage * 100).toString());
+    }, [settings]);
 
     const handleLogout = () => {
         Alert.alert(
@@ -102,6 +120,67 @@ export default function SettingsScreen() {
                                     <Text style={styles.settingSubtitle}>English (US)</Text>
                                 </View>
                             </Pressable>
+                        </View>
+                    </View>
+
+                    {/* Optimizer Settings Section */}
+                    <View style={styles.section}>
+                        <View style={styles.card}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionHeaderText}>📊 Smart Allocation Optimizer</Text>
+                            </View>
+                            
+                            <View style={styles.divider} />
+                            
+                            <View style={styles.settingItem}>
+                                <Text style={styles.settingIcon}>💰</Text>
+                                <View style={styles.settingContent}>
+                                    <Text style={styles.settingTitle}>Minimum Monthly Expenses</Text>
+                                    <Text style={styles.settingSubtitle}>
+                                        Minimum spending threshold (default: $800)
+                                    </Text>
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputPrefix}>$</Text>
+                                    <TextInput
+                                        style={styles.numberInput}
+                                        value={minMonthlyExpenses}
+                                        onChangeText={setMinMonthlyExpenses}
+                                        keyboardType="numeric"
+                                        onBlur={() => {
+                                            const value = parseInt(minMonthlyExpenses) || 800;
+                                            updateSettings({ minimumMonthlyExpenses: value });
+                                        }}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.divider} />
+
+                            <View style={styles.settingItem}>
+                                <Text style={styles.settingIcon}>📈</Text>
+                                <View style={styles.settingContent}>
+                                    <Text style={styles.settingTitle}>Spending Percentage</Text>
+                                    <Text style={styles.settingSubtitle}>
+                                        % of balance spent monthly (default: 15%)
+                                    </Text>
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        style={styles.numberInput}
+                                        value={spendingPercent}
+                                        onChangeText={setSpendingPercent}
+                                        keyboardType="numeric"
+                                        onBlur={() => {
+                                            const value = parseFloat(spendingPercent) || 15;
+                                            const decimalValue = Math.max(0.01, Math.min(1, value / 100));
+                                            updateSettings({ spendingPercentage: decimalValue });
+                                            setSpendingPercent(value.toString());
+                                        }}
+                                    />
+                                    <Text style={styles.inputSuffix}>%</Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
 
@@ -250,5 +329,42 @@ const styles = StyleSheet.create({
     versionText: {
         fontSize: 14,
         color: "#737A82",
+    },
+    sectionHeader: {
+        padding: 16,
+        paddingBottom: 12,
+    },
+    sectionHeaderText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        minWidth: 80,
+    },
+    inputPrefix: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+        marginRight: 4,
+    },
+    inputSuffix: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+        marginLeft: 4,
+    },
+    numberInput: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+        minWidth: 50,
+        textAlign: 'right',
     },
 });

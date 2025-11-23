@@ -20,7 +20,7 @@ import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
 
 const { width } = Dimensions.get("window");
-const TAB_COUNT = 2;
+const TAB_COUNT = 3;
 const TAB_WIDTH = width / TAB_COUNT;
 
 function TabBarIcon(props: {
@@ -97,7 +97,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                     });
                 };
 
-                const iconName = route.name === "index" ? "home" : "bar-chart";
+                const iconName = route.name === "index" ? "home" : route.name === "two" ? "bar-chart" : "lightbulb-o";
 
                 return (
                     <Pressable
@@ -167,6 +167,14 @@ export default function TabLayout() {
                 name="two"
                 options={{
                     title: "Activity",
+                    tabBarShowLabel: false,
+                    headerShown: false,
+                }}
+            />
+            <Tabs.Screen
+                name="three"
+                options={{
+                    title: "Optimizer",
                     tabBarShowLabel: false,
                     headerShown: false,
                 }}
