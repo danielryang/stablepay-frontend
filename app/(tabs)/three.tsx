@@ -9,6 +9,8 @@ import {
     View,
 } from "react-native";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
@@ -348,7 +350,15 @@ export default function OptimizerScreen() {
             <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.errorContainer}>
-                        <Text style={[styles.errorTitle, { color: colors.error }]}>⚠️ Error</Text>
+                        <View style={styles.errorTitleRow}>
+                            <FontAwesome
+                                name="exclamation-triangle"
+                                size={24}
+                                color={colors.error}
+                                style={{ marginRight: 8 }}
+                            />
+                            <Text style={[styles.errorTitle, { color: colors.error }]}>Error</Text>
+                        </View>
                         <Text style={[styles.errorMessage, { color: colors.text }]}>{error}</Text>
                         <Pressable
                             style={[styles.retryButton, { backgroundColor: colors.buttonPrimary }]}
@@ -1330,15 +1340,23 @@ export default function OptimizerScreen() {
                                                     },
                                                 ]}
                                             >
-                                                <Text
-                                                    style={[
-                                                        styles.switchWarningText,
-                                                        { color: colors.warning },
-                                                    ]}
-                                                >
-                                                    ⚠️ Consider switching to{" "}
-                                                    {item.recommendedStablecoin.name}
-                                                </Text>
+                                                <View style={styles.switchWarningRow}>
+                                                    <FontAwesome
+                                                        name="exclamation-triangle"
+                                                        size={14}
+                                                        color={colors.warning}
+                                                        style={{ marginRight: 6 }}
+                                                    />
+                                                    <Text
+                                                        style={[
+                                                            styles.switchWarningText,
+                                                            { color: colors.warning },
+                                                        ]}
+                                                    >
+                                                        Consider switching to{" "}
+                                                        {item.recommendedStablecoin.name}
+                                                    </Text>
+                                                </View>
                                                 <Text
                                                     style={[
                                                         styles.switchWarningSubtext,
@@ -1708,14 +1726,22 @@ export default function OptimizerScreen() {
                                                         },
                                                     ]}
                                                 >
-                                                    <Text
-                                                        style={[
-                                                            styles.volatilityWarningText,
-                                                            { color: colors.warning },
-                                                        ]}
-                                                    >
-                                                        ⚠️ {insight.volatilityWarning}
-                                                    </Text>
+                                                    <View style={styles.volatilityWarningRow}>
+                                                        <FontAwesome
+                                                            name="exclamation-triangle"
+                                                            size={12}
+                                                            color={colors.warning}
+                                                            style={{ marginRight: 6 }}
+                                                        />
+                                                        <Text
+                                                            style={[
+                                                                styles.volatilityWarningText,
+                                                                { color: colors.warning },
+                                                            ]}
+                                                        >
+                                                            {insight.volatilityWarning}
+                                                        </Text>
+                                                    </View>
                                                 </View>
                                             )}
                                         </View>
@@ -1875,6 +1901,11 @@ const styles = StyleSheet.create({
         padding: 32,
         alignItems: "center",
         gap: 16,
+    },
+    errorTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
     },
     errorTitle: {
         fontSize: 24,
@@ -2090,9 +2121,14 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
     },
+    switchWarningRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
     switchWarningText: {
         fontSize: 14,
         fontWeight: "500",
+        flex: 1,
     },
     switchWarningSubtext: {
         fontSize: 12,
@@ -2185,8 +2221,13 @@ const styles = StyleSheet.create({
         padding: 8,
         marginTop: 8,
     },
+    volatilityWarningRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+    },
     volatilityWarningText: {
         fontSize: 12,
+        flex: 1,
     },
     savingsCard: {
         borderRadius: 12,

@@ -10,6 +10,8 @@ import {
 
 import { useRouter } from "expo-router";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
@@ -56,7 +58,11 @@ export default function HomeScreen() {
                     </View>
                 </View>
                 <Pressable onPress={() => router.push("/settings")}>
-                    <Text style={styles.settingsIcon}>⚙️</Text>
+                    <FontAwesome
+                        name="cog"
+                        size={24}
+                        color={colors.text}
+                    />
                 </Pressable>
             </View>
 
@@ -84,9 +90,17 @@ export default function HomeScreen() {
                         )}
                         {publicKeyString && (
                             <Pressable onPress={refreshBalance} style={styles.refreshButton}>
-                                <Text style={[styles.refreshText, { color: colors.primary }]}>
-                                    🔄 Refresh
-                                </Text>
+                                <View style={styles.refreshButtonContent}>
+                                    <FontAwesome
+                                        name="refresh"
+                                        size={12}
+                                        color={colors.primary}
+                                        style={{ marginRight: 4 }}
+                                    />
+                                    <Text style={[styles.refreshText, { color: colors.primary }]}>
+                                        Refresh
+                                    </Text>
+                                </View>
                             </Pressable>
                         )}
                     </View>
@@ -100,11 +114,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/convert")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text
-                                    style={[styles.actionIconText, { color: colors.textInverse }]}
-                                >
-                                    ⟳
-                                </Text>
+                                <FontAwesome
+                                    name="exchange"
+                                    size={18}
+                                    color={colors.textInverse}
+                                />
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Convert
@@ -119,11 +133,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/send")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text
-                                    style={[styles.actionIconText, { color: colors.textInverse }]}
-                                >
-                                    ↗
-                                </Text>
+                                <FontAwesome
+                                    name="paper-plane"
+                                    size={18}
+                                    color={colors.textInverse}
+                                />
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>Send</Text>
                         </Pressable>
@@ -136,11 +150,11 @@ export default function HomeScreen() {
                             onPress={() => router.push("/receive")}
                         >
                             <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
-                                <Text
-                                    style={[styles.actionIconText, { color: colors.textInverse }]}
-                                >
-                                    ↙
-                                </Text>
+                                <FontAwesome
+                                    name="arrow-down"
+                                    size={18}
+                                    color={colors.textInverse}
+                                />
                             </View>
                             <Text style={[styles.actionLabel, { color: colors.text }]}>
                                 Receive
@@ -287,8 +301,9 @@ const styles = StyleSheet.create({
         marginTop: 2,
         fontFamily: "monospace",
     },
-    settingsIcon: {
-        fontSize: 20,
+    refreshButtonContent: {
+        flexDirection: "row",
+        alignItems: "center",
     },
     scrollView: {
         flex: 1,

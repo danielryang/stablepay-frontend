@@ -13,6 +13,8 @@ import {
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useWallet } from "@/contexts/WalletContext";
@@ -173,14 +175,22 @@ export default function CreateWalletScreen() {
                                 ]}
                                 onPress={handleCopyMnemonic}
                             >
-                                <Text
-                                    style={[
-                                        styles.copyButtonText,
-                                        { color: colors.buttonSecondaryText },
-                                    ]}
-                                >
-                                    📋 Copy to Clipboard
-                                </Text>
+                                <View style={styles.copyButtonContent}>
+                                    <FontAwesome
+                                        name="clipboard"
+                                        size={14}
+                                        color={colors.buttonSecondaryText}
+                                        style={{ marginRight: 6 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.copyButtonText,
+                                            { color: colors.buttonSecondaryText },
+                                        ]}
+                                    >
+                                        Copy to Clipboard
+                                    </Text>
+                                </View>
                             </Pressable>
 
                             <Pressable
@@ -244,7 +254,11 @@ export default function CreateWalletScreen() {
                                     },
                                 ]}
                             >
-                                <Text style={styles.warningIcon}>⚠️</Text>
+                                <FontAwesome
+                                    name="exclamation-triangle"
+                                    size={32}
+                                    color={colors.warning}
+                                />
                                 <Text style={[styles.warningTitle, { color: colors.warning }]}>
                                     This is Your Only Way to Recover Your Wallet
                                 </Text>
@@ -553,6 +567,10 @@ const styles = StyleSheet.create({
         padding: 12,
         alignItems: "center",
         borderWidth: 1,
+    },
+    copyButtonContent: {
+        flexDirection: "row",
+        alignItems: "center",
     },
     copyButtonText: {
         fontSize: 14,

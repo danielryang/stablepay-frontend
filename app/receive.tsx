@@ -12,6 +12,8 @@ import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { useWallet } from "@/contexts/WalletContext";
@@ -144,7 +146,11 @@ export default function ReceiveScreen() {
                                         },
                                     ]}
                                 >
-                                    <Text style={styles.actionIcon}>📋</Text>
+                                    <FontAwesome
+                                        name="clipboard"
+                                        size={18}
+                                        color={colors.text}
+                                    />
                                     <Text style={[styles.actionText, { color: colors.text }]}>
                                         Copy
                                     </Text>
@@ -159,7 +165,11 @@ export default function ReceiveScreen() {
                                         },
                                     ]}
                                 >
-                                    <Text style={styles.actionIcon}>↗</Text>
+                                    <FontAwesome
+                                        name="share"
+                                        size={18}
+                                        color={colors.text}
+                                    />
                                     <Text style={[styles.actionText, { color: colors.text }]}>
                                         Share
                                     </Text>

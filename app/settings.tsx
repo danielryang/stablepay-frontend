@@ -13,8 +13,10 @@ import {
 
 import { useRouter } from "expo-router";
 
-import Colors from "@/constants/Colors";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { useOptimizerSettings } from "@/contexts/OptimizerSettingsContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallet } from "@/contexts/WalletContext";
@@ -101,9 +103,7 @@ export default function SettingsScreen() {
                             ]}
                         >
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
-                                    🔔
-                                </Text>
+                                <FontAwesome name="bell" size={22} color={colors.textSecondary} />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Notifications
@@ -128,9 +128,7 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
-                                    🛡
-                                </Text>
+                                <FontAwesome name="shield" size={22} color={colors.textSecondary} />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Security
@@ -149,9 +147,7 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <Pressable style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
-                                    🌍
-                                </Text>
+                                <FontAwesome name="globe" size={22} color={colors.textSecondary} />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Language & Region
@@ -181,17 +177,25 @@ export default function SettingsScreen() {
                             ]}
                         >
                             <View style={styles.sectionHeader}>
-                                <Text style={[styles.sectionHeaderText, { color: colors.text }]}>
-                                    📊 Smart Allocation Optimizer
-                                </Text>
+                                <View style={styles.sectionHeaderRow}>
+                                    <FontAwesome
+                                        name="bar-chart"
+                                        size={20}
+                                        color={colors.text}
+                                        style={{ marginRight: 8 }}
+                                    />
+                                    <Text
+                                        style={[styles.sectionHeaderText, { color: colors.text }]}
+                                    >
+                                        Smart Allocation Optimizer
+                                    </Text>
+                                </View>
                             </View>
 
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
-                                    💰
-                                </Text>
+                                <FontAwesome name="usd" size={22} color={colors.textSecondary} />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Minimum Monthly Expenses
@@ -231,9 +235,11 @@ export default function SettingsScreen() {
                             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                             <View style={styles.settingItem}>
-                                <Text style={[styles.settingIcon, { color: colors.textSecondary }]}>
-                                    📈
-                                </Text>
+                                <FontAwesome
+                                    name="line-chart"
+                                    size={22}
+                                    color={colors.textSecondary}
+                                />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
                                         Spending Percentage
@@ -294,9 +300,11 @@ export default function SettingsScreen() {
                                         { backgroundColor: colors.primaryLight },
                                     ]}
                                 >
-                                    <Text style={[styles.iconText, { color: colors.primary }]}>
-                                        🌓
-                                    </Text>
+                                    <FontAwesome
+                                        name={theme === "dark" ? "moon-o" : "sun-o"}
+                                        size={18}
+                                        color={colors.primary}
+                                    />
                                 </View>
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.settingTitle, { color: colors.text }]}>
@@ -334,9 +342,7 @@ export default function SettingsScreen() {
                             ]}
                         >
                             <Pressable onPress={handleLogout} style={styles.settingItem}>
-                                <Text style={[styles.destructiveIcon, { color: colors.error }]}>
-                                    🚪
-                                </Text>
+                                <FontAwesome name="lock" size={22} color={colors.error} />
                                 <View style={styles.settingContent}>
                                     <Text style={[styles.destructiveText, { color: colors.error }]}>
                                         Lock Wallet
@@ -431,6 +437,10 @@ const styles = StyleSheet.create({
     },
     iconText: {
         fontSize: 14,
+    },
+    sectionHeaderRow: {
+        flexDirection: "row",
+        alignItems: "center",
     },
     settingContent: {
         flex: 1,

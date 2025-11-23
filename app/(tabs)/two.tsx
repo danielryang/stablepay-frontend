@@ -1,5 +1,7 @@
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useTransactions } from "@/contexts/TransactionContext";
@@ -22,7 +24,11 @@ export default function ActivityScreen() {
                             </Text>
                         </View>
                         <Pressable onPress={refreshTransactions} style={styles.refreshButton}>
-                            <Text style={[styles.refreshText, { color: colors.text }]}>🔄</Text>
+                            <FontAwesome
+                                name="refresh"
+                                size={20}
+                                color={colors.text}
+                            />
                         </Pressable>
                     </View>
 
@@ -58,13 +64,17 @@ export default function ActivityScreen() {
                                     <View style={styles.transactionHeader}>
                                         <View style={styles.headerLeft}>
                                             <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
-                                                <Text style={[styles.icon, { color: colors.primary }]}>
-                                                    {tx.type === "sent"
-                                                        ? "↗"
-                                                        : tx.type === "received"
-                                                          ? "↙"
-                                                          : "⟳"}
-                                                </Text>
+                                                <FontAwesome
+                                                    name={
+                                                        tx.type === "sent"
+                                                            ? "arrow-up"
+                                                            : tx.type === "received"
+                                                              ? "arrow-down"
+                                                              : "exchange"
+                                                    }
+                                                    size={14}
+                                                    color={colors.primary}
+                                                />
                                             </View>
                                             <View>
                                                 <Text style={[styles.date, { color: colors.text }]}>{tx.date}</Text>
