@@ -1,4 +1,4 @@
-# Stable Living Frontend
+# Stable Pay Frontend
 
 A comprehensive mobile and web application for managing stablecoin portfolios, optimizing allocations, and facilitating cross-chain transactions with AI-powered insights. Built with React Native (Expo) for cross-platform compatibility. This project was submitted for MadHacks 2025.
 
