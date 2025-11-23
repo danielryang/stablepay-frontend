@@ -290,7 +290,7 @@ export default function SendScreen() {
             type: "sent",
             status: "Confirmed",
             transactionFee: `${transactionFeeARS.toFixed(2)} ARS`, // Always in ARS
-            feesSaved: "0 ARS", // Can be calculated if needed
+            feesSaved: "0 ARS",
             finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS`,
             path: path, // Add path array
             hops: hops, // Add hops array
@@ -480,20 +480,16 @@ export default function SendScreen() {
 
                         <View style={styles.feesSection}>
                             <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Total Fees Saved:</Text>
-                                <Text style={[styles.feeValueSuccess, { color: colors.success }]}>
-                                    8.50 {toCurrency}
-                                </Text>
-                            </View>
-                            <View style={styles.feeRow}>
                                 <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Transaction Fee:</Text>
-                                <Text style={[styles.feeValue, { color: colors.text }]}>
-                                    2.00 {toCurrency}
-                                </Text>
-                            </View>
-                            <View style={styles.feeRow}>
-                                <Text style={[styles.feeLabel, { color: colors.textSecondary }]}>Speed:</Text>
-                                <Text style={[styles.feeValue, { color: colors.text }]}>2s</Text>
+                                {conversionLoading ? (
+                                    <Text style={[styles.feeValue, { color: colors.textSecondary }]}>Loading...</Text>
+                                ) : conversionError ? (
+                                    <Text style={[styles.feeValueError, { color: colors.error }]}>Error</Text>
+                                ) : (
+                                    <Text style={[styles.feeValue, { color: colors.text }]}>
+                                        {transactionFeeARS.toFixed(2)} ARS
+                                    </Text>
+                                )}
                             </View>
                         </View>
                     </View>
