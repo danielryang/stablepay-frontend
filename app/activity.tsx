@@ -1,4 +1,5 @@
-import { Text, View, ScrollView } from "react-native";
+import { Text, View, Pressable, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 const transactions = [
     {
@@ -38,8 +39,17 @@ const transactions = [
 ];
 
 export default function ActivityScreen() {
+    const router = useRouter();
+
     return (
         <View className="flex-1 bg-background">
+            <View className="flex-row items-center p-4 border-b border-border">
+                <Pressable onPress={() => router.back()} className="mr-2">
+                    <Text className="text-foreground text-xl">←</Text>
+                </Pressable>
+                <Text className="text-xl font-bold text-foreground">Transaction History</Text>
+            </View>
+
             <ScrollView className="flex-1 p-4">
                 <View className="gap-4">
                     <Text className="text-lg font-semibold text-foreground">Account 1</Text>

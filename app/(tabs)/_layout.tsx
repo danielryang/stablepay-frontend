@@ -95,7 +95,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                     });
                 };
 
-                const iconName = route.name === "index" ? "home" : "history";
+                const iconName = route.name === "index" ? "home" : "bar-chart";
 
                 return (
                     <Pressable
@@ -138,27 +138,15 @@ export default function TabLayout() {
                 options={{
                     title: "Home",
                     tabBarShowLabel: false,
-                    headerRight: () => (
-                        <Link href="/modal" asChild>
-                            <Pressable>
-                                {({ pressed }) => (
-                                    <FontAwesome
-                                        name="info-circle"
-                                        size={25}
-                                        color={Colors[colorScheme ?? "light"].text}
-                                        style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                                    />
-                                )}
-                            </Pressable>
-                        </Link>
-                    ),
+                    headerShown: false,
                 }}
             />
             <Tabs.Screen
                 name="two"
                 options={{
-                    title: "Transaction History",
+                    title: "Activity",
                     tabBarShowLabel: false,
+                    headerShown: false,
                 }}
             />
         </Tabs>
