@@ -1,15 +1,32 @@
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { useWallet } from "@/contexts/WalletContext";
 
 export default function HomeScreen() {
     const router = useRouter();
+    const { publicKeyString, balance, refreshBalance, isLoading } = useWallet();
+
+    const formatAddress = (address: string | null) => {
+        if (!address) return "Not available";
+        return `${address.slice(0, 4)}...${address.slice(-4)}`;
+    };
+
+    const formatBalance = (bal: number | null) => {
+        if (bal === null) return "0.00";
+        return bal.toFixed(4);
+    };
 
 
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Account 1</Text>
+                <View>
+                    <Text style={styles.headerTitle}>Solana Wallet</Text>
+                    {publicKeyString && (
+                        <Text style={styles.headerSubtitle}>{formatAddress(publicKeyString)}</Text>
+                    )}
+                </View>
                 <Pressable onPress={() => router.push("/settings")}>
                     <Text style={styles.settingsIcon}>⚙️</Text>
                 </Pressable>
@@ -18,21 +35,20 @@ export default function HomeScreen() {
             <ScrollView style={styles.scrollView}>
                 <View style={styles.mainContent}>
                     <View style={styles.balanceCard}>
-                        <Text style={styles.balanceLabel}>Total Balance</Text>
-                        <Text style={styles.balanceAmount}>$0.00</Text>
+                        <Text style={styles.balanceLabel}>USDC Balance</Text>
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="#0891D1" style={{ marginTop: 8 }} />
+                        ) : (
+                            <Text style={styles.balanceAmount}>${formatBalance(balance)}</Text>
+                        )}
+                        {publicKeyString && (
+                            <Pressable onPress={refreshBalance} style={styles.refreshButton}>
+                                <Text style={styles.refreshText}>🔄 Refresh</Text>
+                            </Pressable>
+                        )}
                     </View>
 
                     <View style={styles.actionsGrid}>
-                        <Pressable
-                            style={styles.actionButton}
-                            onPress={() => router.push("/buy")}
-                        >
-                            <View style={styles.actionIcon}>
-                                <Text style={styles.actionIconText}>$</Text>
-                            </View>
-                            <Text style={styles.actionLabel}>Buy</Text>
-                        </Pressable>
-
                         <Pressable
                             style={styles.actionButton}
                             onPress={() => router.push("/convert")}
@@ -78,8 +94,14 @@ export default function HomeScreen() {
                                 </View>
                             </View>
                             <View style={styles.tokenBalance}>
-                                <Text style={styles.tokenAmount}>$500</Text>
-                                <Text style={styles.tokenSubtext}>500 USDC</Text>
+                                {isLoading ? (
+                                    <ActivityIndicator size="small" color="#0891D1" />
+                                ) : (
+                                    <>
+                                        <Text style={styles.tokenAmount}>${formatBalance(balance)}</Text>
+                                        <Text style={styles.tokenSubtext}>{formatBalance(balance)} USDC</Text>
+                                    </>
+                                )}
                             </View>
                         </View>
 
@@ -142,6 +164,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#29343D',
     },
+    headerSubtitle: {
+        fontSize: 12,
+        color: '#737A82',
+        marginTop: 2,
+        fontFamily: 'monospace',
+    },
     settingsIcon: {
         fontSize: 20,
     },
@@ -168,6 +196,16 @@ const styles = StyleSheet.create({
         fontSize: 48,
         fontWeight: 'bold',
         color: '#29343D',
+    },
+    refreshButton: {
+        marginTop: 8,
+        padding: 8,
+        alignSelf: 'flex-start',
+    },
+    refreshText: {
+        fontSize: 12,
+        color: '#0891D1',
+        fontWeight: '500',
     },
     actionsGrid: {
         flexDirection: 'row',

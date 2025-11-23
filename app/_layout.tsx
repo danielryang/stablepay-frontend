@@ -1,3 +1,6 @@
+// IMPORTANT: Polyfills must be imported FIRST before any other imports
+import "../polyfills";
+
 import { useEffect } from "react";
 import "react-native-reanimated";
 
@@ -24,6 +27,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native
 import { useColorScheme } from "@/components/useColorScheme";
 import { OptimizerSettingsProvider } from "@/contexts/OptimizerSettingsContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
+import { WalletProvider } from "@/contexts/WalletContext";
 
 import "../global.css";
 
@@ -78,10 +82,15 @@ function RootLayoutNav() {
     return (
         <TransactionProvider>
             <OptimizerSettingsProvider>
+        <WalletProvider>
+            <TransactionProvider>
                 <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
                     <View style={{ flex: 1, paddingTop: 30, backgroundColor: '#FFFFFF' }}>
                         <Stack>
                             <Stack.Screen name="login" options={{ headerShown: false }} />
+                            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                            <Stack.Screen name="create-wallet" options={{ headerShown: false }} />
+                            <Stack.Screen name="restore-wallet" options={{ headerShown: false }} />
                             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                             <Stack.Screen name="send" options={{ headerShown: false }} />
                             <Stack.Screen name="receive" options={{ headerShown: false }} />
@@ -95,5 +104,7 @@ function RootLayoutNav() {
                 </ThemeProvider>
             </OptimizerSettingsProvider>
         </TransactionProvider>
+            </TransactionProvider>
+        </WalletProvider>
     );
 }
