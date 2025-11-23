@@ -49,16 +49,6 @@ export default function HomeScreen() {
                     <View style={styles.actionsGrid}>
                         <Pressable
                             style={styles.actionButton}
-                            onPress={() => router.push("/buy")}
-                        >
-                            <View style={styles.actionIcon}>
-                                <Text style={styles.actionIconText}>$</Text>
-                            </View>
-                            <Text style={styles.actionLabel}>Buy</Text>
-                        </Pressable>
-
-                        <Pressable
-                            style={styles.actionButton}
                             onPress={() => router.push("/convert")}
                         >
                             <View style={styles.actionIcon}>
