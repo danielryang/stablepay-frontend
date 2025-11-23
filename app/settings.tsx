@@ -8,8 +8,8 @@ export default function SettingsScreen() {
 
     return (
         <View className="flex-1 bg-background">
-            <View className="flex-row items-center justify-between p-4 border-b border-border">
-                <View className="flex-row items-center">
+            <View className="flex-row items-end justify-between px-4 pt-4 pb-3 border-b border-border">
+                <View className="flex-row items-end">
                     <Pressable onPress={() => router.back()} className="mr-2">
                         <Text className="text-foreground text-xl">←</Text>
                     </Pressable>

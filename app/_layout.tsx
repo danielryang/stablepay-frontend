@@ -4,18 +4,20 @@ import "react-native-reanimated";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { View } from "react-native";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { TransactionProvider } from "@/contexts/TransactionContext";
 
 import "../global.css";
 
 export {
     // Catch any errors thrown by the Layout component.
-    ErrorBoundary,
+    ErrorBoundary
 } from "expo-router";
 
 export const unstable_settings = {
@@ -53,16 +55,20 @@ function RootLayoutNav() {
     const colorScheme = useColorScheme();
 
     return (
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-            <Stack>
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="send" options={{ headerShown: false }} />
-                <Stack.Screen name="receive" options={{ headerShown: false }} />
-                <Stack.Screen name="activity" options={{ headerShown: false }} />
-                <Stack.Screen name="settings" options={{ headerShown: false }} />
-                <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-            </Stack>
-        </ThemeProvider>
+        <TransactionProvider>
+            <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+                <View style={{ flex: 1, paddingTop: 30, backgroundColor: '#FFFFFF' }}>
+                    <Stack>
+                        <Stack.Screen name="login" options={{ headerShown: false }} />
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen name="send" options={{ headerShown: false }} />
+                        <Stack.Screen name="receive" options={{ headerShown: false }} />
+                        <Stack.Screen name="activity" options={{ headerShown: false }} />
+                        <Stack.Screen name="settings" options={{ headerShown: false }} />
+                        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+                    </Stack>
+                </View>
+            </ThemeProvider>
+        </TransactionProvider>
     );
 }

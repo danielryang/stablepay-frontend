@@ -1,132 +1,160 @@
-import { Text, View, Pressable, ScrollView, TextInput } from "react-native";
+import { useTransactions } from "@/contexts/TransactionContext";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function SendScreen() {
     const router = useRouter();
+    const { addTransaction } = useTransactions();
     const [amount, setAmount] = useState("40");
-    const [fromAccount, setFromAccount] = useState("Account X");
-    const [toAccount, setToAccount] = useState("Account Y");
     const [fromCurrency, setFromCurrency] = useState("USDC");
     const [toCurrency, setToCurrency] = useState("ARS");
     const [fromAddress, setFromAddress] = useState("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1");
     const [toAddress, setToAddress] = useState("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063");
     const exchangeRate = 1050;
-    const arsTotal = (parseFloat(amount) || 0) * exchangeRate;
+    const convertedAmount = (parseFloat(amount) || 0) * exchangeRate;
+
+    const handleSend = () => {
+        const now = new Date();
+        const dateString = now.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+
+        const shortenAddress = (addr: string) => {
+            if (addr.length > 10) {
+                return `${addr.slice(0, 7)}...${addr.slice(-5)}`;
+            }
+            return addr;
+        };
+
+        const transactionFee = 2.00;
+        const feesSaved = 8.50;
+        const finalTotal = convertedAmount + transactionFee;
+
+        addTransaction({
+            date: dateString,
+            fromAddress: shortenAddress(fromAddress),
+            toAddress: shortenAddress(toAddress),
+            fromAmount: parseFloat(amount).toFixed(2),
+            fromToken: fromCurrency,
+            toAmount: convertedAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            toToken: toCurrency,
+            type: "sent",
+            status: "Confirmed",
+            transactionFee: `${transactionFee} ${toCurrency}`,
+            speed: "2s",
+            feesSaved: `${feesSaved} ${toCurrency}`,
+            finalTotal: `${finalTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${toCurrency}`,
+        });
+
+        // Navigate to home immediately
+        router.push("/(tabs)");
+        
+        // Show success alert after navigation
+        setTimeout(() => {
+            Alert.alert("Success", "Transaction sent successfully!");
+        }, 100);
+    };
 
     return (
-        <View className="flex-1 bg-background">
-            <View className="flex-row items-center p-4 border-b border-border">
-                <Pressable onPress={() => router.back()} className="mr-2">
-                    <Text className="text-foreground text-xl">←</Text>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>←</Text>
                 </Pressable>
-                <Text className="text-xl font-bold text-foreground">Sending Page</Text>
+                <Text style={styles.headerTitle}>Sending Page</Text>
             </View>
 
-            <ScrollView className="flex-1">
-                <View className="p-4 gap-6">
-                    <View className="p-6 bg-card rounded-lg border border-border gap-6">
-                        <View className="gap-4">
-                            <View className="gap-2">
-                                <Text className="text-xs text-muted-foreground">From Wallet Address</Text>
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
+                    <View style={styles.card}>
+                        <View style={styles.addressSection}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>From Wallet Address</Text>
                                 <TextInput
                                     value={fromAddress}
                                     onChangeText={setFromAddress}
-                                    className="text-xs text-foreground bg-input border border-border rounded-md p-2"
+                                    style={styles.input}
+                                    placeholderTextColor="#737A82"
                                 />
                             </View>
-                            <View className="gap-2">
-                                <Text className="text-xs text-muted-foreground">To Wallet Address</Text>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>To Wallet Address</Text>
                                 <TextInput
                                     value={toAddress}
                                     onChangeText={setToAddress}
-                                    className="text-xs text-foreground bg-input border border-border rounded-md p-2"
+                                    style={styles.input}
+                                    placeholderTextColor="#737A82"
                                 />
                             </View>
                         </View>
 
-                        <View className="border-t border-border pt-6">
-                            <View className="flex-row items-center justify-between">
-                                <View className="flex-1 gap-2">
-                                    <Text className="text-sm text-muted-foreground">From</Text>
+                        <View style={styles.divider} />
+
+                        <View style={styles.amountSection}>
+                            <Text style={styles.amountLabel}>Amount</Text>
+                            <View style={styles.conversionContainer}>
+                                <View style={styles.inputSide}>
                                     <TextInput
-                                        value={fromAccount}
-                                        onChangeText={setFromAccount}
-                                        className="font-semibold text-foreground bg-input border border-border rounded-md p-2"
+                                        value={amount}
+                                        onChangeText={setAmount}
+                                        keyboardType="numeric"
+                                        style={[styles.amountInput, { width: Math.max(60, amount.length * 20) }]}
+                                        placeholderTextColor="#737A82"
                                     />
                                     <TextInput
                                         value={fromCurrency}
                                         onChangeText={setFromCurrency}
-                                        className="text-sm text-foreground bg-input border border-border rounded-md p-2"
+                                        style={styles.currencyInput}
+                                        placeholderTextColor="#737A82"
                                     />
                                 </View>
-
-                                <Text className="text-muted-foreground mx-4 text-xl">→</Text>
-
-                                <View className="flex-1 gap-2 items-end">
-                                    <Text className="text-sm text-muted-foreground">To</Text>
-                                    <TextInput
-                                        value={toAccount}
-                                        onChangeText={setToAccount}
-                                        className="font-semibold text-foreground bg-input border border-border rounded-md p-2 w-full text-right"
-                                    />
+                                <Text style={styles.equals}>=</Text>
+                                <View style={styles.outputSide}>
+                                    <Text style={styles.convertedValue}>
+                                        {convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </Text>
                                     <TextInput
                                         value={toCurrency}
                                         onChangeText={setToCurrency}
-                                        className="text-sm text-foreground bg-input border border-border rounded-md p-2 w-full text-right"
+                                        style={styles.currencyInput}
+                                        placeholderTextColor="#737A82"
                                     />
                                 </View>
                             </View>
                         </View>
 
-                        <View className="border-t border-border pt-6">
-                            <View className="items-center gap-3">
-                                <Text className="text-sm text-muted-foreground">Amount</Text>
-                                <View className="flex-row items-center gap-3">
-                                    <View className="flex-row items-baseline gap-2">
-                                        <Text className="text-xl text-foreground">$</Text>
-                                        <TextInput
-                                            value={amount}
-                                            onChangeText={setAmount}
-                                            keyboardType="numeric"
-                                            className="text-3xl font-bold text-foreground w-24 text-center"
-                                        />
-                                        <Text className="text-xl text-muted-foreground">{fromCurrency}</Text>
-                                    </View>
-                                    <Text className="text-xl text-muted-foreground">=</Text>
-                                    <View className="flex-row items-baseline gap-2">
-                                        <Text className="text-3xl font-bold text-foreground">${arsTotal.toFixed(2)}</Text>
-                                        <Text className="text-xl text-muted-foreground">{toCurrency}</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
+                        <View style={styles.divider} />
 
-                        <View className="border-t border-border pt-6 gap-3">
-                            <View className="flex-row justify-between">
-                                <Text className="text-sm text-muted-foreground">Total Fees Saved:</Text>
-                                <Text className="text-sm font-medium text-success">8.50 ARS</Text>
+                        <View style={styles.feesSection}>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Total Fees Saved:</Text>
+                                <Text style={styles.feeValueSuccess}>8.50 {toCurrency}</Text>
                             </View>
-                            <View className="flex-row justify-between">
-                                <Text className="text-sm text-muted-foreground">Transaction Fee:</Text>
-                                <Text className="text-sm font-medium text-foreground">2 ARS</Text>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Transaction Fee:</Text>
+                                <Text style={styles.feeValue}>2.00 {toCurrency}</Text>
                             </View>
-                            <View className="flex-row justify-between">
-                                <Text className="text-sm text-muted-foreground">Speed:</Text>
-                                <Text className="text-sm font-medium text-foreground">2s</Text>
+                            <View style={styles.feeRow}>
+                                <Text style={styles.feeLabel}>Speed:</Text>
+                                <Text style={styles.feeValue}>2s</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View className="flex-row gap-3 pt-4">
+                    <View style={styles.buttonContainer}>
                         <Pressable
                             onPress={() => router.back()}
-                            className="flex-1 h-12 border border-border rounded-lg items-center justify-center"
+                            style={styles.cancelButton}
                         >
-                            <Text className="text-foreground">Cancel</Text>
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
                         </Pressable>
-                        <Pressable className="flex-1 h-12 bg-primary rounded-lg items-center justify-center">
-                            <Text className="text-primary-foreground font-medium">Send</Text>
+                        <Pressable onPress={handleSend} style={styles.sendButton}>
+                            <Text style={styles.sendButtonText}>Send</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -134,3 +162,181 @@ export default function SendScreen() {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FAFAFA',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E1E4E8',
+        backgroundColor: '#FFFFFF',
+    },
+    backButton: {
+        marginRight: 8,
+    },
+    backText: {
+        fontSize: 24,
+        color: '#29343D',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#29343D',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        padding: 16,
+    },
+    card: {
+        padding: 24,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        gap: 24,
+    },
+    addressSection: {
+        gap: 16,
+    },
+    inputGroup: {
+        gap: 8,
+    },
+    label: {
+        fontSize: 12,
+        color: '#737A82',
+    },
+    input: {
+        backgroundColor: '#E1E4E8',
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 12,
+        color: '#29343D',
+    },
+    inputRight: {
+        textAlign: 'right',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#E1E4E8',
+    },
+    amountSection: {
+        alignItems: 'center',
+        gap: 12,
+    },
+    amountLabel: {
+        fontSize: 14,
+        color: '#737A82',
+    },
+    conversionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        flexWrap: 'wrap',
+        paddingHorizontal: 8,
+    },
+    inputSide: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 4,
+        flexShrink: 1,
+    },
+    outputSide: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 4,
+        flexShrink: 1,
+    },
+    dollarSign: {
+        fontSize: 18,
+        color: '#29343D',
+    },
+    amountInput: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#29343D',
+        textAlign: 'center',
+        paddingHorizontal: 4,
+    },
+    currencyInput: {
+        fontSize: 18,
+        color: '#737A82',
+        textAlign: 'center',
+        minWidth: 50,
+        maxWidth: 80,
+    },
+    convertedValue: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#29343D',
+        flexShrink: 1,
+    },
+    equals: {
+        fontSize: 18,
+        color: '#737A82',
+    },
+    feesSection: {
+        gap: 12,
+    },
+    feeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    feeLabel: {
+        fontSize: 14,
+        color: '#737A82',
+    },
+    feeValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+    },
+    feeValueSuccess: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#22C55E',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 16,
+    },
+    cancelButton: {
+        flex: 1,
+        height: 48,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#FFFFFF',
+    },
+    cancelButtonText: {
+        color: '#29343D',
+        fontSize: 16,
+    },
+    sendButton: {
+        flex: 1,
+        height: 48,
+        backgroundColor: '#0891D1',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sendButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+});

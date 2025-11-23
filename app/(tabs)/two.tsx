@@ -1,128 +1,64 @@
-import { Text, View, ScrollView } from "react-native";
-
-const transactions = [
-    {
-        id: 1,
-        date: "Oct 22 at 3:45pm",
-        fromAddress: "0x7a8f2...9b234",
-        toAddress: "0x1a3f1...3x923",
-        fromAmount: "40.00",
-        fromToken: "USDC",
-        toAmount: "45,600",
-        toToken: "ARS",
-        type: "sent",
-        status: "Confirmed",
-        transactionFee: "2 ARS",
-        speed: "2s",
-        feesSaved: "3.50 ARS",
-        initialConverted: "45,602 ARS",
-        finalTotal: "45,602 ARS",
-    },
-    {
-        id: 2,
-        date: "Oct 21 at 2:30pm",
-        fromAddress: "0x9c2e4...5d678",
-        toAddress: "0x4b6f8...1a456",
-        fromAmount: "100.00",
-        fromToken: "USDC",
-        toAmount: "114,000",
-        toToken: "ARS",
-        type: "sent",
-        status: "Confirmed",
-        transactionFee: "2 ARS",
-        speed: "2s",
-        feesSaved: "4.20 ARS",
-        initialConverted: "114,002 ARS",
-        finalTotal: "114,002 ARS",
-    },
-];
+import { useTransactions } from "@/contexts/TransactionContext";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function ActivityScreen() {
+    const { transactions } = useTransactions();
     return (
-        <View className="flex-1 bg-background">
-            <ScrollView className="flex-1 p-4">
-                <View className="gap-4">
-                    <Text className="text-lg font-semibold text-foreground">Account 1</Text>
-                    <Text className="text-sm text-muted-foreground">Transactions</Text>
+        <View style={styles.container}>
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
+                    <Text style={styles.title}>Account 1</Text>
+                    <Text style={styles.subtitle}>Transactions</Text>
 
-                    <View className="gap-3">
+                    <View style={styles.transactionsList}>
                         {transactions.map((tx) => (
-                            <View
-                                key={tx.id}
-                                className="p-4 bg-card rounded-lg border border-border"
-                            >
-                                <View className="flex-row items-start justify-between mb-3">
-                                    <View className="flex-row items-start gap-3">
-                                        <View className="bg-primary/10 rounded-full p-2 mt-1">
-                                            <Text className="text-primary font-bold text-sm">↗</Text>
+                            <View key={tx.id} style={styles.transactionCard}>
+                                <View style={styles.transactionHeader}>
+                                    <View style={styles.headerLeft}>
+                                        <View style={styles.iconContainer}>
+                                            <Text style={styles.icon}>↗</Text>
                                         </View>
-                                        <View className="gap-1">
-                                            <Text className="text-sm font-medium text-foreground">
-                                                {tx.date}
-                                            </Text>
-                                            <Text className="text-xs text-success">{tx.status}</Text>
+                                        <View>
+                                            <Text style={styles.date}>{tx.date}</Text>
+                                            <Text style={styles.status}>{tx.status}</Text>
                                         </View>
                                     </View>
-                                    <View className="items-end">
-                                        <Text className="text-sm font-semibold text-foreground">
+                                    <View style={styles.amounts}>
+                                        <Text style={styles.fromAmount}>
                                             -{tx.fromAmount} {tx.fromToken}
                                         </Text>
-                                        <Text className="text-sm text-muted-foreground">
+                                        <Text style={styles.toAmount}>
                                             +{tx.toAmount} {tx.toToken}
                                         </Text>
                                     </View>
                                 </View>
 
-                                <View className="gap-2 border-t border-border pt-3">
-                                    <View className="flex-row items-center gap-2">
-                                        <Text className="text-xs text-muted-foreground font-mono flex-shrink">
-                                            {tx.fromAddress}
-                                        </Text>
-                                        <Text className="text-xs text-muted-foreground">→</Text>
-                                        <Text className="text-xs text-muted-foreground font-mono flex-shrink">
-                                            {tx.toAddress}
-                                        </Text>
-                                    </View>
+                                <View style={styles.divider} />
+
+                                <View style={styles.addressRow}>
+                                    <Text style={styles.addressLeft}>{tx.fromAddress}</Text>
+                                    <Text style={styles.arrow}>→</Text>
+                                    <Text style={styles.addressRight}>{tx.toAddress}</Text>
                                 </View>
 
-                                <View className="mt-3 gap-2 border-t border-border pt-3">
-                                    <View className="flex-row justify-between">
-                                        <Text className="text-xs text-muted-foreground">
-                                            Transaction Fee:
-                                        </Text>
-                                        <Text className="text-xs font-medium text-foreground">
-                                            {tx.transactionFee}
-                                        </Text>
+                                <View style={styles.divider} />
+
+                                <View style={styles.detailsSection}>
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Transaction Fee:</Text>
+                                        <Text style={styles.detailValue}>{tx.transactionFee}</Text>
                                     </View>
-                                    <View className="flex-row justify-between">
-                                        <Text className="text-xs text-muted-foreground">Speed:</Text>
-                                        <Text className="text-xs font-medium text-foreground">
-                                            {tx.speed}
-                                        </Text>
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Speed:</Text>
+                                        <Text style={styles.detailValue}>{tx.speed}</Text>
                                     </View>
-                                    <View className="flex-row justify-between">
-                                        <Text className="text-xs text-muted-foreground">
-                                            Total Fees Saved:
-                                        </Text>
-                                        <Text className="text-xs font-medium text-success">
-                                            {tx.feesSaved}
-                                        </Text>
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Total Fees Saved:</Text>
+                                        <Text style={styles.detailValueSuccess}>{tx.feesSaved}</Text>
                                     </View>
-                                    <View className="flex-row justify-between">
-                                        <Text className="text-xs text-muted-foreground">
-                                            Initial Converted:
-                                        </Text>
-                                        <Text className="text-xs font-medium text-foreground">
-                                            {tx.initialConverted}
-                                        </Text>
-                                    </View>
-                                    <View className="flex-row justify-between">
-                                        <Text className="text-xs font-semibold text-foreground">
-                                            Final Total:
-                                        </Text>
-                                        <Text className="text-xs font-semibold text-foreground">
-                                            {tx.finalTotal}
-                                        </Text>
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabelBold}>Final Total:</Text>
+                                        <Text style={styles.detailValueBold}>{tx.finalTotal}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -133,3 +69,144 @@ export default function ActivityScreen() {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FAFAFA',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        padding: 16,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#29343D',
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 14,
+        color: '#737A82',
+        marginBottom: 16,
+    },
+    transactionsList: {
+        gap: 12,
+    },
+    transactionCard: {
+        padding: 16,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E1E4E8',
+    },
+    transactionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 12,
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        gap: 12,
+        alignItems: 'flex-start',
+    },
+    iconContainer: {
+        backgroundColor: '#E0F2FE',
+        borderRadius: 999,
+        padding: 8,
+        marginTop: 4,
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
+        color: '#0891D1',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    date: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#29343D',
+    },
+    status: {
+        fontSize: 12,
+        color: '#22C55E',
+        marginTop: 2,
+    },
+    amounts: {
+        alignItems: 'flex-end',
+    },
+    fromAmount: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    toAmount: {
+        fontSize: 14,
+        color: '#737A82',
+        marginTop: 2,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#E1E4E8',
+        marginVertical: 12,
+    },
+    addressRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 8,
+    },
+    addressLeft: {
+        fontSize: 12,
+        color: '#737A82',
+        flex: 1,
+        textAlign: 'left',
+    },
+    addressRight: {
+        fontSize: 12,
+        color: '#737A82',
+        flex: 1,
+        textAlign: 'right',
+    },
+    arrow: {
+        fontSize: 12,
+        color: '#737A82',
+    },
+    detailsSection: {
+        gap: 8,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    detailLabel: {
+        fontSize: 12,
+        color: '#737A82',
+    },
+    detailValue: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#29343D',
+    },
+    detailValueSuccess: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#22C55E',
+    },
+    detailLabelBold: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+    detailValueBold: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#29343D',
+    },
+});
