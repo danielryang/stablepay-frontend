@@ -204,25 +204,47 @@ export default function SendScreen() {
             return;
         }
 
+        // AbortController for request cancellation
+        const abortController = new AbortController();
+        let requestStartTime: number;
+
         const evaluateConversionPath = async () => {
+            requestStartTime = Date.now();
             setConversionLoading(true);
             setConversionError(null);
             try {
                 // Call API with correct direction: from_currency = fromCurrency, to_currency = toCurrency
-                const result = await evaluatePath(fromCurrency, toCurrency, amountNum);
-                setPathData(result);
+                const result = await evaluatePath(fromCurrency, toCurrency, amountNum, abortController.signal);
+                const totalTime = Date.now() - requestStartTime;
+                if (__DEV__) {
+                    console.log(`⏱️ Path evaluation completed in ${totalTime}ms`);
+                }
+                // Only update if request wasn't cancelled
+                if (!abortController.signal.aborted) {
+                    setPathData(result);
+                }
             } catch (error: any) {
+                // Don't show error if request was cancelled
+                if (error.name === 'AbortError' || abortController.signal.aborted) {
+                    return;
+                }
                 console.error("Failed to evaluate path:", error);
                 setConversionError(error.message || "Failed to evaluate conversion path");
                 // Keep previous value on error
             } finally {
-                setConversionLoading(false);
+                if (!abortController.signal.aborted) {
+                    setConversionLoading(false);
+                }
             }
         };
 
-        // Debounce the API call to avoid too many requests
-        const timeoutId = setTimeout(evaluateConversionPath, 500);
-        return () => clearTimeout(timeoutId);
+        // Reduced debounce from 500ms to 300ms for better responsiveness
+        const timeoutId = setTimeout(evaluateConversionPath, 300);
+        
+        return () => {
+            clearTimeout(timeoutId);
+            abortController.abort(); // Cancel in-flight request if component unmounts or dependencies change
+        };
     }, [amount, fromCurrency, toCurrency]);
 
     const handlePayPalLogin = async () => {

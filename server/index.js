@@ -52,6 +52,7 @@ app.post("/api/evaluate_path", async (req, res) => {
             to_currency = "USDE";
         }
 
+        const proxyStartTime = Date.now();
         console.log(`Proxying path evaluation: ${amount} ${from_currency} -> ${to_currency}`);
 
         const response = await fetch(`${BACKEND_URL}/evaluate_path`, {
@@ -73,7 +74,8 @@ app.post("/api/evaluate_path", async (req, res) => {
         }
 
         const data = await response.json();
-        console.log("✅ Path evaluation response received");
+        const proxyTime = Date.now() - proxyStartTime;
+        console.log(`✅ Path evaluation response received (${proxyTime}ms)`);
         res.json(data);
     } catch (error) {
         console.error("❌ Proxy error:", error);

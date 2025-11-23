@@ -89,9 +89,11 @@ export interface PathEvaluationResponse {
 export async function evaluatePath(
     fromCurrency: string,
     toCurrency: string,
-    amount: number
+    amount: number,
+    signal?: AbortSignal
 ): Promise<PathEvaluationResponse> {
     const url = `${PROXY_BASE_URL}/api/evaluate_path`;
+    const requestStartTime = Date.now();
     
     try {
         if (__DEV__) {
@@ -108,6 +110,7 @@ export async function evaluatePath(
                 to_currency: toCurrency,
                 amount: amount,
             }),
+            signal, // Add abort signal for request cancellation
         });
 
         if (!response.ok) {
@@ -130,9 +133,11 @@ export async function evaluatePath(
             throw new Error("Invalid response format: total_fee_ars must be a number");
         }
 
+        const requestTime = Date.now() - requestStartTime;
         if (__DEV__) {
             console.log(`✅ Path evaluated: ${data.path.join(" -> ")}`);
             console.log(`💰 Total fee (ARS): ${data.total_fee_ars}`);
+            console.log(`⏱️ Network request took ${requestTime}ms`);
         }
 
         return {
@@ -144,6 +149,11 @@ export async function evaluatePath(
             hops: data.hops,
         };
     } catch (error: any) {
+        // Don't log error if request was aborted (cancelled)
+        if (error.name === 'AbortError') {
+            throw error; // Re-throw abort errors without logging
+        }
+        
         console.error(`❌ Error evaluating path via ${url}:`, error);
         // Provide more helpful error message
         if (error.message?.includes("Network request failed") || error.message?.includes("Failed to fetch")) {
