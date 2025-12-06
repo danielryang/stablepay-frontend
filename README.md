@@ -6,7 +6,7 @@ A cross-platform mobile/web app for managing stablecoin portfolios with AI-power
 
 ### Core Functionality
 - **Multi-chain Wallet**: Solana-based stablecoin management (USDC, USDT) with encrypted storage
-- **Smart Transfers**: Send to crypto addresses or PayPal with automatic path optimization
+- **Smart Transfers**: Send to crypto addresses or PayPal with automatic path optimization (still WIP)
 - **Currency Conversion**: Real-time rates with multi-hop path finding for minimal fees
 - **Transaction History**: Complete activity log with on-chain sync
 - **Portfolio Optimizer**: AI-powered recommendations for optimal allocations across chains
